@@ -207,18 +207,17 @@ def risk_items(row: dict, current_prediction: float) -> list[dict[str, str]]:
 
 
 def risk_cards_html(items: list[dict[str, str]]) -> str:
-    cards = []
-    for item in items:
-        cards.append(
-            f"""
-            <div class="factor-card" style="border-top-color:{item['color']}">
-              <div class="factor-title">{item['title']}</div>
-              <div class="factor-value" style="color:{item['color']}">{item['value']}</div>
-              <div class="factor-detail">{item['detail']}</div>
-            </div>
-            """
+    cards = [
+        (
+            f'<div class="factor-card" style="border-top-color:{item["color"]}">'
+            f'<div class="factor-title">{item["title"]}</div>'
+            f'<div class="factor-value" style="color:{item["color"]}">{item["value"]}</div>'
+            f'<div class="factor-detail">{item["detail"]}</div>'
+            "</div>"
         )
-    return f"<div class='factor-grid'>{''.join(cards)}</div>"
+        for item in items
+    ]
+    return f'<div class="factor-grid">{"".join(cards)}</div>'
 
 
 def performance_chart(performance: pd.DataFrame) -> go.Figure:
