@@ -1,10 +1,12 @@
 {
-  "data_source": "data/processed/bth_pm25_weather_features_2022-08-01_2026-05-31_era5_pblh.csv",
-  "current_model": "models/high_accuracy_lightgbm_core_target_pm2_5.joblib",
+  "data_source": "data/processed/bth_pm25_weather_features_2018_plus_cnemc_integrated.csv",
+  "current_model": "models/high_accuracy_lightgbm_extended_target_pm2_5_full_2018_plus_cnemc.joblib",
   "next24_model": "models/high_accuracy_lightgbm_core_target_pm2_5_next_24h.joblib",
-  "rows": 436410,
+  "rows": 958711,
   "cities": 13,
-  "start_time": "2022-08-01 00:00:00",
-  "end_time": "2026-05-30 17:00:00",
-  "pblh_missing_rate": 0.0
+  "start_time": "2018-01-01 00:00:00",
+  "end_time": "2026-05-31 18:00:00",
+  "pblh_missing_rate": 0.0,
+  "pm25_missing_rate": 0.0,
+  "note": "2018-2022 PM2.5 uses CNEMC/quotsoft city-hour data; 2023+ uses the previously integrated PM2.5 source. Six missing raw CNEMC days were linearly imputed by city and pollutant."
 }
