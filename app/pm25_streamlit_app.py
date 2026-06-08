@@ -969,6 +969,54 @@ def build_daily_prediction(
     return pd.DataFrame(rows)
 
 
+def render_weather_context(
+    seasonal: pd.DataFrame,
+    daily: pd.DataFrame,
+    current_bundle: dict,
+    city_info: pd.DataFrame,
+    profiles: pd.DataFrame,
+    city: str,
+    selected_date: date,
+    overrides: dict,
+    wind_speed: float,
+    wind_direction: float,
+) -> None:
+    st.markdown("### 气象背景与扩散条件")
+    st.caption("这些图直接服务于当前预测：左侧看季节背景，右侧看历史 PM2.5 与 PBLH，下面展示输入风场和当天气象剖面。")
+    seasonal_col, hist_col = st.columns([0.42, 0.58])
+    with seasonal_col:
+        st.plotly_chart(seasonal_chart(seasonal, city, selected_date.month), use_container_width=True)
+
+    hist = daily[daily["city"] == city].sort_values("date").tail(240)
+    fig_hist = go.Figure()
+    fig_hist.add_trace(go.Scatter(x=hist["date"], y=hist["pm2_5"], name="PM2.5", yaxis="y1"))
+    fig_hist.add_trace(go.Scatter(x=hist["date"], y=hist["boundary_layer_height"], name="PBLH", yaxis="y2"))
+    fig_hist.update_layout(
+        title=f"{city} 历史 PM2.5 与边界层高度",
+        height=330,
+        margin=dict(l=10, r=10, t=50, b=20),
+        yaxis=dict(title="PM2.5 ug/m3"),
+        yaxis2=dict(title="PBLH m", overlaying="y", side="right"),
+    )
+    with hist_col:
+        st.plotly_chart(fig_hist, use_container_width=True)
+
+    w1, w2 = st.columns([0.38, 0.62])
+    with w1:
+        st.plotly_chart(wind_polar(wind_speed, wind_direction), use_container_width=True)
+    weather_df = build_daily_prediction(current_bundle, city_info, profiles, city, selected_date, overrides)
+    fig_weather = px.line(
+        weather_df,
+        x="hour",
+        y=["temperature_2m", "wind_speed_10m", "boundary_layer_height"],
+        title="当天气象变量剖面",
+    )
+    fig_weather.update_layout(height=330, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="小时", yaxis_title="")
+    fig_weather.update_traces(line=dict(width=3))
+    with w2:
+        st.plotly_chart(fig_weather, use_container_width=True)
+
+
 def input_defaults(profile: dict) -> dict[str, float]:
     wind_speed = float(profile.get("wind_speed_10m", 2.0))
     temperature = float(profile.get("temperature_2m", 20.0))
@@ -2008,7 +2056,7 @@ def main() -> None:
     next_category, next_color = pm25_category(next24_prediction)
     t_inverse = row["t_inverse_850_1000"]
 
-    tab_predict, tab_results, tab_training, tab_weather = st.tabs(["预测台", "模型介绍", "训练策略", "气象图"])
+    tab_predict, tab_results, tab_training = st.tabs(["预测台", "模型介绍", "训练策略"])
 
     with tab_predict:
         st.markdown(
@@ -2081,6 +2129,19 @@ def main() -> None:
             fig.update_traces(marker=dict(line=dict(width=1, color="#263238")))
             fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="经度", yaxis_title="纬度")
             st.plotly_chart(fig, use_container_width=True)
+
+        render_weather_context(
+            seasonal,
+            daily,
+            current_bundle,
+            city_info,
+            profiles,
+            city,
+            selected_date,
+            overrides,
+            wind_speed,
+            wind_direction,
+        )
 
     with tab_results:
         st.markdown(model_intro_html(assets), unsafe_allow_html=True)
@@ -2268,38 +2329,6 @@ def main() -> None:
             unsafe_allow_html=True,
         )
         st.caption("当前预测台已支持选择全时期高精度、按日期自动分时期高精度、按日期自动气象归因，以及各时期单独模型。")
-
-    with tab_weather:
-        seasonal_col, hist_col = st.columns([0.42, 0.58])
-        with seasonal_col:
-            st.plotly_chart(seasonal_chart(seasonal, city, selected_date.month), use_container_width=True)
-        hist = daily[daily["city"] == city].sort_values("date").tail(240)
-        fig_hist = go.Figure()
-        fig_hist.add_trace(go.Scatter(x=hist["date"], y=hist["pm2_5"], name="PM2.5", yaxis="y1"))
-        fig_hist.add_trace(go.Scatter(x=hist["date"], y=hist["boundary_layer_height"], name="PBLH", yaxis="y2"))
-        fig_hist.update_layout(
-            title=f"{city} 历史 PM2.5 与边界层高度",
-            height=330,
-            margin=dict(l=10, r=10, t=50, b=20),
-            yaxis=dict(title="PM2.5 ug/m3"),
-            yaxis2=dict(title="PBLH m", overlaying="y", side="right"),
-        )
-        with hist_col:
-            st.plotly_chart(fig_hist, use_container_width=True)
-
-        w1, w2 = st.columns([0.38, 0.62])
-        w1.plotly_chart(wind_polar(wind_speed, wind_direction), use_container_width=True)
-        weather_df = build_daily_prediction(current_bundle, city_info, profiles, city, selected_date, overrides)
-        fig_weather = px.line(
-            weather_df,
-            x="hour",
-            y=["temperature_2m", "wind_speed_10m", "boundary_layer_height"],
-            title="当天气象变量剖面",
-        )
-        fig_weather.update_layout(height=330, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="小时", yaxis_title="")
-        fig_weather.update_traces(line=dict(width=3))
-        w2.plotly_chart(fig_weather, use_container_width=True)
-
 
 if __name__ == "__main__":
     main()
