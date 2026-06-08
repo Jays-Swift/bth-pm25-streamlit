@@ -411,6 +411,62 @@ def model_intro_html(assets: Assets) -> str:
     """
 
 
+def public_training_update_html(assets: Assets) -> str:
+    v2 = assets.get("meteorology_v2") or {}
+    best = v2.get("best_summary", [])
+    best_by_period = {row["period"]: row for row in best}
+    pre = best_by_period.get("pre_covid_2018_2019", {})
+    covid = best_by_period.get("covid_2020_2022", {})
+    post = best_by_period.get("post_covid_2023_plus", {})
+
+    def card(period: str, label: str, row: dict[str, Any], theme: str, fallback: Metrics) -> str:
+        if row:
+            target = row["target_label"]
+            metrics = metric_badges_from_test({"mae": row["mae"], "rmse": row["rmse"], "r2": row["r2"]})
+            feature_count = int(row["feature_count"])
+            train_rows = int(row["train_rows"])
+            meta = f"{target} | {feature_count} 个气象特征 | 训练样本 {train_rows:,}"
+        else:
+            metrics = metric_badges(fallback)
+            meta = "旧版气象贡献模型 | 当前小时气象 baseline"
+        return f"""
+        <article class="intro-model-card {theme}">
+          <div class="model-card-tag">{period}</div>
+          <h4>{label}</h4>
+          <p>{meta}</p>
+          <div class="score-row compact">{metrics}</div>
+        </article>
+        """
+
+    return f"""
+    <div class="intro-page public-update">
+      <section class="intro-hero attribution">
+        <div class="intro-hero-main">
+          <div class="intro-kicker">Public update · 2026-06-08</div>
+          <h3>本轮新训练内容已更新至公网版本</h3>
+          <p>网页已纳入今天新训练的 v2 气象贡献模型，并同步到预测台、模型介绍和训练策略。v2 模型严格保持气象-only 变量口径，排除 PM2.5 时滞、滚动均值和共污染物，重点使用 PBLH、多时滞气象变量、通风系数、连续低 PBLH、连续弱风、高湿、南风输送和北风清洁输送等 248 个过程型气象特征。</p>
+          <div class="intro-chip-row">
+            <span>v2 气象贡献模型</span>
+            <span>三时期单独训练</span>
+            <span>raw / log1p / anomaly 目标对照</span>
+            <span>预测台可直接选择</span>
+          </div>
+        </div>
+        <div class="intro-score-panel">
+          <div class="intro-score-label">网页当前公开版</div>
+          <h4>高精度预测 + v2 气象贡献</h4>
+          <p>高精度模型用于预测展示；v2 气象贡献模型用于分时期气象解释和疫情前后对比。</p>
+        </div>
+      </section>
+      <div class="intro-model-grid">
+        {card("疫情前 2018-2019", "疫情前气象贡献 v2 模型", pre, "green", assets["pre_covid_meteorology_metrics"])}
+        {card("疫情期 2020-2022", "疫情期气象贡献 v2 模型", covid, "amber", assets["covid_meteorology_metrics"])}
+        {card("疫情后 2023+", "疫情后气象贡献 v2 模型", post, "teal", assets["post_covid_meteorology_metrics"])}
+      </div>
+    </div>
+    """
+
+
 def high_accuracy_intro_html(assets: Assets) -> str:
     current = assets["current_metrics"]
     pre = assets["pre_covid_high_accuracy_metrics"]
@@ -3290,6 +3346,8 @@ def main() -> None:
         )
 
     with tab_results:
+        st.markdown(public_training_update_html(assets), unsafe_allow_html=True)
+
         high_accuracy_tab, attribution_tab = st.tabs(["高精度预测模型", "气象贡献模型"])
 
         with high_accuracy_tab:
