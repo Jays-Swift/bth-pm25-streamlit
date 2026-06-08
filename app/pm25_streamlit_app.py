@@ -4,6 +4,7 @@ import json
 import math
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import joblib
 import pandas as pd
@@ -16,6 +17,9 @@ APP_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = APP_DIR.parent
 MODEL_DIR = PROJECT_ROOT / "models"
 ASSET_DIR = PROJECT_ROOT / "app_assets"
+
+Assets = dict[str, Any]
+Metrics = dict[str, Any]
 
 CURRENT_MODEL_PATH = MODEL_DIR / "high_accuracy_lightgbm_extended_target_pm2_5_full_2018_plus_cnemc.joblib"
 NEXT24_MODEL_PATH = MODEL_DIR / "high_accuracy_lightgbm_core_target_pm2_5_next_24h.joblib"
@@ -208,7 +212,7 @@ def load_model(path: str) -> dict:
 
 
 @st.cache_data(show_spinner=False)
-def load_assets() -> dict[str, pd.DataFrame | dict]:
+def load_assets() -> Assets:
     asset_dir = resolve_path("app_assets")
     with (asset_dir / "app_metadata.json").open(encoding="utf-8") as file:
         metadata = json.load(file)
@@ -249,12 +253,12 @@ def pm25_category(value: float) -> tuple[str, str]:
     return "严重污染", "#4e342e"
 
 
-def metric_text(metrics: dict) -> str:
+def metric_text(metrics: Metrics) -> str:
     test = metrics["test"]
     return f"MAE {test['mae']:.2f} | RMSE {test['rmse']:.2f} | R2 {test['r2']:.3f}"
 
 
-def metric_badges(metrics: dict) -> str:
+def metric_badges(metrics: Metrics) -> str:
     test = metrics["test"]
     return (
         f'<span class="score-pill"><b>MAE</b>{test["mae"]:.2f}</span>'
@@ -263,7 +267,7 @@ def metric_badges(metrics: dict) -> str:
     )
 
 
-def model_intro_html(assets: dict) -> str:
+def model_intro_html(assets: Assets) -> str:
     current = assets["current_metrics"]
     next24 = assets["next24_metrics"]
     return f"""
@@ -381,7 +385,7 @@ def scenario_summary_html(
     """
 
 
-def training_strategy_html(assets: dict) -> str:
+def training_strategy_html(assets: Assets) -> str:
     metadata = assets["metadata"]
     current = assets["current_metrics"]
     covid_met = assets["covid_meteorology_metrics"]
@@ -457,7 +461,7 @@ def training_strategy_html(assets: dict) -> str:
     """
 
 
-def tuning_method_html(assets: dict) -> str:
+def tuning_method_html(assets: Assets) -> str:
     current = assets["current_metrics"]
     covid_met = assets["covid_meteorology_metrics"]
     current_params = current.get("best_params", {})
@@ -523,7 +527,7 @@ def tuning_method_html(assets: dict) -> str:
     """
 
 
-def metric_row(name: str, metrics: dict, role: str) -> dict[str, object]:
+def metric_row(name: str, metrics: Metrics, role: str) -> dict[str, object]:
     test = metrics["test"]
     return {
         "模型": name,
@@ -555,7 +559,7 @@ def meteorology_shap_table(shap_df: pd.DataFrame, n: int = 8) -> pd.DataFrame:
     return top_shap_table(weather_df, n)
 
 
-def metrics_overview(metrics: dict) -> pd.DataFrame:
+def metrics_overview(metrics: Metrics) -> pd.DataFrame:
     rows = [
         ("训练样本", f"{metrics.get('train_rows', 0):,}"),
         ("验证样本", f"{metrics.get('valid_rows', 0):,}"),
@@ -569,7 +573,7 @@ def metrics_overview(metrics: dict) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["项目", "值"])
 
 
-def render_model_card(spec: dict, assets: dict) -> None:
+def render_model_card(spec: dict, assets: Assets) -> None:
     metrics = assets[spec["metrics_key"]]
     shap_df = assets.get(spec.get("shap_key"))
     test = metrics["test"]
@@ -693,7 +697,7 @@ def model_card_specs() -> list[dict]:
     ]
 
 
-def training_strategy_rows(assets: dict) -> pd.DataFrame:
+def training_strategy_rows(assets: Assets) -> pd.DataFrame:
     rows = []
     for spec in model_card_specs():
         metrics = assets[spec["metrics_key"]]
