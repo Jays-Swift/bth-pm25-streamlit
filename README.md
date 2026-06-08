@@ -2,6 +2,12 @@
 
 这是一个面向公网部署的 Streamlit 交互网页，用于展示“基于机器学习的京津冀 PM2.5 浓度预测与气象贡献度分析”课题成果。网页内嵌训练后的 LightGBM 模型，可选择城市、日期、小时和模型口径，输入气象条件后预测 PM2.5 浓度，并展示模型指标、SHAP 贡献、疫情分时期对比、v2 气象贡献模型和预测台内的气象背景图。
 
+## 公网访问
+
+在线网页地址：
+
+https://bth-pm25-ai.streamlit.app/
+
 ## 项目概况
 
 - 研究区域：京津冀 13 个城市。
@@ -51,6 +57,12 @@ docs/atmospheric_environment_ml_research_upgrade_plan.md
 该方案将项目从“预测展示型机器学习应用”升级为“大气环境机器学习研究”，重点包括时间阻塞验证、分时期训练、留城市验证、天气型聚类、气象过程指标体系、SHAP bootstrap 稳定性检验、PDP/ALE 解释和典型重污染过程案例分析。
 
 ## 部署
+
+公网地址：
+
+```text
+https://bth-pm25-ai.streamlit.app/
+```
 
 Streamlit Cloud 部署入口：
 
