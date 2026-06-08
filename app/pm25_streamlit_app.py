@@ -429,14 +429,14 @@ def public_training_update_html(assets: Assets) -> str:
         else:
             metrics = metric_badges(fallback)
             meta = "旧版气象贡献模型 | 当前小时气象 baseline"
-        return f"""
-        <article class="intro-model-card {theme}">
-          <div class="model-card-tag">{period}</div>
-          <h4>{label}</h4>
-          <p>{meta}</p>
-          <div class="score-row compact">{metrics}</div>
-        </article>
-        """
+        return (
+            f'<article class="intro-model-card {theme}">'
+            f'<div class="model-card-tag">{period}</div>'
+            f"<h4>{label}</h4>"
+            f"<p>{meta}</p>"
+            f'<div class="score-row compact">{metrics}</div>'
+            "</article>"
+        )
 
     return f"""
     <div class="intro-page public-update">
