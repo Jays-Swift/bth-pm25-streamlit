@@ -29,7 +29,7 @@ PREDICTION_MODEL_SPECS = {
         "label": "全时期高精度模型",
         "path": "high_accuracy_lightgbm_extended_target_pm2_5_full_2018_plus_cnemc.joblib",
         "type": "高精度预测",
-        "description": "默认主模型，适合展示整体预测能力。",
+        "description": "全时期综合预测基准，用于评估多源环境信息约束下的短时浓度估计能力。",
     },
     "pre_high_accuracy": {
         "label": "疫情前高精度模型",
@@ -50,57 +50,57 @@ PREDICTION_MODEL_SPECS = {
         "description": "2023+ 单独训练，需注意 PM2.5 数据源与 2018-2022 不完全一致。",
     },
     "pre_meteorology": {
-        "label": "疫情前气象归因模型",
+        "label": "疫情前基础气象归因模型",
         "path": "high_accuracy_lightgbm_meteorology_target_pm2_5_pre_covid_2018_2019_meteorology_only.joblib",
-        "type": "气象归因",
-        "description": "排除 PM2.5 持续性和共污染物，用于解释气象贡献。",
+        "type": "基础气象归因",
+        "description": "基础气象-only 口径，用于与过程型气象贡献模型进行方法对照。",
     },
     "covid_meteorology": {
-        "label": "疫情期气象归因模型",
+        "label": "疫情期基础气象归因模型",
         "path": "high_accuracy_lightgbm_meteorology_target_pm2_5_covid_2020_2022_meteorology_only.joblib",
-        "type": "气象归因",
-        "description": "排除 PM2.5 持续性和共污染物，用于疫情期气象贡献分析。",
+        "type": "基础气象归因",
+        "description": "基础气象-only 口径，用于疫情期气象贡献结构的基准对照。",
     },
     "post_meteorology": {
-        "label": "疫情后气象归因模型",
+        "label": "疫情后基础气象归因模型",
         "path": "high_accuracy_lightgbm_meteorology_target_pm2_5_post_covid_2023_plus_meteorology_only.joblib",
-        "type": "气象归因",
-        "description": "排除 PM2.5 持续性和共污染物，用于疫情后气象贡献分析。",
+        "type": "基础气象归因",
+        "description": "基础气象-only 口径，用于恢复期气象贡献结构的基准对照。",
     },
     "pre_meteorology_v2": {
-        "label": "疫情前气象贡献 v2 模型",
+        "label": "疫情前过程型气象贡献模型",
         "path": "meteorology_attribution_v2_core_pre_covid_2018_2019_log1p.joblib",
-        "type": "气象贡献 v2",
-        "description": "本轮最新气象-only 归因模型，目标为 log1p(PM2.5)，用于疫情前气象贡献情景估计。",
+        "type": "过程型气象贡献",
+        "description": "过程型气象-only 口径，目标为 log1p(PM2.5)，用于疫情前气象贡献估计。",
     },
     "covid_meteorology_v2": {
-        "label": "疫情期气象贡献 v2 模型",
+        "label": "疫情期过程型气象贡献模型",
         "path": "meteorology_attribution_v2_core_covid_2020_2022_raw.joblib",
-        "type": "气象贡献 v2",
-        "description": "本轮最新气象-only 归因模型，目标为 PM2.5 原值，用于疫情期气象贡献情景估计。",
+        "type": "过程型气象贡献",
+        "description": "过程型气象-only 口径，目标为 PM2.5 原值，用于疫情期气象贡献估计。",
     },
     "post_meteorology_v2": {
-        "label": "疫情后气象贡献 v2 模型",
+        "label": "疫情后过程型气象贡献模型",
         "path": "meteorology_attribution_v2_core_post_covid_2023_plus_anomaly.joblib",
-        "type": "气象贡献 v2",
-        "description": "本轮最新气象-only 归因模型，目标为同城同月同小时气候态异常，用于疫情后气象贡献情景估计。",
+        "type": "过程型气象贡献",
+        "description": "过程型气象-only 口径，目标为同城同月同小时气候态异常，用于疫情后气象贡献估计。",
     },
 }
 
 MODEL_SELECT_OPTIONS = [
     "全时期高精度模型",
     "按日期自动选择分时期高精度模型",
-    "按日期自动选择 v2 气象贡献模型（推荐归因）",
-    "按日期自动选择旧版气象归因模型（对照）",
+    "按日期自动选择过程型气象贡献模型（归因口径）",
+    "按日期自动选择基础气象归因模型（对照口径）",
     "疫情前高精度模型",
     "疫情期高精度模型",
     "疫情后高精度模型",
-    "疫情前气象贡献 v2 模型",
-    "疫情期气象贡献 v2 模型",
-    "疫情后气象贡献 v2 模型",
-    "疫情前旧版气象归因模型",
-    "疫情期旧版气象归因模型",
-    "疫情后旧版气象归因模型",
+    "疫情前过程型气象贡献模型",
+    "疫情期过程型气象贡献模型",
+    "疫情后过程型气象贡献模型",
+    "疫情前基础气象归因模型",
+    "疫情期基础气象归因模型",
+    "疫情后基础气象归因模型",
 ]
 
 MODEL_LABEL_TO_KEY = {
@@ -108,12 +108,12 @@ MODEL_LABEL_TO_KEY = {
     "疫情前高精度模型": "pre_high_accuracy",
     "疫情期高精度模型": "covid_high_accuracy",
     "疫情后高精度模型": "post_high_accuracy",
-    "疫情前气象贡献 v2 模型": "pre_meteorology_v2",
-    "疫情期气象贡献 v2 模型": "covid_meteorology_v2",
-    "疫情后气象贡献 v2 模型": "post_meteorology_v2",
-    "疫情前旧版气象归因模型": "pre_meteorology",
-    "疫情期旧版气象归因模型": "covid_meteorology",
-    "疫情后旧版气象归因模型": "post_meteorology",
+    "疫情前过程型气象贡献模型": "pre_meteorology_v2",
+    "疫情期过程型气象贡献模型": "covid_meteorology_v2",
+    "疫情后过程型气象贡献模型": "post_meteorology_v2",
+    "疫情前基础气象归因模型": "pre_meteorology",
+    "疫情期基础气象归因模型": "covid_meteorology",
+    "疫情后基础气象归因模型": "post_meteorology",
     "疫情前气象归因模型": "pre_meteorology",
     "疫情期气象归因模型": "covid_meteorology",
     "疫情后气象归因模型": "post_meteorology",
@@ -194,6 +194,7 @@ FEATURE_LABELS = {
     "dew_point_2m_roll_mean_72h": "72小时平均露点",
     "relative_humidity_2m": "相对湿度",
     "relative_humidity_2m_roll_mean_3h": "3小时平均相对湿度",
+    "relative_humidity_2m_roll_mean_6h": "6小时平均相对湿度",
     "relative_humidity_2m_roll_mean_12h": "12小时平均相对湿度",
     "relative_humidity_2m_roll_mean_24h": "24小时平均相对湿度",
     "rh_q75_city_period": "同城同阶段湿度高分位阈值",
@@ -220,10 +221,13 @@ FEATURE_LABELS = {
     "wind_v_10m_roll_mean_48h": "48小时平均南北风 V",
     "wind_gusts_10m": "10m 阵风",
     "northerly_cleaning_10m": "北风清洁输送",
+    "northerly_cleaning_intensity": "北风清洁输送强度",
     "northerly_cleaning_10m_roll_mean_24h": "24小时北风清洁输送",
     "northerly_cleaning_10m_roll_mean_48h": "48小时北风清洁输送",
     "northerly_cleaning_10m_roll_mean_72h": "72小时北风清洁输送",
     "southerly_transport_10m": "南风污染输送",
+    "southerly_transport_intensity": "南风输送强度",
+    "ventilation_coefficient": "通风系数",
     "ventilation_coefficient_lag_1h": "前1小时通风系数",
     "ventilation_coefficient_lag_3h": "前3小时通风系数",
     "ventilation_coefficient_roll_mean_3h": "3小时平均通风系数",
@@ -288,6 +292,7 @@ def load_model(path: str) -> dict:
 def load_assets() -> Assets:
     asset_dir = resolve_path("app_assets")
     meteorology_v2_path = asset_dir / "meteorology_attribution_v2_core_results.json"
+    research_upgrade_path = asset_dir / "atmospheric_research_upgrade_results.json"
     with (asset_dir / "app_metadata.json").open(encoding="utf-8") as file:
         metadata = json.load(file)
     return {
@@ -320,6 +325,11 @@ def load_assets() -> Assets:
         "meteorology_v2": (
             json.loads(meteorology_v2_path.read_text(encoding="utf-8"))
             if meteorology_v2_path.exists()
+            else None
+        ),
+        "research_upgrade": (
+            json.loads(research_upgrade_path.read_text(encoding="utf-8"))
+            if research_upgrade_path.exists()
             else None
         ),
     }
@@ -369,15 +379,15 @@ def model_intro_html(assets: Assets) -> str:
     <div class="model-intro">
       <div class="model-hero-grid">
         <div class="model-hero-card primary">
-          <div class="model-kicker">预测台默认</div>
+          <div class="model-kicker">综合预测基准</div>
           <h3>全时期高精度模型</h3>
           <p>覆盖 2018-01-01 至 2026-05-31，用于当前小时 PM2.5 高精度预测。它综合气象、ERA5 PBLH、逆温、风输送、污染时滞、滚动均值和共污染物。</p>
           <div class="score-row">{metric_badges(current)}</div>
         </div>
         <div class="model-hero-card muted">
-          <div class="model-kicker">辅助展示</div>
+          <div class="model-kicker">提前量参照</div>
           <h3>24 小时辅助模型</h3>
-          <p>用于给出 24 小时后趋势参考。它仍沿用较早训练口径，因此不作为本轮疫情分时期气象归因的主要证据。</p>
+          <p>用于给出 24 小时后趋势参考。该模型采用早期预测口径，主要作为提前量参照，不作为分时期气象贡献分析的核心依据。</p>
           <div class="score-row">{metric_badges(next24)}</div>
         </div>
       </div>
@@ -385,7 +395,7 @@ def model_intro_html(assets: Assets) -> str:
         <div class="model-route-card accent-blue">
           <span class="route-badge">预测主线</span>
           <h4>全时期高精度模型</h4>
-          <p>用于刻画模型在多源环境信息约束下的应用预测能力，适合预测台展示和整体性能说明。</p>
+          <p>用于刻画模型在多源环境信息约束下的应用预测能力，作为综合预测口径和整体性能参照。</p>
           <div class="route-meta">2018-2026 | 气象 + PBLH + 污染持续性 + 共污染物</div>
         </div>
         <div class="model-route-card accent-green">
@@ -398,7 +408,7 @@ def model_intro_html(assets: Assets) -> str:
           <span class="route-badge">疫情期</span>
           <h4>疫情期气象贡献模型</h4>
           <p>排除 PM2.5 持续性和共污染物，专门观察人为活动减弱背景下气象因子权重变化。</p>
-          <div class="route-meta">2020-2022 | 气象归因核心阶段</div>
+          <div class="route-meta">2020-2022 | 气象归因重点阶段</div>
         </div>
         <div class="model-route-card accent-purple">
           <span class="route-badge">疫情后</span>
@@ -406,62 +416,6 @@ def model_intro_html(assets: Assets) -> str:
           <p>用于和疫情前、疫情期对照，分析 PBLH、湿度、风速和逆温等贡献在恢复期的再强化特征。</p>
           <div class="route-meta">2023+ | 恢复期贡献对照</div>
         </div>
-      </div>
-    </div>
-    """
-
-
-def public_training_update_html(assets: Assets) -> str:
-    v2 = assets.get("meteorology_v2") or {}
-    best = v2.get("best_summary", [])
-    best_by_period = {row["period"]: row for row in best}
-    pre = best_by_period.get("pre_covid_2018_2019", {})
-    covid = best_by_period.get("covid_2020_2022", {})
-    post = best_by_period.get("post_covid_2023_plus", {})
-
-    def card(period: str, label: str, row: dict[str, Any], theme: str, fallback: Metrics) -> str:
-        if row:
-            target = row["target_label"]
-            metrics = metric_badges_from_test({"mae": row["mae"], "rmse": row["rmse"], "r2": row["r2"]})
-            feature_count = int(row["feature_count"])
-            train_rows = int(row["train_rows"])
-            meta = f"{target} | {feature_count} 个气象特征 | 训练样本 {train_rows:,}"
-        else:
-            metrics = metric_badges(fallback)
-            meta = "旧版气象贡献模型 | 当前小时气象 baseline"
-        return (
-            f'<article class="intro-model-card {theme}">'
-            f'<div class="model-card-tag">{period}</div>'
-            f"<h4>{label}</h4>"
-            f"<p>{meta}</p>"
-            f'<div class="score-row compact">{metrics}</div>'
-            "</article>"
-        )
-
-    return f"""
-    <div class="intro-page public-update">
-      <section class="intro-hero attribution">
-        <div class="intro-hero-main">
-          <div class="intro-kicker">Public update · 2026-06-08</div>
-          <h3>本轮新训练内容已更新至公网版本</h3>
-          <p>网页已纳入今天新训练的 v2 气象贡献模型，并同步到预测台、模型介绍和训练策略。v2 模型严格保持气象-only 变量口径，排除 PM2.5 时滞、滚动均值和共污染物，重点使用 PBLH、多时滞气象变量、通风系数、连续低 PBLH、连续弱风、高湿、南风输送和北风清洁输送等 248 个过程型气象特征。</p>
-          <div class="intro-chip-row">
-            <span>v2 气象贡献模型</span>
-            <span>三时期单独训练</span>
-            <span>raw / log1p / anomaly 目标对照</span>
-            <span>预测台可直接选择</span>
-          </div>
-        </div>
-        <div class="intro-score-panel">
-          <div class="intro-score-label">网页当前公开版</div>
-          <h4>高精度预测 + v2 气象贡献</h4>
-          <p>高精度模型用于预测展示；v2 气象贡献模型用于分时期气象解释和疫情前后对比。</p>
-        </div>
-      </section>
-      <div class="intro-model-grid">
-        {card("疫情前 2018-2019", "疫情前气象贡献 v2 模型", pre, "green", assets["pre_covid_meteorology_metrics"])}
-        {card("疫情期 2020-2022", "疫情期气象贡献 v2 模型", covid, "amber", assets["covid_meteorology_metrics"])}
-        {card("疫情后 2023+", "疫情后气象贡献 v2 模型", post, "teal", assets["post_covid_meteorology_metrics"])}
       </div>
     </div>
     """
@@ -476,9 +430,9 @@ def high_accuracy_intro_html(assets: Assets) -> str:
     <div class="intro-page">
       <section class="intro-hero prediction">
         <div class="intro-hero-main">
-          <div class="intro-kicker">High-accuracy prediction models</div>
-          <h3>高精度预测模型：面向应用预测的 PM2.5 估计体系</h3>
-          <p>这一组模型的目标是尽可能准确地给出京津冀城市小时尺度 PM2.5 浓度。它并不只依赖气象变量，而是把气象、ERA5 边界层高度、逆温指数、风输送、PM2.5 时滞、滚动均值、共污染物和时空控制变量共同纳入 LightGBM。这样做的优势是预测稳定、误差较低，适合预测台交互展示；需要注意的是，它的 SHAP 结果会同时反映污染持续性、共污染物和气象条件，不应被直接等同为“纯气象贡献”。</p>
+          <div class="intro-kicker">预测模型体系</div>
+          <h3>高精度预测模型：短时浓度估计与性能参照</h3>
+          <p>高精度模型用于估计京津冀城市小时尺度 PM2.5 浓度。特征矩阵同时纳入近地面气象、ERA5 边界层高度、逆温指数、风输送、PM2.5 时滞、滚动均值、共污染物和时空控制变量。该口径能够充分利用污染过程的短时持续性，因此适合作为预测能力上限和综合预测基准；相应地，其 SHAP 结果混合了污染持续性、共污染物和气象背景，不能直接解释为纯气象贡献。</p>
           <div class="intro-chip-row">
             <span>2018-2026 全时期主模型</span>
             <span>疫情前/疫情期/疫情后分时期对照</span>
@@ -487,16 +441,16 @@ def high_accuracy_intro_html(assets: Assets) -> str:
           </div>
         </div>
         <div class="intro-score-panel">
-          <div class="intro-score-label">预测台默认主模型</div>
+          <div class="intro-score-label">当前主预测口径</div>
           <h4>全时期高精度模型</h4>
           <div class="score-row">{metric_badges(current)}</div>
-          <p>覆盖 2018-01-01 至 2026-05-31，是当前预测台默认使用的模型，适合展示项目的工程化预测能力。</p>
+          <p>覆盖 2018-01-01 至 2026-05-31，作为当前综合预测口径和后续气象贡献模型的性能参照。</p>
         </div>
       </section>
       {section_bridge_html(
-        "模型谱系",
-        "四类高精度模型分别承担不同展示任务",
-        "下面这组卡片不是重复罗列指标，而是把预测模型按使用场景拆开：全时期模型负责预测台默认输出，三套分时期模型负责疫情前、疫情期、疫情后的预测能力对照。读这组卡片时，应重点关注数据时期、特征口径和研究定位。",
+        "模型组成",
+        "不同时间口径下的预测模型对照",
+        "全时期模型用于形成统一预测口径，三套分时期模型分别对应疫情前、疫情期和疫情后。该组模型的解释重点在于数据时期、特征准入和评估用途，而不是单一精度数值的机械比较。",
         "blue",
       )}
       <div class="intro-model-grid">
@@ -508,13 +462,13 @@ def high_accuracy_intro_html(assets: Assets) -> str:
         </article>
         <article class="intro-model-card green">
           <div class="model-card-tag">疫情前</div>
-          <h4>正常时期预测上限</h4>
+          <h4>正常时期预测参照</h4>
           <p>2018-2019 单独训练，用作正常排放背景下的高精度预测基准。其特征口径与主模型一致，便于和疫情期、疫情后模型横向比较。</p>
           <div class="score-row compact">{metric_badges(pre)}</div>
         </article>
         <article class="intro-model-card amber">
           <div class="model-card-tag">疫情期</div>
-          <h4>人为活动减弱时期预测</h4>
+          <h4>疫情时期预测参照</h4>
           <p>2020-2022 单独训练，用于检验疫情时期污染水平和污染持续性改变后的短时预测稳定性。</p>
           <div class="score-row compact">{metric_badges(covid)}</div>
         </article>
@@ -526,21 +480,21 @@ def high_accuracy_intro_html(assets: Assets) -> str:
         </article>
       </div>
       {section_bridge_html(
-        "解读边界",
-        "高精度模型展示预测上限，但不直接等同于纯气象归因",
-        "这一部分说明高精度模型的性能来源及学术使用边界。模型加入污染时滞和共污染物后，预测误差会显著下降，但这些变量也会吸收排放背景和污染持续性的影响，因此需要和气象贡献模型分开解读。",
+        "解释边界",
+        "高精度模型提供性能参照，不承担纯气象归因",
+        "污染时滞和共污染物进入特征矩阵后，模型误差显著下降。这些变量同时包含排放背景、污染持续性和二次生成过程信息，因此高精度模型主要用于刻画可预测性，气象因子的相对独立贡献应由气象-only 模型承担。",
         "slate",
       )}
       <div class="method-band">
         <div>
-          <span class="method-band-kicker">性能来源</span>
+          <span class="method-band-kicker">预测信息来源</span>
           <h4>高精度模型把污染持续性作为关键可预测信息</h4>
-          <p>PM2.5 具有明显的小时级持续性：前 1 小时、前 3 小时、前 24 小时浓度以及滚动均值通常能携带边界层内污染累积、区域输送和排放背景的综合信号。模型同时使用 PM10、NO2、CO、SO2、O3、AOD、dust 等共污染物，进一步约束同一气团和同一污染过程中的化学与输送状态。因此高精度模型 R2 往往显著高于气象贡献模型，这是合理的，也正是它适合交互预测的原因。</p>
+          <p>PM2.5 具有明显的小时级持续性：前 1 小时、前 3 小时、前 24 小时浓度以及滚动均值通常能携带边界层内污染累积、区域输送和排放背景的综合信号。模型同时使用 PM10、NO2、CO、SO2、O3、AOD、dust 等共污染物，进一步约束同一气团和同一污染过程中的化学与输送状态。因此，高精度模型 R2 显著高于气象贡献模型，主要反映污染持续性变量对短时浓度估计的信息增益。</p>
         </div>
         <div>
-          <span class="method-band-kicker">归因边界</span>
-          <h4>不能把高精度 SHAP 直接写成气象归因结论</h4>
-          <p>当 PM2.5 滞后、滚动均值和共污染物进入模型后，SHAP 前列经常由污染持续性变量占据。它们提高了预测精度，但会吸收一部分排放、人为活动和二次生成过程的影响。因此该模型适合证明“机器学习框架能预测得准”，而关于 PBLH、逆温、湿度、气压和风输送的独立贡献，应优先引用气象贡献模型。</p>
+          <span class="method-band-kicker">归因限制</span>
+          <h4>高精度 SHAP 不宜直接作为气象归因依据</h4>
+          <p>当 PM2.5 滞后、滚动均值和共污染物进入模型后，SHAP 前列往往由污染持续性变量占据。这些变量提升了预测精度，也吸收了部分排放、人为活动和二次生成过程信息。关于 PBLH、逆温、湿度、气压和风输送的独立贡献，应优先依据气象贡献模型。</p>
         </div>
       </div>
     </div>
@@ -564,69 +518,69 @@ def meteorology_contribution_intro_html(assets: Assets) -> str:
     <div class="intro-page">
       <section class="intro-hero attribution">
         <div class="intro-hero-main">
-          <div class="intro-kicker">Meteorology contribution models</div>
-          <h3>气象贡献模型：面向学术归因的天气驱动解释体系</h3>
-          <p>这一组模型的核心不是追求最高预测分数，而是尽量隔离气象背景对 PM2.5 变化的独立解释力。最新 v2 气象贡献模型排除了 PM2.5 时滞、PM2.5 滚动均值和共污染物，只保留气象、PBLH、逆温、风输送、降水、复合扩散指数、气象时滞/累积特征、城市空间和时间周期变量。这样得到的精度通常低于高精度预测模型，但更适合评估大气稳定度、边界层高度、湿度、气压和风输送在不同时期的相对贡献。</p>
+          <div class="intro-kicker">气象贡献模型体系</div>
+          <h3>气象贡献模型：气象-only 变量约束下的解释模型</h3>
+          <p>气象贡献模型用于估计气象背景对 PM2.5 变化的独立解释力。过程型气象模型剔除 PM2.5 时滞、PM2.5 滚动均值、PM10、NO2、CO、SO2、O3、AOD 和 dust 等污染过程变量，仅保留气象、PBLH、逆温、风输送、降水、复合扩散指数、气象时滞/累积特征、城市空间和时间周期变量。该口径的精度低于高精度预测模型是合理现象，其价值在于更清楚地讨论边界层高度、湿度、气压、通风条件和区域输送的相对贡献。</p>
           <div class="intro-chip-row">
             <span>气象-only 归因口径</span>
             <span>248 个气象与时空特征</span>
-            <span>raw / log1p / anomaly 三目标对照</span>
+          <span>原值 / 对数 / 气候态异常目标对照</span>
             <span>SHAP bootstrap 置信区间</span>
           </div>
         </div>
         <div class="intro-score-panel">
-          <div class="intro-score-label">本轮最新归因训练</div>
-          <h4>v2 分时期最佳模型</h4>
-          <p>每个时期从 PM2.5 原值、log1p(PM2.5)、同城同月同小时气候态异常三种目标中选择测试 R2 表现最优者，用于阶段性结论。</p>
+          <div class="intro-score-label">过程型气象-only 口径</div>
+          <h4>分时期代表模型</h4>
+          <p>每个时期比较 PM2.5 原值、log1p(PM2.5) 和同城同月同小时气候态异常三种目标形式，并在统一测试口径下确定该时期的代表模型。</p>
         </div>
       </section>
       {section_bridge_html(
         "分时期归因模型",
-        "疫情前、疫情期、疫情后分别训练，避免时期差异被平均掉",
-        "下面三张卡片对应本课题最核心的气象贡献比较。每个时期都单独训练，并从不同目标形式中选择最适合该时期的解释尺度，用于刻画气象因子贡献在疫情期和非疫情期的阶段性差异。",
+        "疫情前、疫情期、疫情后分别建立气象-only 模型",
+        "三个时期分别训练，可以避免全时期模型对特殊阶段的气象贡献结构产生平均化处理。各时期再比较三种目标形式，用于确定更适合该阶段的解释尺度。",
         "green",
       )}
       <div class="intro-model-grid">
         <article class="intro-model-card green">
           <div class="model-card-tag">疫情前 2018-2019</div>
-          <h4>{pre.get("target_label", "最佳目标")} 归因模型</h4>
-          <p>疫情前模型用于刻画正常排放背景下气象扩散条件的解释力。最新结果中，季节周期、空间纬度、24小时平均 PBLH、北风清洁输送和气压滞后共同构成主要解释信号。</p>
+          <h4>{pre.get("target_label", "代表目标")} 归因模型</h4>
+          <p>疫情前模型用于刻画常规排放背景下的气象扩散约束。结果中，季节周期、空间纬度、24小时平均 PBLH、北风清洁输送和气压滞后共同构成主要解释信号。</p>
           <div class="score-row compact">{score(pre, assets["pre_covid_meteorology_metrics"])}</div>
         </article>
         <article class="intro-model-card amber">
           <div class="model-card-tag">疫情期 2020-2022</div>
-          <h4>{covid.get("target_label", "最佳目标")} 归因模型</h4>
-          <p>疫情期模型单独训练，避免人为活动减弱时期被正常时期样本稀释。PBLH 滚动均值、南北风 V 分量、气压滞后和露点/湿度变量是解释 PM2.5 变化的重要气象信号。</p>
+          <h4>{covid.get("target_label", "代表目标")} 归因模型</h4>
+          <p>疫情期模型单独训练，以保留该阶段排放活动变化背景下的气象响应。PBLH 滚动均值、南北风 V 分量、气压滞后和露点/湿度变量是解释 PM2.5 变化的重要气象信号。</p>
           <div class="score-row compact">{score(covid, assets["covid_meteorology_metrics"])}</div>
         </article>
         <article class="intro-model-card teal">
           <div class="model-card-tag">疫情后 2023+</div>
-          <h4>{post.get("target_label", "最佳目标")} 归因模型</h4>
+          <h4>{post.get("target_label", "代表目标")} 归因模型</h4>
           <p>疫情后模型用于分析恢复期扩散约束的再强化过程。结果显示 24小时平均 PBLH、露点、通风系数、风速滚动均值和北风清洁输送在归因结果中更加突出。</p>
           <div class="score-row compact">{score(post, assets["post_covid_meteorology_metrics"])}</div>
         </article>
       </div>
       {section_bridge_html(
         "方法升级",
-        "v2 气象贡献模型从当前小时气象升级为过程型气象解释",
-        "这一组方法卡片说明 v2 相比旧版 baseline 的改进：不仅看当前小时，还把持续低 PBLH、弱风、高湿、通风系数、南北输送和降水持续过程纳入气象-only 特征矩阵，并用 SHAP bootstrap 检查贡献排序稳定性。",
+        "从单时刻气象变量扩展到过程型气象特征",
+        "过程型模型相较基础气象模型的主要改进，是把持续低 PBLH、弱风、高湿、通风系数、南北输送和降水过程纳入气象-only 特征矩阵，并用 SHAP bootstrap 检查贡献排序稳定性。",
         "green",
       )}
       <div class="method-band three">
         <div>
           <span class="method-band-kicker">特征工程</span>
           <h4>从单时刻气象扩展到过程型气象</h4>
-          <p>v2 模型加入 PBLH、风速、U/V 风、相对湿度、气压、露点、降水和通风系数的 1/3/6/12/24/48/72 小时时滞、滚动均值或累计量，还构建了低 PBLH、弱风、高湿、南风输送、北风清洁输送和湿度-PBLH 交互等复合特征。这些特征仍属于气象变量，不会破坏气象归因属性。</p>
+          <p>过程型模型加入 PBLH、风速、U/V 风、相对湿度、气压、露点、降水和通风系数的 1/3/6/12/24/48/72 小时时滞、滚动均值或累计量，还构建了低 PBLH、弱风、高湿、南风输送、北风清洁输送和湿度-PBLH 交互等复合特征。这些特征仍属于气象变量，不会破坏气象归因属性。</p>
         </div>
         <div>
           <span class="method-band-kicker">目标函数</span>
           <h4>用多目标形式降低单一 PM2.5 原值的偏差</h4>
-          <p>直接预测 PM2.5 原值容易被极端污染和排放背景影响。v2 同时比较原值、log1p(PM2.5) 和同城同月同小时气候态异常：log 目标降低重污染极端值影响，异常目标更聚焦气象扰动造成的偏离，原值目标便于解释实际浓度尺度。</p>
+          <p>直接预测 PM2.5 原值容易被极端污染和排放背景影响。过程型模型同时比较原值、log1p(PM2.5) 和同城同月同小时气候态异常：log 目标降低重污染极端值影响，异常目标更聚焦气象扰动造成的偏离，原值目标便于解释实际浓度尺度。</p>
         </div>
         <div>
-          <span class="method-band-kicker">稳健性</span>
-          <h4>用分时期训练和 SHAP 置信区间支撑结论</h4>
-          <p>疫情前、疫情期、疫情后分别训练，避免一个总模型把时期差异平均掉。SHAP 重要性使用 bootstrap 给出置信区间，使“哪个气象因子更重要”的说法不仅是单次排序，而有稳定性证据。</p>
+          <span class="method-band-kicker">稳健性检验</span>
+          <h4>分时期训练与 SHAP 置信区间</h4>
+          <p>疫情前、疫情期和疫情后分别训练，避免一个总模型平均时期差异。SHAP 重要性通过 bootstrap 给出置信区间，使气象因子贡献排序不只依赖单次抽样结果。</p>
         </div>
       </div>
     </div>
@@ -712,8 +666,8 @@ def training_strategy_html(assets: Assets) -> str:
     <div class="training-intro">
       <section class="training-hero">
         <div class="training-kicker">训练设计</div>
-        <h3>围绕时间外推和变量控制设计训练流程</h3>
-        <p>训练策略的核心不是简单堆模型，而是先固定时间切分，再用不同特征口径做对照实验：高精度模型检验应用预测能力，气象归因模型控制污染持续性和共污染物，专门考察气象、PBLH、逆温和风输送的独立解释力。</p>
+        <h3>围绕时间外推和变量控制建立训练规范</h3>
+        <p>训练策略以时间阻塞验证和变量准入控制为基础。高精度模型用于评估应用预测能力，气象归因模型则在排除污染持续性和共污染物后，考察气象、PBLH、逆温和风输送的独立解释力。</p>
         <div class="training-chip-row">
           <span>{metadata.get("start_time", "2018+")} 至 {metadata.get("end_time", "2026")}</span>
           <span>13 个城市</span>
@@ -732,24 +686,24 @@ def training_strategy_html(assets: Assets) -> str:
     {section_bridge_html(
       "特征口径",
       "高精度模型允许使用全部有助于预测的环境信息",
-      "下面三张卡片先说明高精度模型的变量边界：它既使用气象和 PBLH，也使用污染持续性和共污染物。这样做是为了服务预测台和精度展示，因此读者需要把它和后面的气象-only 归因模型区分开。",
+      "高精度模型的变量边界需要先行说明：该口径既使用气象和 PBLH，也使用污染持续性和共污染物。该设计服务于预测精度评估，因此应与后续气象-only 归因模型区分解读。",
       "blue",
     )}
     <div class="training-family-grid">
       <section class="training-family-card blue">
-        <div class="family-index">01</div>
+        <div class="family-index">目标设定</div>
         <h4>目标变量定义</h4>
         <p>当前小时模型预测 target_pm2_5；24 小时辅助模型预测 target_pm2_5_next_24h。所有样本按城市和时间形成 city-hour 监督学习表。</p>
         <div class="family-foot">避免把当前预测和提前量预测混作同一个任务</div>
       </section>
       <section class="training-family-card green">
-        <div class="family-index">02</div>
+        <div class="family-index">变量口径</div>
         <h4>特征口径控制</h4>
         <p>extended 特征集包含共污染物和 PM2.5 持续性；meteorology 特征集主动剔除这些强预测变量，只保留气象、PBLH、稳定度、风输送和时空控制变量。</p>
         <div class="family-foot">把“预测增益”和“气象解释”分离</div>
       </section>
       <section class="training-family-card amber">
-        <div class="family-index">03</div>
+        <div class="family-index">时期设计</div>
         <h4>分时期验证</h4>
         <p>疫情前、疫情期、疫情后分别训练和测试，避免疫情期人为活动变化被全时期模型平均掉，再比较不同阶段 SHAP 和残差结构。</p>
         <div class="family-foot">服务于 2020-2022 与非疫情期对比</div>
@@ -757,11 +711,11 @@ def training_strategy_html(assets: Assets) -> str:
     </div>
 
     <div class="training-flow">
-      <div class="flow-step"><b>1</b><h4>数据整合</h4><p>CNEMC/quotsoft PM2.5、ERA5/CDS 气象、ERA5 PBLH 合并为 city-hour 表。</p></div>
-      <div class="flow-step"><b>2</b><h4>特征构建</h4><p>PBLH、逆温指数、U/V 风分量、南北输送、时滞和时间周期统一进入特征矩阵。</p></div>
-      <div class="flow-step"><b>3</b><h4>时间切分</h4><p>全时期和分时期模型都按时间后置验证、测试，避免随机切分造成信息泄漏。</p></div>
-      <div class="flow-step"><b>4</b><h4>Optuna 调参</h4><p>以验证集 RMSE 为目标搜索 LightGBM 参数，使用 early stopping 控制过拟合。</p></div>
-      <div class="flow-step"><b>5</b><h4>解释输出</h4><p>在测试集报告 MAE、RMSE、R2，并用 SHAP 与残差分析支撑气象贡献讨论。</p></div>
+      <div class="flow-step"><b>数据层</b><h4>数据整合</h4><p>CNEMC/quotsoft PM2.5、ERA5/CDS 气象、ERA5 PBLH 合并为 city-hour 表。</p></div>
+      <div class="flow-step"><b>特征层</b><h4>特征构建</h4><p>PBLH、逆温指数、U/V 风分量、南北输送、时滞和时间周期统一进入特征矩阵。</p></div>
+      <div class="flow-step"><b>验证层</b><h4>时间切分</h4><p>全时期和分时期模型都按时间后置验证、测试，避免随机切分造成信息泄漏。</p></div>
+      <div class="flow-step"><b>优化层</b><h4>Optuna 调参</h4><p>以验证集 RMSE 为目标搜索 LightGBM 参数，使用 early stopping 控制过拟合。</p></div>
+      <div class="flow-step"><b>解释层</b><h4>解释输出</h4><p>在测试集报告 MAE、RMSE、R2，并用 SHAP 与残差分析支撑气象贡献讨论。</p></div>
     </div>
 
     <div class="training-period-grid">
@@ -792,13 +746,13 @@ def tuning_method_html(assets: Assets) -> str:
     return f"""
     <div class="method-deep-dive">
       <section class="method-panel">
-        <div class="method-kicker">关键方法 01</div>
+        <div class="method-kicker">预处理规范</div>
         <h4>预处理与特征矩阵</h4>
         <p>数值特征进入 median imputer，并额外保留缺失指示列；类别特征先用众数补齐，再做 one-hot 编码，避免城市、时期等类别变量被错误当成连续数值。</p>
         <p>时间变量不只用 hour、month、dayofyear，也构建 sin/cos 周期特征，避免 23 点和 0 点、12 月和 1 月在模型中被误认为相距很远。</p>
       </section>
       <section class="method-panel">
-        <div class="method-kicker">关键方法 02</div>
+        <div class="method-kicker">验证规范</div>
         <h4>时间切分原则</h4>
         <p>全时期模型使用固定时间后置验证：验证集从 2024-09-01 开始，测试集从 2024-10-01 开始。</p>
         <p>分时期模型在各自时期内部按时间顺序自动切为 70% 训练、15% 验证、15% 测试。没有使用随机切分，因为 PM2.5 强时间连续性会造成相邻小时泄漏。</p>
@@ -807,7 +761,7 @@ def tuning_method_html(assets: Assets) -> str:
 
     <div class="tuning-board">
       <section class="tuning-main">
-        <div class="method-kicker">关键方法 03</div>
+        <div class="method-kicker">参数搜索</div>
         <h4>Optuna + LightGBM 调参方式</h4>
         <p>每个 trial 都在训练集拟合 LightGBM，并只用验证集 RMSE 作为优化目标。搜索过程不接触测试集，测试集只在最终模型确定后使用一次。</p>
         <div class="param-grid">
@@ -834,7 +788,7 @@ def tuning_method_html(assets: Assets) -> str:
       <section class="training-detail-card">
         <h4>最终重训逻辑</h4>
         <p>候选模型先在训练集上搜索参数，并在验证集上 early stopping。确定最佳参数后，将训练集和验证集合并，重新拟合最终模型。</p>
-        <p>最终 n_estimators 不是无限增大，而是取验证阶段 best_iteration 的约 1.08 倍，给合并训练留出少量余量。</p>
+        <p>最终 n_estimators 依据验证阶段 best_iteration 设定，并保留约 1.08 倍余量，用于合并训练集和验证集后的最终拟合。</p>
       </section>
       <section class="training-detail-card">
         <h4>最佳参数示例</h4>
@@ -843,7 +797,7 @@ def tuning_method_html(assets: Assets) -> str:
       </section>
       <section class="training-detail-card">
         <h4>解释与稳健性输出</h4>
-        <p>每个最终模型在测试集上报告 MAE、RMSE、R2；SHAP 使用测试集抽样计算平均绝对贡献，默认最多抽取 5000 行。</p>
+        <p>每个最终模型在测试集上报告 MAE、RMSE、R2；SHAP 使用测试集抽样计算平均绝对贡献，通常最多抽取 5000 行。</p>
         <p>气象残差只表示气象归因模型未解释部分，可辅助讨论非气象因素，不能直接等同于排放量变化。</p>
       </section>
     </div>
@@ -861,7 +815,7 @@ def high_accuracy_training_html(assets: Assets) -> str:
       <section class="training-hero">
         <div class="training-kicker">高精度训练主线</div>
         <h3>用完整污染过程信息追求 PM2.5 应用预测精度</h3>
-        <p>高精度模型的训练目标是尽可能准确地复原当前小时 PM2.5 浓度，因此特征矩阵采用 extended 口径：既包含气象和 ERA5 PBLH，也纳入 PM2.5 时滞、滚动均值、PM10、NO2、CO、SO2、O3、AOD、dust 等共污染物。这个口径不是为了做纯气象归因，而是为了给预测台提供稳定、低误差的应用预测结果，并作为气象贡献模型的精度上限参照。</p>
+        <p>高精度模型的训练目标是尽可能准确地复原当前小时 PM2.5 浓度，因此特征矩阵采用 extended 口径：既包含气象和 ERA5 PBLH，也纳入 PM2.5 时滞、滚动均值、PM10、NO2、CO、SO2、O3、AOD、dust 等共污染物。该口径用于形成稳定、低误差的应用预测结果，并作为气象贡献模型的精度上限参照。</p>
         <div class="training-chip-row">
           <span>{metadata.get("start_time", "2018+")} 至 {metadata.get("end_time", "2026")}</span>
           <span>{int(metadata.get("rows", 0)):,} 条 city-hour 样本</span>
@@ -873,31 +827,31 @@ def high_accuracy_training_html(assets: Assets) -> str:
         <div class="training-score-label">全时期主模型</div>
         <h4>测试集表现</h4>
         <div class="score-row">{metric_badges(current)}</div>
-        <p>全时期主模型使用 71 个特征，Optuna 搜索 {current.get("trials", "NA")} 轮，测试集从 {current.get("test_start", "NA")} 开始，适合作为预测台默认模型。</p>
+        <p>全时期主模型使用 71 个特征，Optuna 搜索 {current.get("trials", "NA")} 轮，测试集从 {current.get("test_start", "NA")} 开始，作为综合预测基准模型。</p>
       </section>
     </div>
 
     {section_bridge_html(
       "特征口径",
       "高精度模型允许使用全部有助于预测的环境信息",
-      "下面三张卡片先说明高精度模型的变量边界：它既使用气象和 PBLH，也使用污染持续性和共污染物。这样做是为了服务预测台和精度展示，因此读者需要把它和后面的气象-only 归因模型区分开。",
+      "高精度模型的变量边界需要先行说明：它既使用气象和 PBLH，也使用污染持续性和共污染物。该口径用于预测性能评估，应与气象-only 归因模型分开解读。",
       "blue",
     )}
     <div class="training-family-grid">
       <section class="training-family-card blue">
-        <div class="family-index">01</div>
+        <div class="family-index">气象变量</div>
         <h4>多源特征矩阵构建</h4>
         <p>基础气象变量包括气温、露点、相对湿度、气压、降水、云量、风速、风向、阵风和 ERA5 PBLH。风向被拆解为 U/V 分量，进一步构造南风污染输送和北风清洁输送，使模型能理解京津冀区域输送方向。</p>
         <div class="family-foot">气象 + PBLH + 稳定度 + 风输送</div>
       </section>
       <section class="training-family-card green">
-        <div class="family-index">02</div>
+        <div class="family-index">污染记忆</div>
         <h4>污染持续性信息的预测增益</h4>
         <p>PM2.5 的短时变化具有明显记忆性，前 1/3/24 小时 PM2.5 和滚动均值能表达污染团累积、滞留和消散过程。共污染物则提供同一污染过程中的化学和排放背景信息，因此能显著提高预测精度。</p>
         <div class="family-foot">这是预测能力来源，不是纯气象解释</div>
       </section>
       <section class="training-family-card amber">
-        <div class="family-index">03</div>
+        <div class="family-index">时期对照</div>
         <h4>分时期建模的对照意义</h4>
         <p>全时期模型学习总体规律，分时期高精度模型分别学习疫情前、疫情期、疫情后的污染持续性和共污染物结构，从而比较疫情期人为活动变化对预测难度和特征贡献结构的影响。</p>
         <div class="family-foot">全时期用于应用，分时期用于对照</div>
@@ -906,22 +860,22 @@ def high_accuracy_training_html(assets: Assets) -> str:
 
     {section_bridge_html(
       "训练流水线",
-      "从数据补齐到最终评估的五个步骤",
-      "这一排流程卡片用于交代模型指标生成机制。重点是时间顺序切分、验证集调参、测试集最终评估三个环节，避免把相邻小时样本随机打散后造成过高估计。",
+      "从数据补齐到最终评估的技术路径",
+      "该路径用于明确模型指标的生成机制，重点包括时间顺序切分、验证集调参和测试集最终评估三个环节，避免相邻小时样本随机混合造成过高估计。",
       "blue",
     )}
     <div class="training-flow">
-      <div class="flow-step"><b>1</b><h4>数据补齐</h4><p>2018-2022 CNEMC/quotsoft PM2.5 与 ERA5 气象、ERA5 PBLH 合并；缺失原始日按城市和污染物线性插补。</p></div>
-      <div class="flow-step"><b>2</b><h4>特征生成</h4><p>生成时间周期、PM2.5 时滞/滚动、共污染物、PBLH、逆温、U/V 风和南北输送等特征。</p></div>
-      <div class="flow-step"><b>3</b><h4>时间切分</h4><p>全时期模型固定后置验证和测试；分时期模型在每个时期内按时间顺序 70/15/15 切分。</p></div>
-      <div class="flow-step"><b>4</b><h4>调参重训</h4><p>Optuna 在验证集 RMSE 上搜索 LightGBM 参数；最佳参数确定后合并训练集和验证集重训最终模型。</p></div>
-      <div class="flow-step"><b>5</b><h4>测试解释</h4><p>测试集只在最终阶段使用，报告 MAE、RMSE、R2，并用 SHAP 判断预测信息主要来自哪些变量。</p></div>
+      <div class="flow-step"><b>数据层</b><h4>数据补齐</h4><p>2018-2022 CNEMC/quotsoft PM2.5 与 ERA5 气象、ERA5 PBLH 合并；缺失原始日按城市和污染物线性插补。</p></div>
+      <div class="flow-step"><b>特征层</b><h4>特征生成</h4><p>生成时间周期、PM2.5 时滞/滚动、共污染物、PBLH、逆温、U/V 风和南北输送等特征。</p></div>
+      <div class="flow-step"><b>验证层</b><h4>时间切分</h4><p>全时期模型固定后置验证和测试；分时期模型在每个时期内按时间顺序 70/15/15 切分。</p></div>
+      <div class="flow-step"><b>优化层</b><h4>调参重训</h4><p>Optuna 在验证集 RMSE 上搜索 LightGBM 参数；最佳参数确定后合并训练集和验证集重训最终模型。</p></div>
+      <div class="flow-step"><b>解释层</b><h4>测试解释</h4><p>测试集只在最终阶段使用，报告 MAE、RMSE、R2，并用 SHAP 判断预测信息主要来自哪些变量。</p></div>
     </div>
 
     {section_bridge_html(
       "时期对照",
       "全时期模型用于应用预测，分时期模型用于比较特殊阶段",
-      "下面的时期对照把全时期、疫情期和非疫情期放在同一阅读层级中。它强调的是预测上限和时期差异，不直接解释人为活动强度，也不替代气象归因模型的结论。",
+      "时期对照用于同时呈现全时期、疫情期和非疫情期的预测能力差异。本节强调预测上限和时期差异，不直接解释人为活动强度，也不替代气象归因模型的结论。",
       "slate",
     )}
     <div class="method-band three">
@@ -954,7 +908,7 @@ def high_accuracy_tuning_html(assets: Assets) -> str:
     {section_bridge_html(
       "调参框架",
       "Optuna 搜索与高精度预测优化",
-      "这个模块解释模型不是手工随意设参，而是围绕验证集 RMSE 系统搜索 LightGBM 的树复杂度、学习率、采样比例和正则强度。它对应论文方法章节中的模型优化部分。",
+      "模型参数并非人工固定设定，而是围绕验证集 RMSE 系统搜索 LightGBM 的树复杂度、学习率、采样比例和正则强度，用于保证模型优化过程具有可复现性和方法规范性。",
       "blue",
     )}
     <div class="tuning-board">
@@ -984,8 +938,8 @@ def high_accuracy_tuning_html(assets: Assets) -> str:
 
     {section_bridge_html(
       "迭代收尾",
-      "最佳参数到最终模型的转化流程",
-      "这组三张卡片说明训练结束后的处理方式：先合并训练集和验证集重训，再固定最终模型输出测试集指标和 SHAP 解释。这样读者能追溯最终分数从哪里来，也能理解高精度 SHAP 的解释边界。",
+      "最佳参数到最终模型的转化路径",
+      "训练结束后先合并训练集和验证集重训，再固定最终模型输出测试集指标和 SHAP 解释，以保证最终分数和解释结果可追溯。",
       "blue",
     )}
     <div class="training-detail-grid">
@@ -999,7 +953,7 @@ def high_accuracy_tuning_html(assets: Assets) -> str:
       </section>
       <section class="training-detail-card">
         <h4>结果解释口径</h4>
-        <p>高精度模型的 SHAP 前列通常包含 PM2.5 滞后、滚动均值和共污染物。这说明模型预测得准，但归因解释不能简单写成“气象变量贡献最大”。</p>
+        <p>高精度模型的 SHAP 前列通常包含 PM2.5 滞后、滚动均值和共污染物。该结果说明污染持续性对短时预测具有较强信息量，不能直接推断为气象变量贡献最大。</p>
       </section>
     </div>
     """
@@ -1018,12 +972,12 @@ def meteorology_training_html(assets: Assets) -> str:
     <div class="training-intro">
       <section class="training-hero">
         <div class="training-kicker">气象归因训练策略</div>
-        <h3>从 city-hour 样本到分时期气象贡献结论的训练流程</h3>
-        <p>这一页只说明训练方法，不重复模型介绍。气象归因训练先把每条城市小时样本归入疫情前、疫情期、疫情后三个时期；随后执行变量准入控制，禁止污染历史和共污染物进入特征矩阵；再生成气象时滞、滚动、累计和复合扩散特征；最后在每个时期分别训练三种目标形式，并用统一评估和 SHAP bootstrap 输出气象贡献证据。</p>
+        <h3>从 city-hour 样本到分时期气象贡献判断的研究路径</h3>
+        <p>气象归因训练以时期切分、变量准入和过程型气象特征构建为主线。每条城市小时样本先归入疫情前、疫情期、疫情后三个时期；随后排除污染历史和共污染物；再生成气象时滞、滚动、累计和复合扩散特征；最后在每个时期分别训练三种目标形式，并用统一评估和 SHAP bootstrap 输出气象贡献证据。</p>
         <div class="training-chip-row">
           <span>{metadata.get("start_time", "2018+")} 至 {metadata.get("end_time", "2026")}</span>
           <span>3 个时期独立训练</span>
-          <span>{candidate_count} 套 v2 候选实验</span>
+          <span>{candidate_count} 套候选实验</span>
           <span>{feature_count} 个气象与时空特征</span>
         </div>
       </section>
@@ -1045,19 +999,19 @@ def meteorology_training_html(assets: Assets) -> str:
     )}
     <div class="training-family-grid">
       <section class="training-family-card green">
-        <div class="family-index">01</div>
+        <div class="family-index">样本单元</div>
         <h4>样本单元固定为 city-hour</h4>
         <p>每一行代表一个城市在一个小时的 PM2.5 与同步气象状态。训练目标不在站点随机抽样层面定义，而是在城市小时序列上构建监督学习表。</p>
         <div class="family-foot">保证污染过程具有时间顺序</div>
       </section>
       <section class="training-family-card amber">
-        <div class="family-index">02</div>
+        <div class="family-index">时期掩码</div>
         <h4>时期掩码先于模型训练</h4>
         <p>2018-2019、2020-2022、2023+ 三段先拆开，再分别训练。疫情期样本不会和非疫情期混合拟合，避免特殊时期被全时期平均效应掩盖。</p>
         <div class="family-foot">服务疫情期与非疫情期对比</div>
       </section>
       <section class="training-family-card blue">
-        <div class="family-index">03</div>
+        <div class="family-index">时间后置</div>
         <h4>时间后置训练验证测试</h4>
         <p>每个时期内部按时间顺序划分训练、验证、测试，不使用随机切分。验证集用于调参和 early stopping，测试集用于最终报告。</p>
         <div class="family-foot">降低相邻小时泄漏风险</div>
@@ -1092,11 +1046,11 @@ def meteorology_training_html(assets: Assets) -> str:
       "green",
     )}
     <div class="training-flow">
-      <div class="flow-step"><b>1</b><h4>原始气象入表</h4><p>近地面温湿压、降水、云量、风速风向、PBLH 和压力层温度先与 PM2.5 按城市小时对齐。</p></div>
-      <div class="flow-step"><b>2</b><h4>风向矢量化</h4><p>将角度风向转化为 U/V 分量，并生成南风输送、北风清洁输送等方向性传输特征。</p></div>
-      <div class="flow-step"><b>3</b><h4>稳定度量化</h4><p>构建逆温指数、低 PBLH 标记、弱风标记、高湿标记和通风系数，表达垂直扩散能力。</p></div>
-      <div class="flow-step"><b>4</b><h4>滞后累计生成</h4><p>为 PBLH、风速、U/V 风、湿度、气压、露点、降水和通风系数生成时滞、滚动均值或累计量。</p></div>
-      <div class="flow-step"><b>5</b><h4>天气型辅助分层</h4><p>使用气象变量聚类形成 weather_type_k6，用于后续条件误差分析和 SHAP 解释分层。</p></div>
+      <div class="flow-step"><b>入表</b><h4>原始气象入表</h4><p>近地面温湿压、降水、云量、风速风向、PBLH 和压力层温度先与 PM2.5 按城市小时对齐。</p></div>
+      <div class="flow-step"><b>矢量化</b><h4>风向矢量化</h4><p>将角度风向转化为 U/V 分量，并生成南风输送、北风清洁输送等方向性传输特征。</p></div>
+      <div class="flow-step"><b>稳定度</b><h4>稳定度量化</h4><p>构建逆温指数、低 PBLH 标记、弱风标记、高湿标记和通风系数，表达垂直扩散能力。</p></div>
+      <div class="flow-step"><b>累积项</b><h4>滞后累计生成</h4><p>为 PBLH、风速、U/V 风、湿度、气压、露点、降水和通风系数生成时滞、滚动均值或累计量。</p></div>
+      <div class="flow-step"><b>分层</b><h4>天气型辅助分层</h4><p>使用气象变量聚类形成 weather_type_k6，用于后续条件误差分析和 SHAP 解释分层。</p></div>
     </div>
 
     {section_bridge_html(
@@ -1143,7 +1097,7 @@ def meteorology_tuning_html(assets: Assets) -> str:
       <section class="tuning-main">
         <div class="method-kicker">LightGBM 训练执行</div>
         <h4>同一搜索空间约束下训练全部候选模型</h4>
-        <p>每个时期分别训练 raw、log1p、anomaly 三类目标，形成 {candidate_count} 套 v2 候选模型。每套候选都只在训练集拟合，在验证集上进行 early stopping 和参数选择，测试集保留到最终比较阶段。</p>
+        <p>每个时期分别训练 raw、log1p、anomaly 三类目标，形成 {candidate_count} 套候选模型。每套候选都只在训练集拟合，在验证集上进行 early stopping 和参数选择，测试集保留到最终比较阶段。</p>
         <p>候选模型最终统一还原到 PM2.5 浓度尺度，并在同一后置测试集上报告 R2、RMSE、MAE、Bias。这样比较的对象不是模型类型差异，而是目标尺度和时期背景差异。</p>
         <div class="param-grid">
           <div class="param-row"><b>objective</b><span>以验证集 RMSE 作为主优化指标，保证不同目标形式可比较。</span></div>
@@ -1154,11 +1108,11 @@ def meteorology_tuning_html(assets: Assets) -> str:
       </section>
       <section class="tuning-side">
         <h4>训练对照信息</h4>
-        <div class="tuning-stat"><span>疫情前旧版 R2</span><b>{pre_old["test"]["r2"]:.3f}</b></div>
-        <div class="tuning-stat"><span>疫情期旧版 R2</span><b>{covid_old["test"]["r2"]:.3f}</b></div>
-        <div class="tuning-stat"><span>疫情后旧版 R2</span><b>{post_old["test"]["r2"]:.3f}</b></div>
-        <div class="tuning-stat"><span>旧版调参</span><b>{covid_old.get("trials", "NA")} 轮/时期</b></div>
-        <div class="tuning-stat"><span>v2 候选模型</span><b>{candidate_count} 套</b></div>
+        <div class="tuning-stat"><span>疫情前基础模型 R2</span><b>{pre_old["test"]["r2"]:.3f}</b></div>
+        <div class="tuning-stat"><span>疫情期基础模型 R2</span><b>{covid_old["test"]["r2"]:.3f}</b></div>
+        <div class="tuning-stat"><span>疫情后基础模型 R2</span><b>{post_old["test"]["r2"]:.3f}</b></div>
+        <div class="tuning-stat"><span>基础模型调参</span><b>{covid_old.get("trials", "NA")} 轮/时期</b></div>
+        <div class="tuning-stat"><span>过程型候选模型</span><b>{candidate_count} 套</b></div>
       </section>
     </div>
 
@@ -1200,7 +1154,7 @@ def meteorology_v2_training_rows(assets: Assets) -> pd.DataFrame:
     if table.empty:
         return table
     table = table.copy()
-    table.insert(0, "模型代际", "v2 气象贡献")
+    table.insert(0, "模型口径", "过程型气象贡献")
     return table
 
 
@@ -1251,9 +1205,9 @@ def high_accuracy_performance_table(assets: Assets) -> pd.DataFrame:
 def legacy_meteorology_performance_table(assets: Assets) -> pd.DataFrame:
     return pd.DataFrame(
         [
-            metric_row("疫情前旧版气象归因", assets["pre_covid_meteorology_metrics"], "2018-2019 气象-only 原值模型"),
-            metric_row("疫情期旧版气象归因", assets["covid_meteorology_metrics"], "2020-2022 气象-only 原值模型"),
-            metric_row("疫情后旧版气象归因", assets["post_covid_meteorology_metrics"], "2023+ 气象-only 原值模型"),
+            metric_row("疫情前基础气象归因", assets["pre_covid_meteorology_metrics"], "2018-2019 气象-only 原值模型"),
+            metric_row("疫情期基础气象归因", assets["covid_meteorology_metrics"], "2020-2022 气象-only 原值模型"),
+            metric_row("疫情后基础气象归因", assets["post_covid_meteorology_metrics"], "2023+ 气象-only 原值模型"),
         ]
     )
 
@@ -1291,7 +1245,7 @@ def meteorology_v2_best_table(assets: Assets) -> pd.DataFrame:
         rows.append(
             {
                 "时期": row["period_label"],
-                "最佳目标": row["target_label"],
+                "代表目标": row["target_label"],
                 "R2": round(float(row["r2"]), 3),
                 "RMSE": round(float(row["rmse"]), 3),
                 "MAE": round(float(row["mae"]), 3),
@@ -1317,12 +1271,12 @@ def meteorology_v2_old_new_compare_table(assets: Assets) -> pd.DataFrame:
         rows.append(
             {
                 "时期": row["时期"],
-                "旧版气象 R2": round(float(old.get("r2", 0)), 3),
-                "v2 最佳 R2": row["R2"],
-                "R2 提升": round(float(row["R2"]) - float(old.get("r2", 0)), 3),
-                "旧版 RMSE": round(float(old.get("rmse", 0)), 2),
-                "v2 最佳 RMSE": round(float(row["RMSE"]), 2),
-                "v2 最佳目标": row["最佳目标"],
+                "基础气象 R2": round(float(old.get("r2", 0)), 3),
+                "过程型模型 R2": row["R2"],
+                "R2 差值": round(float(row["R2"]) - float(old.get("r2", 0)), 3),
+                "基础气象 RMSE": round(float(old.get("rmse", 0)), 2),
+                "过程型模型 RMSE": round(float(row["RMSE"]), 2),
+                "过程型代表目标": row["代表目标"],
             }
         )
     return pd.DataFrame(rows)
@@ -1351,7 +1305,7 @@ def meteorology_v2_shap_chart(model: dict[str, Any]) -> go.Figure:
         x="平均绝对 SHAP",
         y="特征",
         orientation="h",
-        title=f"{model['period_label']} v2 最佳气象贡献 Top SHAP",
+        title=f"{model['period_label']}过程型气象贡献 Top SHAP",
     )
     fig.update_traces(marker_color="#059669")
     fig.update_layout(height=430, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="平均绝对 SHAP", yaxis_title="")
@@ -1366,29 +1320,556 @@ def meteorology_v2_r2_chart(summary: pd.DataFrame) -> go.Figure:
         color="目标形式",
         barmode="group",
         text="R2",
-        title="v2 气象贡献模型三目标 R2 对比",
+        title="过程型气象贡献模型三目标 R2 对比",
     )
     fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
     fig.update_layout(height=360, margin=dict(l=10, r=10, t=50, b=20), yaxis_range=[0, 1.0], xaxis_title="")
     return fig
 
 
+def research_frame(assets: Assets, key: str) -> pd.DataFrame:
+    upgrade = assets.get("research_upgrade") or {}
+    data = upgrade.get(key, [])
+    return pd.DataFrame(data)
+
+
+def research_upgrade_status_html(assets: Assets) -> str:
+    upgrade = assets.get("research_upgrade") or {}
+    findings = upgrade.get("key_findings", [])
+    evidence_items = "".join(
+        (
+            '<section class="research-evidence-item">'
+            '<div class="research-evidence-mark"></div>'
+            f"<p>{finding}</p>"
+            "</section>"
+        )
+        for finding in findings
+    )
+    return (
+        '<div class="research-upgrade-hero">'
+        '<section class="research-upgrade-main">'
+        '<div class="research-kicker">研究验证体系</div>'
+        "<h3>从预测模型评估扩展为大气环境机器学习研究框架</h3>"
+        "<p>研究验证不再仅以总体 R2 作为评价依据，而是在过程型气象贡献模型基础上引入留城市验证、透明样条对照、天气型机制分层、典型气象条件误差和 SHAP 稳定性分析。该体系用于检验模型是否能够外推到未参与训练的城市，气象解释是否具有稳定性，以及关键污染天气型是否与边界层、通风、湿度和区域输送等大气环境机制相一致。</p>"
+        '<div class="intro-chip-row">'
+        "<span>留城市验证</span>"
+        "<span>透明样条对照</span>"
+        "<span>天气型机制</span>"
+        "<span>SHAP bootstrap 稳定性</span>"
+        "</div>"
+        "</section>"
+        '<section class="research-upgrade-side">'
+        '<div class="research-kicker muted">解释口径</div>'
+        "<h4>模型解释贡献，不等同于严格因果效应</h4>"
+        "<p>SHAP、偏依赖响应和透明样条响应曲线用于说明模型在给定特征空间下如何使用气象信息。相关结果应表述为模型解释贡献，并与边界层、通风、湿度、输送和天气型机制共同论证，避免将其直接等同于严格因果效应。</p>"
+        "</section>"
+        "</div>"
+        '<section class="research-evidence-panel">'
+        "<h4>验证结果概览</h4>"
+        f'<div class="research-evidence-list">{evidence_items}</div>'
+        "</section>"
+    )
+
+
+def _first_matching(rows: list[dict[str, Any]], **criteria: Any) -> dict[str, Any]:
+    for row in rows:
+        if all(row.get(key) == value for key, value in criteria.items()):
+            return row
+    return {}
+
+
+def _fmt_number(value: Any, digits: int = 3, fallback: str = "NA") -> str:
+    try:
+        if value is None or (isinstance(value, float) and math.isnan(value)):
+            return fallback
+        return f"{float(value):.{digits}f}"
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _fmt_pm25(value: Any, fallback: str = "NA") -> str:
+    try:
+        if value is None or (isinstance(value, float) and math.isnan(value)):
+            return fallback
+        return f"{float(value):.1f}"
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _top_feature_labels(model: dict[str, Any], n: int = 5) -> str:
+    top = model.get("top_shap", [])[:n]
+    labels = [feature_label(row.get("feature", "")) for row in top]
+    return "、".join(labels) if labels else "NA"
+
+
+def research_conclusion_html(assets: Assets) -> str:
+    v2 = assets.get("meteorology_v2") or {}
+    upgrade = assets.get("research_upgrade") or {}
+    best_summary = v2.get("best_summary", [])
+    best_models = v2.get("best_models", [])
+    leave_city = upgrade.get("leave_city_summary", [])
+    weather_types = upgrade.get("weather_type_mechanism", [])
+    weather_highlights = upgrade.get("weather_type_highlights", [])
+    shap_similarity = upgrade.get("shap_rank_similarity", [])
+    gam_like = upgrade.get("gam_like_metrics", [])
+
+    pre = _first_matching(best_summary, period="pre_covid_2018_2019")
+    covid = _first_matching(best_summary, period="covid_2020_2022")
+    post = _first_matching(best_summary, period="post_covid_2023_plus")
+    pre_model = _first_matching(best_models, period="pre_covid_2018_2019")
+    covid_model = _first_matching(best_models, period="covid_2020_2022")
+    post_model = _first_matching(best_models, period="post_covid_2023_plus")
+    pre_leave = _first_matching(leave_city, period_label="疫情前")
+    covid_leave = _first_matching(leave_city, period_label="疫情期")
+    post_leave = _first_matching(leave_city, period_label="疫情后")
+    pre_highlight = _first_matching(weather_highlights, period_label="疫情前")
+    covid_highlight = _first_matching(weather_highlights, period_label="疫情期")
+    post_highlight = _first_matching(weather_highlights, period_label="疫情后")
+    pre_gam = _first_matching(gam_like, period_label="疫情前")
+    covid_gam = _first_matching(gam_like, period_label="疫情期")
+    post_gam = _first_matching(gam_like, period_label="疫情后")
+    pre_covid_sim = _first_matching(shap_similarity, left_period="疫情前", right_period="疫情期")
+    pre_post_sim = _first_matching(shap_similarity, left_period="疫情前", right_period="疫情后")
+    covid_post_sim = _first_matching(shap_similarity, left_period="疫情期", right_period="疫情后")
+
+    north_pre = _first_matching(weather_types, period_label="疫情前", weather_type_label="强北风清洁输送型")
+    north_covid = _first_matching(weather_types, period_label="疫情期", weather_type_label="强北风清洁输送型")
+    north_post = _first_matching(weather_types, period_label="疫情后", weather_type_label="强北风清洁输送型")
+    south_post = _first_matching(weather_types, period_label="疫情后", weather_type_label="强南风输送型")
+
+    headline_stats = [
+        ("气象-only 解释力", f"R2 {_fmt_number(pre.get('r2'))} / {_fmt_number(covid.get('r2'))} / {_fmt_number(post.get('r2'))}", "疫情前、疫情期、疫情后代表模型"),
+        ("留城市泛化", f"平均 R2 {_fmt_number(pre_leave.get('mean_r2'))} / {_fmt_number(covid_leave.get('mean_r2'))}", "疫情前与疫情期具有较稳定空间外推能力"),
+        ("静稳高湿污染型", f"中位数 {_fmt_pm25(pre_highlight.get('highest_pm25_median'))} / {_fmt_pm25(covid_highlight.get('highest_pm25_median'))} / {_fmt_pm25(post_highlight.get('highest_pm25_median'))}", "三个时期最高 PM2.5 天气型均为极低边界层静稳高湿型"),
+        ("SHAP 结构差异", f"Jaccard {_fmt_number(covid_post_sim.get('top20_jaccard'))}", "疫情期与疫情后 Top20 贡献结构差异明显"),
+    ]
+    stat_html = "".join(
+        (
+            '<div class="research-stat-tile">'
+            f"<span>{label}</span>"
+            f"<b>{value}</b>"
+            f"<p>{note}</p>"
+            "</div>"
+        )
+        for label, value, note in headline_stats
+    )
+
+    return (
+        '<div class="research-brief">'
+        '<section class="research-brief-head">'
+        '<div class="research-kicker">阶段性研究判断</div>'
+        "<h3>京津冀 PM2.5 的气象影响主要体现为边界层通风、湿度静稳和南北向输送的共同调制</h3>"
+        "<p>当前结果可概括为一组阶段性研究证据：高精度模型给出污染浓度短时预测的性能上限；气象-only 模型在剔除 PM2.5 滞后、滚动均值和共污染物后，用于估计气象背景对浓度波动的相对独立解释力。研究重点并非单一 R2 数值，而是不同时期的气象贡献结构及其大气环境机制。</p>"
+        '<div class="research-stat-grid">'
+        f"{stat_html}"
+        "</div>"
+        "</section>"
+        '<div class="research-brief-body">'
+        '<section class="research-note">'
+        "<h4>气象背景的独立解释力</h4>"
+        f"<p>过程型气象-only 模型在疫情前、疫情期和疫情后测试集上的 R2 分别为 {_fmt_number(pre.get('r2'))}、{_fmt_number(covid.get('r2'))} 和 {_fmt_number(post.get('r2'))}；透明样条对照模型仍保留 {_fmt_number(pre_gam.get('r2'))}、{_fmt_number(covid_gam.get('r2'))} 和 {_fmt_number(post_gam.get('r2'))} 的解释度。由于这组模型不使用污染时滞和共污染物，上述结果说明气象、PBLH、风输送和时空背景本身能够解释相当比例的 PM2.5 波动。</p>"
+        "</section>"
+        '<section class="research-note">'
+        "<h4>分时期贡献结构</h4>"
+        f"<p>疫情前的前列变量集中于 {_top_feature_labels(pre_model, 5)}；疫情期集中于 {_top_feature_labels(covid_model, 5)}；疫情后集中于 {_top_feature_labels(post_model, 5)}。这一变化表明，疫情前后气象贡献结构并非简单平移，恢复期的 PBLH、露点、通风系数和风速过程更突出，提示扩散条件约束有所强化。</p>"
+        "</section>"
+        '<section class="research-note">'
+        "<h4>典型天气背景</h4>"
+        f"<p>三个时期 PM2.5 中位数最高的天气型均为极低边界层静稳高湿型，对应中位浓度约 {_fmt_pm25(pre_highlight.get('highest_pm25_median'))}、{_fmt_pm25(covid_highlight.get('highest_pm25_median'))} 和 {_fmt_pm25(post_highlight.get('highest_pm25_median'))} ug/m3。该天气型同时具有低 PBLH、弱风、高湿和低通风特征，符合污染累积天气背景的物理认识。</p>"
+        "</section>"
+        '<section class="research-note">'
+        "<h4>输送方向与空间泛化</h4>"
+        f"<p>强北风清洁输送型在三个时期均对应较低 PM2.5 中位数，约 {_fmt_pm25(north_pre.get('pm25_median'))}、{_fmt_pm25(north_covid.get('pm25_median'))} 和 {_fmt_pm25(north_post.get('pm25_median'))} ug/m3；疫情后强南风输送型频率约 {_fmt_number(south_post.get('frequency_pct'), 1)}%。留城市验证中，疫情前和疫情期平均 R2 分别为 {_fmt_number(pre_leave.get('mean_r2'))} 和 {_fmt_number(covid_leave.get('mean_r2'))}，说明模型具有一定区域泛化能力；疫情后异常量目标的留城市表现下降，提示同城气候态基准存在空间外推边界。</p>"
+        "</section>"
+        "</div>"
+        '<div class="research-boundary-panel">'
+        "<h4>解释边界</h4>"
+        f"<p>SHAP 排名稳定性支持分时期差异判断：疫情前与疫情期 Top20 Jaccard 为 {_fmt_number(pre_covid_sim.get('top20_jaccard'))}，疫情期与疫情后为 {_fmt_number(covid_post_sim.get('top20_jaccard'))}。但 SHAP 反映的是模型在给定特征空间下对变量的使用方式，不等同于严格因果效应。跨时期比较还应同时考虑 2023+ PM2.5 数据源与 2018-2022 不完全一致、排放活动缺少直接清单约束，以及异常量目标对城市历史基准的依赖。</p>"
+        "</div>"
+        "</div>"
+    )
+
+
+def leave_city_summary_table(assets: Assets) -> pd.DataFrame:
+    frame = research_frame(assets, "leave_city_summary")
+    if frame.empty:
+        return frame
+    table = frame[
+        [
+            "period_label",
+            "target_label",
+            "cities",
+            "mean_r2",
+            "median_r2",
+            "min_r2",
+            "max_r2",
+            "mean_rmse",
+            "mean_mae",
+            "mean_bias",
+        ]
+    ].copy()
+    table.columns = ["时期", "目标形式", "城市数", "平均 R2", "中位 R2", "最低 R2", "最高 R2", "平均 RMSE", "平均 MAE", "平均 Bias"]
+    for column in ["平均 R2", "中位 R2", "最低 R2", "最高 R2", "平均 RMSE", "平均 MAE", "平均 Bias"]:
+        table[column] = table[column].astype(float).round(3)
+    return table
+
+
+def leave_city_r2_chart(assets: Assets) -> go.Figure:
+    table = leave_city_summary_table(assets)
+    long = table.melt(id_vars=["时期"], value_vars=["平均 R2", "中位 R2"], var_name="指标", value_name="R2")
+    fig = px.bar(long, x="时期", y="R2", color="指标", barmode="group", text="R2", title="留城市验证：平均与中位 R2")
+    fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+    fig.update_layout(height=360, margin=dict(l=10, r=10, t=50, b=20), yaxis_range=[0, 0.95], xaxis_title="")
+    return fig
+
+
+def leave_city_detail_chart(assets: Assets) -> go.Figure:
+    frame = research_frame(assets, "leave_city_metrics")
+    if frame.empty:
+        return go.Figure()
+    frame = frame.copy()
+    frame["R2"] = frame["r2"].astype(float)
+    fig = px.bar(
+        frame,
+        x="holdout_city",
+        y="R2",
+        color="period_label",
+        barmode="group",
+        hover_data={"rmse": ":.2f", "mae": ":.2f", "bias": ":.2f"},
+        title="13 城市逐一留出验证 R2",
+    )
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.update_layout(height=410, margin=dict(l=10, r=10, t=50, b=20), yaxis_title="R2", xaxis_title="留出城市")
+    return fig
+
+
+def gam_like_compare_table(assets: Assets) -> pd.DataFrame:
+    gam = research_frame(assets, "gam_like_metrics")
+    v2 = meteorology_v2_best_table(assets)
+    if gam.empty or v2.empty:
+        return pd.DataFrame()
+    v2_lookup = {row["时期"]: row for _, row in v2.iterrows()}
+    rows = []
+    for _, row in gam.iterrows():
+        period = row["period_label"]
+        v2_row = v2_lookup.get(period, {})
+        rows.append(
+            {
+                "时期": period,
+                "目标形式": row["target_label"],
+                "透明对照 R2": round(float(row["r2"]), 3),
+                "透明对照 RMSE": round(float(row["rmse"]), 2),
+                "过程型 LightGBM R2": round(float(v2_row.get("R2", 0)), 3),
+                "过程型 LightGBM RMSE": round(float(v2_row.get("RMSE", 0)), 2),
+                "透明模型特征数": int(row["feature_count"]),
+                "样条气象变量数": int(row["spline_feature_count"]),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def gam_like_compare_chart(assets: Assets) -> go.Figure:
+    table = gam_like_compare_table(assets)
+    if table.empty:
+        return go.Figure()
+    long = table.melt(id_vars=["时期"], value_vars=["透明对照 R2", "过程型 LightGBM R2"], var_name="模型", value_name="R2")
+    fig = px.bar(long, x="时期", y="R2", color="模型", barmode="group", text="R2", title="透明对照模型与过程型 LightGBM 性能比较")
+    fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+    fig.update_layout(height=360, margin=dict(l=10, r=10, t=50, b=20), yaxis_range=[0, 0.85], xaxis_title="")
+    return fig
+
+
+def gam_response_chart(assets: Assets, feature: str) -> go.Figure:
+    frame = research_frame(assets, "gam_like_response_profiles")
+    if frame.empty:
+        return go.Figure()
+    part = frame[frame["feature"] == feature].copy()
+    if part.empty:
+        return go.Figure()
+    part["气象变量"] = part["feature"].map(feature_label)
+    fig = px.line(
+        part,
+        x="value",
+        y="mean_prediction_pm25",
+        color="period_label",
+        markers=True,
+        title=f"透明对照响应曲线：{feature_label(feature)}",
+    )
+    fig.update_traces(line=dict(width=3), marker=dict(size=5))
+    fig.update_layout(height=380, margin=dict(l=10, r=10, t=50, b=20), xaxis_title=feature_label(feature), yaxis_title="平均预测 PM2.5")
+    return fig
+
+
+def weather_type_table(assets: Assets) -> pd.DataFrame:
+    frame = research_frame(assets, "weather_type_mechanism")
+    if frame.empty:
+        return frame
+    table = frame[
+        [
+            "period_label",
+            "weather_type_k6",
+            "weather_type_label",
+            "frequency_pct",
+            "pm25_median",
+            "pm25_p90",
+            "pblh_mean",
+            "wind_speed_mean",
+            "relative_humidity_mean",
+            "mae",
+            "rmse",
+            "r2",
+        ]
+    ].copy()
+    table.columns = ["时期", "天气型", "机制名称", "频率(%)", "PM2.5 中位数", "PM2.5 P90", "平均 PBLH", "平均风速", "平均相对湿度", "MAE", "RMSE", "R2"]
+    for column in ["频率(%)", "PM2.5 中位数", "PM2.5 P90", "平均 PBLH", "平均风速", "平均相对湿度", "MAE", "RMSE", "R2"]:
+        table[column] = pd.to_numeric(table[column], errors="coerce").round(2)
+    return table
+
+
+def weather_type_frequency_chart(assets: Assets) -> go.Figure:
+    frame = research_frame(assets, "weather_type_mechanism")
+    if frame.empty:
+        return go.Figure()
+    fig = px.bar(
+        frame,
+        x="weather_type_label",
+        y="frequency_pct",
+        color="period_label",
+        barmode="group",
+        title="分时期天气型出现频率",
+    )
+    fig.update_layout(height=420, margin=dict(l=10, r=10, t=50, b=120), xaxis_title="", yaxis_title="频率(%)")
+    fig.update_xaxes(tickangle=-28)
+    return fig
+
+
+def weather_type_pm25_chart(assets: Assets) -> go.Figure:
+    frame = research_frame(assets, "weather_type_mechanism")
+    if frame.empty:
+        return go.Figure()
+    fig = px.bar(
+        frame,
+        x="weather_type_label",
+        y="pm25_median",
+        color="period_label",
+        barmode="group",
+        title="不同天气型 PM2.5 中位数",
+    )
+    fig.update_layout(height=420, margin=dict(l=10, r=10, t=50, b=120), xaxis_title="", yaxis_title="PM2.5 ug/m3")
+    fig.update_xaxes(tickangle=-28)
+    return fig
+
+
+def condition_metrics_table(assets: Assets) -> pd.DataFrame:
+    frame = research_frame(assets, "critical_condition_metrics")
+    if frame.empty:
+        return frame
+    table = frame[["period_label", "condition_label", "rows", "observed_mean", "predicted_mean", "mae", "rmse", "r2", "bias"]].copy()
+    table.columns = ["时期", "气象条件", "样本数", "实测均值", "预测均值", "MAE", "RMSE", "R2", "Bias"]
+    for column in ["实测均值", "预测均值", "MAE", "RMSE", "R2", "Bias"]:
+        table[column] = pd.to_numeric(table[column], errors="coerce").round(2)
+    return table
+
+
+def condition_rmse_chart(assets: Assets) -> go.Figure:
+    table = condition_metrics_table(assets)
+    if table.empty:
+        return go.Figure()
+    core = table[table["气象条件"].isin(["低边界层条件", "弱风条件", "高湿条件", "低通风条件", "南风输送条件", "北风清洁输送条件"])].copy()
+    if core.empty:
+        core = table
+    fig = px.bar(core, x="气象条件", y="RMSE", color="时期", barmode="group", text="RMSE", title="关键气象条件下模型误差")
+    fig.update_traces(texttemplate="%{text:.1f}", textposition="outside")
+    fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=90), xaxis_title="", yaxis_title="RMSE ug/m3")
+    fig.update_xaxes(tickangle=-22)
+    return fig
+
+
+def shap_similarity_table(assets: Assets) -> pd.DataFrame:
+    frame = research_frame(assets, "shap_rank_similarity")
+    if frame.empty:
+        return frame
+    table = frame.copy()
+    table["时期对比"] = table["left_period"] + " vs " + table["right_period"]
+    table = table[["时期对比", "common_features", "top20_overlap", "top20_jaccard", "spearman_rank_corr_all_features"]]
+    table.columns = ["时期对比", "共同特征数", "Top20 交集", "Top20 Jaccard", "全特征 Spearman"]
+    table["Top20 Jaccard"] = table["Top20 Jaccard"].astype(float).round(3)
+    table["全特征 Spearman"] = table["全特征 Spearman"].astype(float).round(3)
+    return table
+
+
+def shap_similarity_chart(assets: Assets) -> go.Figure:
+    table = shap_similarity_table(assets)
+    if table.empty:
+        return go.Figure()
+    long = table.melt(id_vars=["时期对比"], value_vars=["Top20 Jaccard", "全特征 Spearman"], var_name="稳定性指标", value_name="数值")
+    fig = px.bar(long, x="时期对比", y="数值", color="稳定性指标", barmode="group", text="数值", title="分时期 SHAP 排名相似度")
+    fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+    fig.update_layout(height=360, margin=dict(l=10, r=10, t=50, b=20), yaxis_range=[0, 1.0], xaxis_title="")
+    return fig
+
+
+def shap_stability_period_table(assets: Assets, period_label: str, n: int = 12) -> pd.DataFrame:
+    frame = research_frame(assets, "shap_stability_top20")
+    if frame.empty:
+        return frame
+    part = frame[frame["period_label"] == period_label].head(n).copy()
+    table = part[["feature_label", "mean_abs_shap", "bootstrap_ci_low", "bootstrap_ci_high", "relative_ci_width", "rank"]].copy()
+    table.columns = ["特征", "平均绝对 SHAP", "95% CI 下限", "95% CI 上限", "相对 CI 宽度", "排名"]
+    for column in ["平均绝对 SHAP", "95% CI 下限", "95% CI 上限", "相对 CI 宽度"]:
+        table[column] = table[column].astype(float).round(4)
+    return table
+
+
+def shap_stability_period_chart(assets: Assets, period_label: str) -> go.Figure:
+    table = shap_stability_period_table(assets, period_label, 12)
+    if table.empty:
+        return go.Figure()
+    table = table.sort_values("平均绝对 SHAP")
+    error_plus = table["95% CI 上限"] - table["平均绝对 SHAP"]
+    error_minus = table["平均绝对 SHAP"] - table["95% CI 下限"]
+    fig = go.Figure(
+        go.Bar(
+            x=table["平均绝对 SHAP"],
+            y=table["特征"],
+            orientation="h",
+            marker_color="#0f766e",
+            error_x=dict(type="data", symmetric=False, array=error_plus, arrayminus=error_minus, color="#334155"),
+        )
+    )
+    fig.update_layout(
+        title=f"{period_label} SHAP Top 特征与 bootstrap 置信区间",
+        height=430,
+        margin=dict(l=10, r=10, t=50, b=20),
+        xaxis_title="平均绝对 SHAP",
+        yaxis_title="",
+    )
+    return fig
+
+
+def render_research_validation_section(assets: Assets) -> None:
+    if not assets.get("research_upgrade"):
+        st.warning("尚未检索到研究验证结果文件，当前仅保留模型训练与预测结果。")
+        return
+
+    st.markdown(research_conclusion_html(assets), unsafe_allow_html=True)
+    st.markdown(research_upgrade_status_html(assets), unsafe_allow_html=True)
+    validation_tab, transparent_tab, weather_type_tab, shap_tab, condition_tab = st.tabs(
+        ["空间泛化验证", "透明解释对照", "天气型机制", "SHAP 稳定性", "条件误差"]
+    )
+
+    with validation_tab:
+        st.markdown(
+            """
+            <div class="explain-band green">
+              <h4>留城市验证的研究含义</h4>
+              <p>留城市验证每次完整移除一个城市，只用其余 12 个城市训练，再预测被留出城市。它检验的是模型能否学习区域气象规律，而不是记住某个城市的固定浓度水平。</p>
+              <p>疫情前与疫情期平均 R2 均接近 0.69，说明过程型气象-only 模型具有一定空间泛化能力；疫情后气候态异常目标明显较弱，提示该目标对城市历史基准依赖较强，空间外推时需要单独说明边界条件。</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        lv_col_a, lv_col_b = st.columns([0.45, 0.55])
+        lv_col_a.plotly_chart(leave_city_r2_chart(assets), use_container_width=True)
+        lv_col_b.plotly_chart(leave_city_detail_chart(assets), use_container_width=True)
+        st.dataframe(leave_city_summary_table(assets), use_container_width=True, hide_index=True)
+
+    with transparent_tab:
+        st.markdown(
+            """
+            <div class="explain-band blue">
+              <h4>透明模型对照的研究含义</h4>
+              <p>透明样条对照模型使用关键气象变量的平滑基函数与 Ridge 回归，牺牲一部分精度来换取更清晰的响应曲线。该模型用于检验主要气象变量是否能在较透明的模型结构中保留一致的响应方向。</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        gam_col_a, gam_col_b = st.columns([0.48, 0.52])
+        gam_col_a.plotly_chart(gam_like_compare_chart(assets), use_container_width=True)
+        with gam_col_b:
+            response_feature = st.selectbox(
+                "响应曲线变量",
+                [
+                    "boundary_layer_height",
+                    "ventilation_coefficient",
+                    "relative_humidity_2m",
+                    "wind_speed_10m",
+                    "pressure_msl",
+                    "precipitation",
+                ],
+                format_func=feature_label,
+            )
+            st.plotly_chart(gam_response_chart(assets, response_feature), use_container_width=True)
+        st.dataframe(gam_like_compare_table(assets), use_container_width=True, hide_index=True)
+        st.caption("透明对照模型的精度通常低于过程型 LightGBM；其作用在于提供可解释响应形态，而不是追求最高 R2。")
+
+    with weather_type_tab:
+        st.markdown(
+            """
+            <div class="explain-band green">
+              <h4>天气型机制解释</h4>
+              <p>天气型聚类只使用气象变量，不使用 PM2.5。它把低边界层、高湿、南北风输送、强扩散和降水清除等过程组织成可解释的天气背景，使模型结果能落回大气环境机制。</p>
+              <p>极低边界层静稳高湿型在三个时期中均对应较高 PM2.5，是低 PBLH、弱风、高湿和低通风共同造成污染累积的主要证据；疫情后强南风输送型频率上升，可作为恢复期区域输送增强的机制线索。</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        wt_col_a, wt_col_b = st.columns(2)
+        wt_col_a.plotly_chart(weather_type_frequency_chart(assets), use_container_width=True)
+        wt_col_b.plotly_chart(weather_type_pm25_chart(assets), use_container_width=True)
+        with st.expander("天气型机制明细", expanded=False):
+            st.dataframe(weather_type_table(assets), use_container_width=True, hide_index=True)
+
+    with shap_tab:
+        st.markdown(
+            """
+            <div class="explain-band amber">
+              <h4>SHAP 稳定性解释</h4>
+              <p>单次 SHAP 排名容易受抽样扰动影响。本项目对测试样本重复抽样，计算 Top 特征均值、标准差和 95% 置信区间，并比较三时期特征排序相似度。相关结果应表述为模型解释贡献，而不是严格因果效应。</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        shap_col_a, shap_col_b = st.columns([0.46, 0.54])
+        shap_col_a.plotly_chart(shap_similarity_chart(assets), use_container_width=True)
+        with shap_col_b:
+            shap_period = st.selectbox("SHAP 时期", ["疫情前", "疫情期", "疫情后"], index=1)
+            st.plotly_chart(shap_stability_period_chart(assets, shap_period), use_container_width=True)
+        st.dataframe(shap_similarity_table(assets), use_container_width=True, hide_index=True)
+        with st.expander("所选时期 Top SHAP 置信区间", expanded=False):
+            st.dataframe(shap_stability_period_table(assets, shap_period, 20), use_container_width=True, hide_index=True)
+
+    with condition_tab:
+        st.markdown(
+            """
+            <div class="explain-band blue">
+              <h4>典型气象条件误差分析</h4>
+              <p>气象贡献模型的评估不应只依赖总体 R2。低边界层、弱风、高湿、低通风、南风输送和北风清洁输送等条件是 PM2.5 污染过程的关键背景，在这些条件下单独报告误差可以检验模型是否覆盖主要污染气象机制。</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.plotly_chart(condition_rmse_chart(assets), use_container_width=True)
+        with st.expander("关键气象条件误差明细", expanded=False):
+            st.dataframe(condition_metrics_table(assets), use_container_width=True, hide_index=True)
+
+
 def v2_period_narrative(model: dict[str, Any]) -> str:
     period = model["period"]
     if period == "pre_covid_2018_2019":
         return (
-            "疫情前最佳模型选择 log1p(PM2.5)，说明在正常排放背景下，降低重污染极端值对训练的干扰后，"
+            "疫情前代表模型采用 log1p(PM2.5) 目标，说明在正常排放背景下，降低重污染极端值对训练的干扰后，"
             "气象变量能够更稳定地解释浓度变化。SHAP 前列包含年内周期、纬度、24小时平均 PBLH、"
             "北风清洁输送和72小时气压滞后，反映出季节背景、城市南北空间差异、边界层扩散和冷空气过程共同控制污染累积。"
         )
     if period == "covid_2020_2022":
         return (
-            "疫情期最佳模型选择 PM2.5 原值，R2 在三目标中最高，说明人为活动减弱并不意味着气象解释力消失。"
+            "疫情期代表模型采用 PM2.5 原值目标，R2 在三种目标形式中最高，说明人为活动减弱并不意味着气象解释力消失。"
             "24小时平均 PBLH、24/48小时南北风 V 分量、72小时气压滞后与露点/湿度相关变量共同进入前列，"
             "表明静稳扩散条件、区域输送和湿度过程仍然是疫情期 PM2.5 波动的重要气象驱动。"
         )
     return (
-        "疫情后最佳模型选择同城同月同小时气候态异常，说明恢复期更适合解释 PM2.5 相对本地气候背景的偏离。"
+        "疫情后代表模型采用同城同月同小时气候态异常目标，说明恢复期更适合解释 PM2.5 相对本地气候背景的偏离。"
         "24小时平均 PBLH、露点、24小时通风系数、12小时平均风速和北风清洁输送位于前列，"
         "体现边界层约束、湿度过程和通风扩散能力对污染异常的控制作用增强。"
     )
@@ -1424,7 +1905,7 @@ def render_model_card(spec: dict, assets: Assets) -> None:
         st.markdown(f"**定位**：{spec['role']}")
         st.markdown(f"**研究任务定位**：{spec['question']}")
         st.markdown(f"**特征口径**：{spec['features']}")
-        st.markdown(f"**学术使用建议**：{spec['academic_use']}")
+        st.markdown(f"**研究使用定位**：{spec['academic_use']}")
         if spec.get("result_reading"):
             st.markdown(f"**结果解读**：{spec['result_reading']}")
         if spec.get("limitation"):
@@ -1449,11 +1930,11 @@ def model_card_specs() -> list[dict]:
             "family": "预测主模型",
             "metrics_key": "current_metrics",
             "shap_key": "current_shap",
-            "role": "预测台默认模型，用于 2018+ 全时期当前小时 PM2.5 估计。",
+            "role": "综合预测基准模型，用于 2018+ 全时期当前小时 PM2.5 估计。",
             "question": "评估当前气象、PM2.5 历史和共污染物背景约束下的 PM2.5 当前小时预测能力。",
             "features": "气象、ERA5 PBLH、逆温、风输送、PM2.5 时滞、滚动均值、PM10、CO、NO2、SO2、O3、AOD、dust。",
-            "academic_use": "用于证明机器学习框架具备较强预测能力，不直接作为气象因子独立贡献的唯一依据。",
-            "result_reading": "该模型精度最高，说明在跨年份、跨城市场景下，LightGBM 能有效捕捉污染持续性、共污染物协同变化和气象扩散条件之间的非线性关系。它是网页预测台最稳妥的默认选择。",
+            "academic_use": "用于评估机器学习框架的预测能力，不直接作为气象因子独立贡献的唯一依据。",
+            "result_reading": "该模型精度最高，说明在跨年份、跨城市场景下，LightGBM 能有效捕捉污染持续性、共污染物协同变化和气象扩散条件之间的非线性关系。它构成当前综合预测口径的主模型。",
             "limitation": "SHAP 前列会包含 PM2.5 时滞、滚动均值和共污染物，因此它更适合说明预测能力，而不是单独说明气象因子贡献。",
             "note": "该模型跨越 2018-2026，2023+ PM2.5 数据源与 2018-2022 不完全一致，跨期解释需谨慎。",
             "expanded": True,
@@ -1468,7 +1949,7 @@ def model_card_specs() -> list[dict]:
             "features": "与全时期高精度模型同类，但只在疫情前数据内训练和测试。",
             "academic_use": "作为疫情前预测精度上限和气象归因模型的对照。",
             "result_reading": "它提供了疫情前正常排放背景下的预测上限。若该模型显著优于疫情前气象模型，说明 PM2.5 自身持续性和共污染物背景对短时预测有很强贡献。",
-            "limitation": "该模型仍包含污染历史和共污染物，不能直接用于判断 PBLH、湿度、风和逆温的独立贡献强弱。",
+            "limitation": "该模型仍包含污染历史和共污染物，不宜直接用于判断 PBLH、湿度、风和逆温的独立贡献强弱。",
             "note": "该模型 SHAP 前列主要为 PM2.5 滚动均值、时滞和 PM10，说明预测能力主要来自污染持续性。",
         },
         {
@@ -1479,9 +1960,9 @@ def model_card_specs() -> list[dict]:
             "role": "2018-2019 单独训练，只保留气象、PBLH、风输送、稳定度、时间和城市特征。",
             "question": "正常排放时期，气象背景本身能解释多少 PM2.5 变化。",
             "features": "排除 PM2.5 时滞、滚动均值和共污染物，突出 PBLH、湿度、风、气压、逆温等气象贡献。",
-            "academic_use": "论文中解释疫情前气象贡献的核心模型。",
-            "result_reading": "旧版模型已经能显示气象-only 口径与高精度口径之间的差距，说明气象对 PM2.5 有解释力，但不足以替代污染持续性和排放背景。",
-            "limitation": "旧版模型主要使用当前小时气象和少量基础派生变量，缺少本轮 v2 中的长时滞、累积和复合扩散指数，因此最新论文结论应优先引用 v2 结果。",
+            "academic_use": "用于解释疫情前气象贡献结构的主要对照模型。",
+            "result_reading": "基础气象模型能够显示气象-only 口径与高精度口径之间的差距，说明气象对 PM2.5 有解释力，但不足以替代污染持续性和排放背景。",
+            "limitation": "基础气象模型主要使用当前小时气象和少量基础派生变量，长时滞、累积和复合扩散指数表达不足，因此阶段性研究结论应优先依据过程型气象贡献模型。",
             "note": "精度显著低于高精度模型是预期现象，因为它故意不使用强污染持续性特征。",
         },
         {
@@ -1492,7 +1973,7 @@ def model_card_specs() -> list[dict]:
             "role": "2020-2022 单独训练的高精度预测模型。",
             "question": "评估疫情期污染持续性和共污染物结构变化背景下的 PM2.5 短时预测稳定性。",
             "features": "气象 + PBLH + 稳定度 + PM2.5 时滞/滚动均值 + 共污染物。",
-            "academic_use": "用于展示疫情期预测能力，并和疫情期气象归因模型形成对照。",
+            "academic_use": "用于评估疫情期预测能力，并和疫情期气象归因模型形成对照。",
             "result_reading": "疫情期高精度模型可用于检验特殊时期污染过程的可学习短时持续性。它的表现越好，越说明即便人为活动下降，污染过程仍保留连续演变特征。",
             "limitation": "该模型不适合直接判定疫情期气象因子贡献的增强或减弱，因为污染历史变量会吸收一部分非气象因素。",
             "note": "高 R2 主要说明污染短时持续性强，不表示气象变量单独解释了全部污染变化。",
@@ -1505,9 +1986,9 @@ def model_card_specs() -> list[dict]:
             "role": "2020-2022 单独训练，专门观察人为活动减弱背景下气象贡献结构。",
             "question": "比较疫情期气象条件对 PM2.5 的解释权重相对于疫情前的阶段性变化。",
             "features": "排除 PM2.5 持续性和共污染物，只看气象、PBLH、逆温、风输送、时间和城市。",
-            "academic_use": "论文中疫情期气象贡献分析的核心模型。",
-            "result_reading": "旧版疫情期气象模型为疫情三年单独建模，能初步显示人为活动减弱背景下气象变量解释结构的变化。",
-            "limitation": "由于旧版特征主要集中在当前小时，无法充分表达持续低边界层、连续高湿、长时间弱风和通风条件累积效应；相关方法局限已在 v2 模型中改进。",
+            "academic_use": "用于疫情期气象贡献分析的主要对照模型。",
+            "result_reading": "基础气象模型为疫情三年单独建模，能够初步显示人为活动减弱背景下气象变量解释结构的变化。",
+            "limitation": "由于基础特征主要集中在当前小时，无法充分表达持续低边界层、连续高湿、长时间弱风和通风条件累积效应；相关方法局限已在过程型模型中改进。",
             "note": "适合解释露点、湿度、季节周期、风输送等在疫情期的贡献变化。",
         },
         {
@@ -1518,7 +1999,7 @@ def model_card_specs() -> list[dict]:
             "role": "2023+ 单独训练的高精度预测模型。",
             "question": "疫情后阶段加入共污染物和污染持续性后，预测精度上限是多少。",
             "features": "气象、PBLH、PM2.5 时滞/滚动均值、共污染物和气溶胶变量。",
-            "academic_use": "用于疫情后预测展示和与气象归因模型对照。",
+            "academic_use": "用于疫情后预测评估和与气象归因模型对照。",
             "result_reading": "疫情后高精度模型用于观察恢复期污染短时预测能力。它与疫情前、疫情期高精度模型一起构成分时期预测性能对照。",
             "limitation": "2023+ 数据源差异会影响跨阶段对比，模型表现应更多看作恢复期内部预测能力，而不是直接代表排放恢复强度。",
             "note": "2023+ PM2.5 数据源与 2018-2022 不完全一致，跨时期比较要标注这一点。",
@@ -1531,9 +2012,9 @@ def model_card_specs() -> list[dict]:
             "role": "2023+ 单独训练，用于疫情后气象贡献解释。",
             "question": "刻画疫情后 PBLH、低边界层、湿度、风速和逆温对污染累积解释力的恢复特征。",
             "features": "只保留气象、PBLH、稳定度、风输送、时间和城市特征。",
-            "academic_use": "论文中疫情后气象贡献分析的核心模型。",
-            "result_reading": "旧版疫情后气象模型已经显示 PBLH、低边界层和湿度相关特征重新突出，支持边界层扩散约束在恢复期重新变强的判断。",
-            "limitation": "最新 v2 模型加入异常目标和通风系数等过程型特征后，更适合作为疫情后归因结论的主证据。",
+            "academic_use": "用于疫情后气象贡献分析的主要对照模型。",
+            "result_reading": "基础气象模型已经显示 PBLH、低边界层和湿度相关特征重新突出，支持边界层扩散约束在恢复期重新变强的判断。",
+            "limitation": "过程型模型加入异常目标和通风系数等特征后，更适合作为疫情后归因结论的主证据。",
             "note": "该模型中 PBLH 和低边界层标记重新突出，是边界层约束污染累积的重要证据。",
         },
         {
@@ -1541,13 +2022,13 @@ def model_card_specs() -> list[dict]:
             "family": "提前量预测",
             "metrics_key": "next24_metrics",
             "shap_key": "next24_shap",
-            "role": "用于展示 24 小时后 PM2.5 辅助预测。",
+            "role": "用于提供 24 小时后 PM2.5 辅助预测。",
             "question": "评估较长提前量条件下模型提供 PM2.5 趋势参考的可用性。",
-            "features": "旧训练口径的核心特征集，未完全纳入本轮 2018+ 分时期训练框架。",
-            "academic_use": "只作为网页辅助展示，不作为疫情分时期贡献分析的主要证据。",
-            "result_reading": "24 小时辅助模型提供趋势参考，适合在预测台中帮助用户理解一天后的大致变化方向。",
-            "limitation": "该模型未纳入本轮 2018+ 分时期训练和 v2 气象归因框架，不能作为论文核心模型。",
-            "note": "当前课题核心结论应优先引用当前小时全时期模型和三套分时期气象贡献模型。",
+            "features": "早期预测口径的主要特征集，未完全纳入本轮 2018+ 分时期训练框架。",
+            "academic_use": "只作为趋势辅助参考，不作为疫情分时期贡献分析的主要证据。",
+            "result_reading": "24 小时辅助模型提供较长提前量下的趋势参照，用于辅助判断次日 PM2.5 浓度变化方向。",
+            "limitation": "该模型未纳入本轮 2018+ 分时期训练和过程型气象归因框架，不作为主要研究证据。",
+            "note": "当前课题主要结论应优先引用当前小时全时期模型和三套分时期气象贡献模型。",
         },
     ]
 
@@ -1619,9 +2100,14 @@ def resolve_prediction_model_key(choice: str, selected_date: date, hour: int) ->
     period = period_for_datetime(selected_date, hour)
     if choice == "按日期自动选择分时期高精度模型":
         return PERIOD_TO_HIGH_ACCURACY[period]
-    if choice in {"按日期自动选择 v2 气象贡献模型（推荐归因）", "按日期自动选择气象归因模型"}:
+    if choice in {
+        "按日期自动选择过程型气象贡献模型（归因口径）",
+        "按日期自动选择气象归因模型",
+    }:
         return PERIOD_TO_METEOROLOGY_V2[period]
-    if choice == "按日期自动选择旧版气象归因模型（对照）":
+    if choice in {
+        "按日期自动选择基础气象归因模型（对照口径）",
+    }:
         return PERIOD_TO_METEOROLOGY[period]
     return MODEL_LABEL_TO_KEY[choice]
 
@@ -1968,7 +2454,7 @@ def render_weather_context(
     wind_direction: float,
 ) -> None:
     st.markdown("### 气象背景与扩散条件")
-    st.caption("这些图直接服务于当前预测：左侧看季节背景，右侧看历史 PM2.5 与 PBLH，下面展示输入风场和当天气象剖面。")
+    st.caption("图组用于刻画当前预测情景的气象背景：左侧呈现季节参考，右侧呈现历史 PM2.5 与 PBLH，下方给出输入风场和当天气象剖面。")
     seasonal_col, hist_col = st.columns([0.42, 0.58])
     with seasonal_col:
         st.plotly_chart(seasonal_chart(seasonal, city, selected_date.month), use_container_width=True)
@@ -2063,11 +2549,15 @@ def make_overrides(values: dict[str, float]) -> dict[str, float]:
 
 
 def style_page() -> None:
-    st.set_page_config(page_title="京津冀 PM2.5 预测模型", layout="wide")
+    st.set_page_config(page_title="京津冀 PM2.5 浓度预测与气象贡献度分析", layout="wide")
     st.markdown(
         """
         <style>
         .stApp {background:#f5f7fb;}
+        header {visibility:hidden;}
+        #MainMenu {visibility:hidden;}
+        footer {visibility:hidden;}
+        [data-testid="stToolbar"] {visibility:hidden; height:0;}
         .block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
         div[data-testid="stMetricValue"] {font-size: 1.85rem;}
         div[data-testid="stMetric"] {
@@ -2323,26 +2813,15 @@ def style_page() -> None:
             border-radius:12px;
             padding:20px 22px 18px 22px;
             min-height:190px;
-            box-shadow:0 14px 34px rgba(24,39,75,0.07);
+            box-shadow:0 4px 14px rgba(24,39,75,0.03);
         }
         .model-hero-card.primary {
-            background:linear-gradient(135deg,#ffffff 0%,#eef6ff 100%);
+            background:#ffffff;
             border-color:#bfdbfe;
         }
         .model-hero-card.muted {
-            background:linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
+            background:#ffffff;
         }
-        .model-hero-card::after {
-            content:"";
-            position:absolute;
-            right:-42px;
-            top:-48px;
-            width:150px;
-            height:150px;
-            border-radius:999px;
-            background:rgba(37,99,235,0.08);
-        }
-        .model-hero-card.muted::after {background:rgba(100,116,139,0.08);}
         .model-kicker {
             display:inline-flex;
             align-items:center;
@@ -2671,22 +3150,12 @@ def style_page() -> None:
             border:1px solid #d8dee6;
             border-radius:12px;
             background:#ffffff;
-            box-shadow:0 14px 34px rgba(24,39,75,0.065);
+            box-shadow:0 4px 14px rgba(24,39,75,0.03);
         }
         .training-hero {
             padding:22px 24px 20px 24px;
-            background:linear-gradient(135deg,#ffffff 0%,#eef6ff 100%);
+            background:#ffffff;
             border-color:#bfdbfe;
-        }
-        .training-hero::after {
-            content:"";
-            position:absolute;
-            right:-56px;
-            top:-62px;
-            width:190px;
-            height:190px;
-            border-radius:999px;
-            background:rgba(37,99,235,0.08);
         }
         .training-kicker {
             display:inline-flex;
@@ -2729,7 +3198,7 @@ def style_page() -> None:
         }
         .training-score-card {
             padding:20px;
-            background:linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
+            background:#ffffff;
         }
         .training-score-label {
             color:#64748b;
@@ -2814,15 +3283,16 @@ def style_page() -> None:
         }
         .flow-step b {
             display:inline-flex;
-            width:28px;
-            height:28px;
             align-items:center;
             justify-content:center;
             border-radius:999px;
             background:#eef6ff;
             color:#2563eb;
-            font-size:0.84rem;
+            font-size:0.78rem;
+            line-height:1.2;
+            padding:5px 9px;
             margin-bottom:10px;
+            white-space:nowrap;
         }
         .flow-step h4 {
             margin:0 0 8px 0;
@@ -3080,6 +3550,208 @@ def style_page() -> None:
             font-size:0.82rem;
             line-height:1.5;
         }
+        .research-upgrade-hero {
+            display:grid;
+            grid-template-columns:minmax(0,1.25fr) minmax(300px,0.75fr);
+            gap:14px;
+            margin:10px 0 14px 0;
+        }
+        .research-upgrade-main,
+        .research-upgrade-side {
+            border:1px solid #d8dee6;
+            border-radius:10px;
+            background:#ffffff;
+            box-shadow:0 10px 26px rgba(24,39,75,0.055);
+            padding:18px 20px;
+            border-top:4px solid #0f766e;
+        }
+        .research-upgrade-side {
+            background:#f8fafc;
+            border-top-color:#64748b;
+        }
+        .research-kicker {
+            display:inline-flex;
+            border-radius:999px;
+            padding:5px 10px;
+            background:#ecfdf5;
+            color:#0f766e;
+            font-size:0.76rem;
+            font-weight:900;
+            margin-bottom:10px;
+        }
+        .research-kicker.muted {
+            background:#e2e8f0;
+            color:#475569;
+        }
+        .research-upgrade-main h3,
+        .research-upgrade-side h4 {
+            margin:0 0 10px 0;
+            color:#132033;
+            line-height:1.35;
+        }
+        .research-upgrade-main h3 {font-size:1.22rem;}
+        .research-upgrade-side h4 {font-size:1.04rem;}
+        .research-upgrade-main p,
+        .research-upgrade-side p {
+            margin:0;
+            color:#475569;
+            line-height:1.7;
+            font-size:0.93rem;
+        }
+        .research-evidence-panel {
+            border:1px solid #d8dee6;
+            border-radius:8px;
+            background:#ffffff;
+            padding:17px 18px 15px 18px;
+            margin:12px 0 16px 0;
+            box-shadow:0 4px 14px rgba(24,39,75,0.03);
+        }
+        .research-evidence-panel h4 {
+            margin:0 0 12px 0;
+            color:#132033;
+            font-size:1.04rem;
+            line-height:1.35;
+        }
+        .research-evidence-list {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:0 20px;
+        }
+        .research-evidence-item {
+            position:relative;
+            padding:0 0 12px 16px;
+            border-bottom:1px solid #e5eaf0;
+        }
+        .research-evidence-item:nth-last-child(-n+2) {
+            border-bottom:0;
+            padding-bottom:0;
+        }
+        .research-evidence-mark {
+            position:absolute;
+            left:0;
+            top:0.58em;
+            width:5px;
+            height:5px;
+            border-radius:999px;
+            background:#0f766e;
+        }
+        .research-evidence-item p {
+            margin:0;
+            color:#475569;
+            line-height:1.68;
+            font-size:0.9rem;
+        }
+        .research-brief {
+            border:1px solid #d8dee6;
+            border-radius:10px;
+            background:#ffffff;
+            padding:20px 22px;
+            margin:10px 0 18px 0;
+            box-shadow:0 6px 18px rgba(24,39,75,0.035);
+        }
+        .research-brief-head {
+            border-bottom:1px solid #e5eaf0;
+            padding-bottom:16px;
+            margin-bottom:16px;
+        }
+        .research-brief-head h3 {
+            margin:0 0 10px 0;
+            color:#132033;
+            font-size:1.26rem;
+            line-height:1.38;
+        }
+        .research-brief-head p,
+        .research-note p,
+        .research-boundary-panel p {
+            margin:0;
+            color:#475569;
+            line-height:1.76;
+            font-size:0.94rem;
+        }
+        .research-brief-body {
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:0;
+            border:1px solid #e5eaf0;
+            border-radius:8px;
+            overflow:hidden;
+            margin-top:14px;
+        }
+        .research-note {
+            padding:15px 16px;
+            border-right:1px solid #e5eaf0;
+            border-bottom:1px solid #e5eaf0;
+            background:#ffffff;
+        }
+        .research-note:nth-child(2n) {
+            border-right:0;
+        }
+        .research-note:nth-last-child(-n+2) {
+            border-bottom:0;
+        }
+        .research-note h4,
+        .research-boundary-panel h4 {
+            margin:0 0 8px 0;
+            color:#132033;
+            font-size:1.02rem;
+            line-height:1.36;
+        }
+        .research-boundary-panel {
+            margin-top:14px;
+            padding:14px 16px;
+            border-left:3px solid #64748b;
+            background:#f8fafc;
+            border-radius:8px;
+        }
+        .research-stat-grid {
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:10px;
+            margin-top:16px;
+        }
+        .research-stat-tile {
+            border:1px solid #d8dee6;
+            border-radius:9px;
+            background:#f8fafc;
+            padding:11px 12px;
+            min-height:108px;
+        }
+        .research-stat-tile span {
+            display:block;
+            color:#64748b;
+            font-size:0.78rem;
+            font-weight:900;
+            margin-bottom:5px;
+        }
+        .research-stat-tile b {
+            display:block;
+            color:#0f766e;
+            font-size:1.02rem;
+            line-height:1.32;
+            margin-bottom:6px;
+        }
+        .research-stat-tile p {
+            color:#64748b;
+            font-size:0.78rem;
+            line-height:1.45;
+        }
+        .model-hero-card,
+        .intro-hero-main,
+        .intro-score-panel,
+        .training-hero,
+        .training-score-card,
+        .training-family-card,
+        .flow-step,
+        .method-panel,
+        .tuning-main,
+        .tuning-side,
+        .training-detail-card,
+        .period-conclusion-card,
+        .research-upgrade-main,
+        .research-upgrade-side,
+        .research-evidence-panel {
+            box-shadow:0 4px 14px rgba(24,39,75,0.03);
+        }
         @media (max-width: 900px) {
             .forecast-overview {grid-template-columns:repeat(2,minmax(0,1fr));}
             .forecast-panel {grid-template-columns:1fr;}
@@ -3101,6 +3773,25 @@ def style_page() -> None:
             .training-detail-grid {grid-template-columns:1fr;}
             .training-artifacts {grid-template-columns:1fr;}
             .period-conclusion-grid {grid-template-columns:1fr;}
+            .research-upgrade-hero {grid-template-columns:1fr;}
+            .research-evidence-list {grid-template-columns:1fr;}
+            .research-evidence-item:nth-last-child(-n+2) {
+                border-bottom:1px solid #e5eaf0;
+                padding-bottom:12px;
+            }
+            .research-evidence-item:last-child {
+                border-bottom:0;
+                padding-bottom:0;
+            }
+            .research-brief-body {grid-template-columns:1fr;}
+            .research-note,
+            .research-note:nth-child(2n),
+            .research-note:nth-last-child(-n+2) {
+                border-right:0;
+                border-bottom:1px solid #e5eaf0;
+            }
+            .research-note:last-child {border-bottom:0;}
+            .research-stat-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
         }
         @media (max-width: 620px) {
             .forecast-overview {grid-template-columns:1fr;}
@@ -3111,6 +3802,8 @@ def style_page() -> None:
             .intro-hero-main,
             .intro-score-panel {padding:17px 16px;}
             .training-flow {grid-template-columns:1fr;}
+            .research-stat-grid {grid-template-columns:1fr;}
+            .research-brief {padding:16px;}
         }
         </style>
         """,
@@ -3130,7 +3823,7 @@ def main() -> None:
     seasonal = assets["seasonal"]
     metadata = assets["metadata"]
 
-    st.title("京津冀 PM2.5 浓度预测与气象贡献度展示")
+    st.title("京津冀 PM2.5 浓度预测与气象贡献度分析")
 
     left, right = st.columns([0.78, 0.22])
     with right:
@@ -3147,20 +3840,20 @@ def main() -> None:
         )
         selected_date = st.date_input("日期", value=date.today(), key="selected_date")
         hour = st.slider("小时", 0, 23, 12, key="selected_hour")
-        st.caption("日期会影响月份、日序、周末特征，并决定载入哪个季节/小时的历史默认气象画像。")
+        st.caption("日期用于确定月份、日序、周末标记，并匹配相应季节与小时的城市历史气象画像。")
 
         profile = get_profile(profiles, city, selected_date.month, hour)
         defaults = input_defaults(profile)
         if "input_temperature_2m" not in st.session_state:
             write_input_state(defaults)
 
-        if st.button("载入该城市历史默认值", use_container_width=True):
+        if st.button("载入城市历史气象画像", use_container_width=True):
             write_input_state(defaults)
             st.session_state["input_confirmed"] = False
             st.rerun()
 
         with st.form("prediction_input_form", border=True):
-            st.caption("修改后点击底部按钮，预测结果才会更新。")
+            st.caption("表单修改后需提交确认，主面板结果随已确认输入更新。")
             if st.session_state.get("selected_prediction_model") not in MODEL_SELECT_OPTIONS:
                 st.session_state["selected_prediction_model"] = MODEL_SELECT_OPTIONS[0]
             model_choice = st.selectbox(
@@ -3169,7 +3862,7 @@ def main() -> None:
                 index=0,
                 key="selected_prediction_model",
             )
-            st.caption("高精度模型适合实际预测；v2 气象贡献模型适合观察气象-only 条件下的贡献情景；旧版气象归因模型保留为对照。")
+            st.caption("高精度模型用于浓度估计；过程型气象贡献模型用于气象-only 解释；基础气象归因模型作为方法对照保留。")
             st.subheader("近地面气象")
             c1, c2 = st.columns(2)
             with c1:
@@ -3234,7 +3927,7 @@ def main() -> None:
             or any(float(confirmed["values"][key]) != float(form_values[key]) for key in form_values)
         )
         if changed:
-            st.info("当前表单已有修改，点击“确认输入并预测”后主面板才会更新。")
+            st.info("当前表单包含尚未确认的修改；提交后主面板将按新输入重新计算。")
         elif st.session_state.get("input_confirmed", False):
             st.success("输入已确认，结果来自当前表单。")
 
@@ -3256,7 +3949,7 @@ def main() -> None:
     next_category, next_color = pm25_category(next24_prediction)
     t_inverse = row["t_inverse_850_1000"]
 
-    tab_predict, tab_results, tab_training = st.tabs(["预测台", "模型介绍", "训练策略"])
+    tab_predict, tab_results, tab_training, tab_validation = st.tabs(["预测台", "模型介绍", "训练策略", "研究验证"])
 
     with tab_predict:
         st.markdown(
@@ -3286,12 +3979,12 @@ def main() -> None:
         if expected_period and expected_period != selected_period:
             st.warning(
                 f"当前日期属于{PERIOD_LABELS[selected_period]}，但你选择的是{PERIOD_LABELS[expected_period]}模型。"
-                "这属于跨时期外推，结果更适合做敏感性对照，不建议作为主预测。"
+                "这属于跨时期外推，结果更适合作为敏感性对照，不作为主预测依据。"
             )
         if "气象" in selected_model["type"]:
-            st.info("当前使用的是气象贡献/归因模型：它会弱化或排除污染持续性和共污染物信息，适合解释气象贡献，预测精度通常低于高精度模型。")
-        if selected_model["type"] == "气象贡献 v2":
-            st.caption("v2 模型需要长时滞、滚动和复合扩散特征；预测台会用当前输入叠加该城市月小时历史画像自动补齐这些气象过程变量。")
+            st.info("当前选择气象贡献/归因模型：该类模型弱化或排除污染持续性和共污染物信息，适合解释气象贡献，预测精度通常低于高精度模型。")
+        if selected_model["type"] == "过程型气象贡献":
+            st.caption("过程型气象贡献模型需要长时滞、滚动和复合扩散特征；预测台根据当前输入和城市月小时历史画像补齐气象过程变量。")
         st.markdown(risk_cards_html(risk_items(row, current_prediction)), unsafe_allow_html=True)
 
         chart_col, map_col = st.columns([0.62, 0.38])
@@ -3346,15 +4039,13 @@ def main() -> None:
         )
 
     with tab_results:
-        st.markdown(public_training_update_html(assets), unsafe_allow_html=True)
-
         high_accuracy_tab, attribution_tab = st.tabs(["高精度预测模型", "气象贡献模型"])
 
         with high_accuracy_tab:
             st.markdown(high_accuracy_intro_html(assets), unsafe_allow_html=True)
 
             st.subheader("模型表现总览")
-            st.caption("这一页只展示追求预测精度的模型。它们适合预测台交互、性能展示和预测误差讨论。")
+            st.caption("本节汇总以预测精度为目标的模型，用于短时浓度估计、性能评估和误差讨论。")
             performance = high_accuracy_performance_table(assets)
             chart_a, chart_b = st.columns(2)
             chart_a.plotly_chart(performance_chart(performance), use_container_width=True)
@@ -3380,15 +4071,15 @@ def main() -> None:
                 """
                 <div class="explain-band blue">
                   <h4>结果解读口径</h4>
-                  <p>全时期高精度模型是网页预测台的默认主模型，用于展示项目在实际输入场景下的预测能力。分时期高精度模型则把疫情前、疫情期、疫情后分别训练，用于比较特殊时期污染持续性的阶段性变化。</p>
-                  <p>如果高精度模型 R2 明显高于气象贡献模型，并不说明气象不重要，而是说明 PM2.5 历史浓度和共污染物对短时预测非常有信息量。论文中可把这部分写成“预测能力上限”，再用气象贡献模型讨论独立气象影响。</p>
+                  <p>全时期高精度模型作为综合预测基准，用于评估实际输入场景下的预测能力。分时期高精度模型则把疫情前、疫情期、疫情后分别训练，用于比较特殊时期污染持续性的阶段性变化。</p>
+                  <p>如果高精度模型 R2 明显高于气象贡献模型，并不说明气象不重要，而是说明 PM2.5 历史浓度和共污染物对短时预测非常有信息量。该结果可作为“预测能力上限”的参照，再由气象贡献模型进一步讨论独立气象影响。</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
 
-            st.subheader("高精度模型卡片")
-            st.caption("点击卡片展开后，可查看模型定位、研究任务、特征口径、训练样本、迭代次数和 SHAP 前列特征。")
+            st.subheader("高精度模型档案")
+            st.caption("模型档案包含模型定位、研究任务、特征口径、训练样本、迭代次数和 SHAP 前列特征。")
             for spec in model_card_specs():
                 if spec["family"] in {"预测主模型", "分时期预测", "提前量预测"}:
                     render_model_card(spec, assets)
@@ -3415,9 +4106,9 @@ def main() -> None:
             st.markdown(
                 """
                 <div class="explain-band amber">
-                  <h4>高精度 SHAP 的论文写法</h4>
+                  <h4>高精度 SHAP 的解释边界</h4>
                   <p>高精度模型的 SHAP 前列通常包含 PM2.5 滞后、滚动均值和共污染物。它们代表污染过程的短时记忆和共变结构，能显著提升预测精度，但会混合排放、人为活动和二次生成信息。</p>
-                  <p>因此，高精度模型的学术价值在于证明“PM2.5 浓度可被机器学习稳定预测”，并为气象贡献模型提供性能参照；真正讨论 PBLH、逆温、湿度、气压、风输送贡献时，应切换到右侧“气象贡献模型”标签页。</p>
+                  <p>因此，高精度模型的研究价值在于评估 PM2.5 浓度的可预测性，并为气象贡献模型提供性能参照；讨论 PBLH、逆温、湿度、气压、风输送贡献时，应以右侧“气象贡献模型”标签页为主要依据。</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -3428,36 +4119,36 @@ def main() -> None:
             v2 = assets.get("meteorology_v2")
 
             if v2:
-                st.subheader("v2 最新气象贡献模型总览")
+                st.subheader("过程型气象贡献模型总览")
                 st.caption("本轮训练把疫情前、疫情期、疫情后三个时期分别建模，并对 PM2.5 原值、log1p(PM2.5)、同城同月同小时气候态异常三种目标逐一比较。")
                 v2_summary = meteorology_v2_summary_table(assets)
                 v2_best = meteorology_v2_best_table(assets)
                 v2_chart_col, v2_table_col = st.columns([0.55, 0.45])
                 v2_chart_col.plotly_chart(meteorology_v2_r2_chart(v2_summary), use_container_width=True)
                 with v2_table_col:
-                    st.markdown("**每个时期的最佳归因模型**")
+                    st.markdown("**各时期代表归因模型**")
                     st.dataframe(v2_best, use_container_width=True, hide_index=True)
 
-                with st.expander("查看 9 套 v2 候选模型完整指标", expanded=False):
+                with st.expander("9 套过程型候选模型完整指标", expanded=False):
                     st.dataframe(v2_summary, use_container_width=True, hide_index=True)
                     st.caption("同一时期内比较三种目标形式，可以避免只用 PM2.5 原值时被极端污染和排放背景过度牵引。")
 
-                st.subheader("旧版气象模型与 v2 精进效果")
+                st.subheader("基础气象模型与过程型模型对照")
                 old_new = meteorology_v2_old_new_compare_table(assets)
                 st.dataframe(old_new, use_container_width=True, hide_index=True)
                 st.markdown(
                     """
                     <div class="explain-band green">
-                      <h4>v2 模型的学术价值</h4>
-                      <p>旧版气象贡献模型主要验证“只用气象变量也能解释一部分 PM2.5”。v2 则进一步把气象过程做成时滞、滚动、累计和复合扩散指数，并用三种目标形式筛选每个时期最合适的解释尺度。</p>
-                      <p>这使得模型不只是给出一个 R2，而是能讨论连续低 PBLH、长时间弱风、高湿、通风系数、北风清洁输送、南北风 V 分量和气压滞后等具有大气环境意义的过程变量。</p>
+                      <h4>过程型模型的研究意义</h4>
+                      <p>基础气象贡献模型主要验证气象变量对 PM2.5 变化具有一定解释力。过程型模型进一步把气象过程表达为时滞、滚动、累计和复合扩散指数，并用三种目标形式筛选每个时期更合适的解释尺度。</p>
+                      <p>因此，过程型结果不局限于单一 R2 数值，还能够讨论连续低 PBLH、长时间弱风、高湿、通风系数、北风清洁输送、南北风 V 分量和气压滞后等具有大气环境意义的过程变量。</p>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-                st.subheader("v2 最佳模型卡片")
-                st.caption("点击展开后可查看每个时期最佳目标、样本量、特征数、最佳迭代和带 bootstrap 置信区间的 Top SHAP。")
+                st.subheader("过程型代表模型档案")
+                st.caption("各时期档案汇总代表目标、样本量、特征数、迭代信息和带 bootstrap 置信区间的 Top SHAP。")
                 for index, model in enumerate(v2.get("best_models", [])):
                     test = model["test_pm25"]
                     title = (
@@ -3482,8 +4173,7 @@ def main() -> None:
                                         ("验证样本", f"{int(model['valid_rows']):,}"),
                                         ("测试样本", f"{int(model['test_rows']):,}"),
                                         ("特征数", f"{int(model['feature_count']):,}"),
-                                        ("最佳迭代", str(model["best_iteration"])),
-                                        ("模型文件", model["model_path"]),
+                                        ("迭代轮数", str(model["best_iteration"])),
                                     ],
                                     columns=["项目", "值"],
                                 ),
@@ -3496,7 +4186,7 @@ def main() -> None:
                         st.plotly_chart(meteorology_v2_shap_chart(model), use_container_width=True)
                         st.caption("Bootstrap 置信区间用于评估 SHAP 排名稳定性；特征贡献仍是模型解释结果，需要结合大气物理机制讨论。")
             else:
-                st.warning("当前 app_assets 中未找到 meteorology_attribution_v2_core_results.json，暂时只能展示旧版气象归因模型。")
+                st.warning("尚未检索到过程型气象贡献模型结果，当前仅呈现基础气象归因模型。")
                 v2_best = pd.DataFrame()
 
             st.subheader("气象贡献模型与高精度模型的分工")
@@ -3541,15 +4231,15 @@ def main() -> None:
             for column in ["高精度 R2", "高精度 RMSE", "气象贡献 R2", "气象贡献 RMSE"]:
                 compare[column] = compare[column].astype(float).round(3)
             st.dataframe(compare, use_container_width=True, hide_index=True)
-            st.caption("高精度模型用于评估应用预测能力；气象贡献模型用于评估气象背景对污染变化的独立解释力。论文的归因结论应以气象贡献模型为主。")
+            st.caption("高精度模型用于评估应用预测能力；气象贡献模型用于评估气象背景对污染变化的独立解释力。气象贡献相关研究判断应以气象贡献模型为主。")
 
-            st.subheader("旧版气象归因模型卡片")
-            st.caption("这些是预测台当前可直接选择的气象归因模型。它们保留为交互展示和旧版对照；本轮论文式结论优先引用 v2 最新模型。")
+            st.subheader("基础气象归因模型档案")
+            st.caption("基础气象归因模型保留为方法对照；阶段性研究结论优先依据过程型气象贡献模型。")
             for spec in model_card_specs():
                 if spec["family"] == "气象归因":
                     render_model_card(spec, assets)
 
-            st.subheader("旧版气象 SHAP 与残差辅助")
+            st.subheader("基础气象 SHAP 与残差辅助")
             p1, p2, p3 = st.columns(3)
             with p1:
                 st.markdown("**疫情前 2018-2019**")
@@ -3585,7 +4275,7 @@ def main() -> None:
                       <span class="period-factor">24小时平均 PBLH</span>
                       <span class="period-factor">北风清洁输送</span>
                     </div>
-                    <p>疫情前最佳 v2 模型显示，PM2.5 变化并非只由单时刻气象决定，而是由季节周期、城市南北空间差异、连续边界层扩散能力和冷空气输送共同约束。</p>
+                    <p>疫情前代表过程型模型显示，PM2.5 变化并非只由单时刻气象决定，而是由季节周期、城市南北空间差异、连续边界层扩散能力和冷空气输送共同约束。</p>
                   </section>
                   <section class="period-conclusion-card" style="--accent:#d97706;--soft:#fffbeb;">
                     <div class="period-tag">疫情期 2020-2022</div>
@@ -3600,14 +4290,14 @@ def main() -> None:
                   </section>
                   <section class="period-conclusion-card" style="--accent:#0f766e;--soft:#ecfdf5;">
                     <div class="period-tag">疫情后 2023+</div>
-                    <h4>边界层约束和通风扩散能力重新成为核心证据</h4>
+                    <h4>边界层约束和通风扩散能力重新成为主要证据</h4>
                     <div class="period-factor-row">
                       <span class="period-factor">24小时平均 PBLH</span>
                       <span class="period-factor">通风系数</span>
                       <span class="period-factor">平均风速</span>
                       <span class="period-factor">北风清洁输送</span>
                     </div>
-                    <p>疫情后最佳模型使用气候态异常目标，说明气象贡献更适合解释相对本地季节背景的偏离。PBLH、通风系数和风速共同指向扩散条件对污染异常的控制作用。</p>
+                    <p>疫情后代表模型使用气候态异常目标，说明气象贡献更适合解释相对本地季节背景的偏离。PBLH、通风系数和风速共同指向扩散条件对污染异常的控制作用。</p>
                     <div class="period-warning">跨时期比较需注明：2023+ PM2.5 数据源与 2018-2022 不完全一致。</div>
                   </section>
                 </div>
@@ -3623,68 +4313,71 @@ def main() -> None:
 
             st.subheader("高精度模型训练明细")
             st.caption(
-                "这里保留追求预测准确率的模型：全时期主模型、疫情前/疫情期/疫情后分时期高精度模型，"
+                "该表保留追求预测准确率的模型：全时期主模型、疫情前/疫情期/疫情后分时期高精度模型，"
                 "以及 24 小时辅助预测模型。它们可以使用 PM2.5 历史浓度和共污染物，因此适合讨论预测能力上限。"
             )
             st.dataframe(high_accuracy_training_rows(assets), use_container_width=True, hide_index=True)
 
             st.subheader("高精度模型调参和迭代")
             st.caption(
-                "这一部分说明高精度模型的 Optuna + LightGBM 参数搜索、时间后置验证设计，"
+                "本节概括高精度模型的 Optuna + LightGBM 参数搜索、时间后置验证设计，"
                 "以及测试集仅用于最终评估的实验规范。"
             )
             st.markdown(high_accuracy_tuning_html(assets), unsafe_allow_html=True)
 
-            st.subheader("高精度模型训练产物")
+            st.subheader("高精度模型研究输出")
             st.markdown(
                 """
                 <div class="training-artifacts">
-                  <div class="artifact-card"><b>models/</b><span>保存全时期主模型、分时期高精度模型和 24 小时辅助预测模型。</span></div>
-                  <div class="artifact-card"><b>reports/</b><span>保存高精度模型指标、测试集预测、SHAP 排名、训练摘要和模型对比结果。</span></div>
-                  <div class="artifact-card"><b>app_assets/</b><span>保存预测台和模型介绍页直接读取的高精度模型展示数据。</span></div>
+                  <div class="artifact-card"><b>模型对象</b><span>形成全时期综合预测模型、分时期高精度预测模型和 24 小时辅助预测模型。</span></div>
+                  <div class="artifact-card"><b>评估结果</b><span>输出测试集指标、预测误差、SHAP 排名、训练概览和模型对比结果。</span></div>
+                  <div class="artifact-card"><b>结果数据</b><span>整理预测台、模型介绍和训练策略读取的指标、解释结果与城市画像。</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            st.caption("网页预测台中的默认主模型和分时期高精度模型，均来自这一套训练流程。")
+            st.caption("综合预测基准模型和分时期高精度模型均来自这一训练规范。")
 
         with training_attribution_tab:
             st.markdown(meteorology_training_html(assets), unsafe_allow_html=True)
 
-            st.subheader("训练明细：旧版 baseline")
+            st.subheader("训练明细：基础气象模型")
             st.caption(
-                "这张表记录旧版气象-only baseline 的样本量、特征集、调参轮数和测试表现，"
-                "用于和 v2 过程型气象训练策略形成方法对照。"
+                "该表记录基础气象-only 模型的样本量、特征集、调参轮数和测试表现，"
+                "用于和过程型气象训练策略形成方法对照。"
             )
             st.dataframe(meteorology_legacy_training_rows(assets), use_container_width=True, hide_index=True)
 
             v2_rows = meteorology_v2_training_rows(assets)
             if not v2_rows.empty:
-                st.subheader("训练明细：v2 候选实验矩阵")
+                st.subheader("训练明细：过程型候选实验矩阵")
                 st.caption(
-                    "这张表对应 3 个时期 x 3 种目标形式的候选训练矩阵，展示每套候选的样本量、特征数、最佳迭代和测试集指标。"
+                    "该表对应 3 个时期 x 3 种目标形式的候选训练矩阵，汇总每套候选的样本量、特征数、迭代轮数和测试集指标。"
                 )
                 st.dataframe(v2_rows, use_container_width=True, hide_index=True)
 
             st.subheader("参数搜索、评估分层与解释输出")
             st.caption(
-                "这一部分对应训练策略的执行细节：参数搜索以验证集为依据，测试集用于最终比较，"
+                "本节对应训练策略的执行细节：参数搜索以验证集为依据，测试集用于最终比较，"
                 "条件误差和 SHAP bootstrap 用于支撑归因结论。"
             )
             st.markdown(meteorology_tuning_html(assets), unsafe_allow_html=True)
 
-            st.subheader("气象归因训练产物")
+            st.subheader("气象归因模型研究输出")
             st.markdown(
                 """
                 <div class="training-artifacts">
-                  <div class="artifact-card"><b>models/</b><span>保存旧版气象 baseline、v2 时期最佳气象贡献模型，以及可在预测台选择的时期模型。</span></div>
-                  <div class="artifact-card"><b>reports/</b><span>保存气象-only 指标、v2 三目标对比、条件误差、天气型结果和 SHAP bootstrap 置信区间。</span></div>
-                  <div class="artifact-card"><b>app_assets/</b><span>保存模型介绍页、训练策略页和预测台读取的气象贡献模型结果。</span></div>
+                  <div class="artifact-card"><b>模型对象</b><span>形成基础气象模型、过程型时期代表模型，以及预测台可调用的时期模型。</span></div>
+                  <div class="artifact-card"><b>评估结果</b><span>输出气象-only 指标、三目标对比、条件误差、天气型结果和 SHAP bootstrap 置信区间。</span></div>
+                  <div class="artifact-card"><b>解释数据</b><span>整理模型介绍、训练策略和预测台读取的气象贡献模型结果。</span></div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            st.caption("论文中的气象因子贡献、疫情期与非疫情期对比，建议优先引用 v2 气象贡献模型。")
+            st.caption("气象因子贡献、疫情期与非疫情期对比，应优先依据过程型气象贡献模型。")
+
+    with tab_validation:
+        render_research_validation_section(assets)
 
 if __name__ == "__main__":
     main()
