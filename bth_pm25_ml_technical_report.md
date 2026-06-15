@@ -32,7 +32,7 @@ PM2.5浓度变化同时受排放强度、二次生成、区域输送和气象扩
 
 主要数据文件集中在 `data/processed/` 目录下。
 
-其中，`bth_pm25_weather_features_2018_plus_cnemc_integrated.csv` 是PM2.5预测与气象贡献分析的主训练表；
+`bth_pm25_weather_features_2018_plus_cnemc_integrated.csv` 是PM2.5预测与气象贡献分析的主训练表；
 
 `bth_weather_features_2018-01-01_2026-05-31_era5_pblh.csv` 提供近地面气象与ERA5 PBLH综合气象表；
 
