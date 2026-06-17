@@ -322,6 +322,26 @@ def load_assets() -> Assets:
         "model_metrics_summary": pd.read_csv(asset_dir / "pm25_model_metrics_summary.csv"),
         "model_top_shap_summary": pd.read_csv(asset_dir / "pm25_model_top_shap_summary.csv"),
         "period_residual_analysis": pd.read_csv(asset_dir / "period_residual_analysis.csv"),
+        "combined_extrapolation": (
+            pd.read_csv(asset_dir / "meteorology_v2_combined_space_time_extrapolation.csv")
+            if (asset_dir / "meteorology_v2_combined_space_time_extrapolation.csv").exists()
+            else pd.DataFrame()
+        ),
+        "combined_extrapolation_summary": (
+            pd.read_csv(asset_dir / "meteorology_v2_combined_space_time_extrapolation_summary.csv")
+            if (asset_dir / "meteorology_v2_combined_space_time_extrapolation_summary.csv").exists()
+            else pd.DataFrame()
+        ),
+        "feature_group_ablation": (
+            pd.read_csv(asset_dir / "meteorology_v2_feature_group_ablation.csv")
+            if (asset_dir / "meteorology_v2_feature_group_ablation.csv").exists()
+            else pd.DataFrame()
+        ),
+        "validation_extension_metadata": (
+            json.loads((asset_dir / "meteorology_validation_extension_run_metadata.json").read_text(encoding="utf-8"))
+            if (asset_dir / "meteorology_validation_extension_run_metadata.json").exists()
+            else {}
+        ),
         "meteorology_v2": (
             json.loads(meteorology_v2_path.read_text(encoding="utf-8"))
             if meteorology_v2_path.exists()
@@ -1314,6 +1334,132 @@ def leave_city_detail_chart(assets: Assets) -> go.Figure:
     return fig
 
 
+def combined_extrapolation_summary_table(assets: Assets) -> pd.DataFrame:
+    frame = assets.get("combined_extrapolation_summary", pd.DataFrame())
+    if frame.empty:
+        return frame
+    table = frame[
+        [
+            "period_label",
+            "target_label",
+            "cities",
+            "mean_r2",
+            "median_r2",
+            "min_r2",
+            "max_r2",
+            "mean_rmse",
+            "mean_mae",
+            "mean_bias",
+        ]
+    ].copy()
+    table.columns = ["时期", "代表目标", "城市数", "平均 R2", "中位 R2", "最低 R2", "最高 R2", "平均 RMSE", "平均 MAE", "平均 Bias"]
+    for column in ["平均 R2", "中位 R2", "最低 R2", "最高 R2", "平均 RMSE", "平均 MAE", "平均 Bias"]:
+        table[column] = pd.to_numeric(table[column], errors="coerce").round(3)
+    return table
+
+
+def combined_extrapolation_summary_chart(assets: Assets) -> go.Figure:
+    table = combined_extrapolation_summary_table(assets)
+    if table.empty:
+        return go.Figure()
+    long = table.melt(id_vars=["时期"], value_vars=["平均 R2", "中位 R2"], var_name="指标", value_name="R2")
+    fig = px.bar(long, x="时期", y="R2", color="指标", barmode="group", text="R2", title="组合外推验证：平均与中位 R2")
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+    fig.update_layout(height=360, margin=dict(l=10, r=10, t=50, b=20), yaxis_range=[-0.1, 0.8], xaxis_title="")
+    return fig
+
+
+def combined_extrapolation_city_chart(assets: Assets) -> go.Figure:
+    frame = assets.get("combined_extrapolation", pd.DataFrame())
+    if frame.empty:
+        return go.Figure()
+    frame = frame.copy()
+    frame["R2"] = pd.to_numeric(frame["r2"], errors="coerce")
+    fig = px.bar(
+        frame,
+        x="holdout_city",
+        y="R2",
+        color="period_label",
+        barmode="group",
+        hover_data={"rmse": ":.2f", "mae": ":.2f", "bias": ":.2f", "test_rows": True},
+        title="组合外推逐城市 R2",
+    )
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.update_layout(height=430, margin=dict(l=10, r=10, t=50, b=20), yaxis_title="R2", xaxis_title="留出城市")
+    return fig
+
+
+def feature_group_ablation_table(assets: Assets) -> pd.DataFrame:
+    frame = assets.get("feature_group_ablation", pd.DataFrame())
+    if frame.empty:
+        return frame
+    table = frame[
+        [
+            "period_label",
+            "feature_group_label",
+            "feature_count",
+            "r2",
+            "rmse",
+            "delta_r2_from_previous",
+            "rmse_reduction_from_previous",
+        ]
+    ].copy()
+    table.columns = ["时期", "特征组", "特征数", "测试 R2", "测试 RMSE", "R2 增量", "RMSE 降低"]
+    for column in ["测试 R2", "测试 RMSE", "R2 增量", "RMSE 降低"]:
+        table[column] = pd.to_numeric(table[column], errors="coerce").round(3)
+    return table
+
+
+def feature_group_ablation_chart(assets: Assets) -> go.Figure:
+    frame = assets.get("feature_group_ablation", pd.DataFrame())
+    if frame.empty:
+        return go.Figure()
+    frame = frame.copy()
+    frame["测试 R2"] = pd.to_numeric(frame["r2"], errors="coerce")
+    frame["特征组"] = frame["feature_group_label"]
+    group_order = frame["特征组"].drop_duplicates().tolist()
+    fig = px.line(
+        frame,
+        x="特征组",
+        y="测试 R2",
+        color="period_label",
+        markers=True,
+        category_orders={"特征组": group_order},
+        title="特征组消融：逐步加入气象过程信息后的 R2",
+    )
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.update_traces(line=dict(width=3), marker=dict(size=8))
+    fig.update_layout(height=430, margin=dict(l=10, r=10, t=50, b=105), xaxis_title="", yaxis_title="测试 R2")
+    fig.update_xaxes(tickangle=-22)
+    return fig
+
+
+def feature_group_delta_chart(assets: Assets) -> go.Figure:
+    frame = assets.get("feature_group_ablation", pd.DataFrame())
+    if frame.empty:
+        return go.Figure()
+    frame = frame.copy()
+    frame["R2 增量"] = pd.to_numeric(frame["delta_r2_from_previous"], errors="coerce")
+    frame = frame.dropna(subset=["R2 增量"])
+    if frame.empty:
+        return go.Figure()
+    fig = px.bar(
+        frame,
+        x="feature_group_label",
+        y="R2 增量",
+        color="period_label",
+        barmode="group",
+        text="R2 增量",
+        title="相对上一特征组的 R2 增量",
+    )
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+    fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=105), xaxis_title="", yaxis_title="R2 增量")
+    fig.update_xaxes(tickangle=-22)
+    return fig
+
+
 def gam_like_compare_table(assets: Assets) -> pd.DataFrame:
     gam = research_frame(assets, "gam_like_metrics")
     v2 = meteorology_v2_best_table(assets)
@@ -1525,8 +1671,8 @@ def render_research_validation_section(assets: Assets) -> None:
 
     st.markdown(research_conclusion_html(assets), unsafe_allow_html=True)
     st.markdown(research_upgrade_status_html(assets), unsafe_allow_html=True)
-    validation_tab, transparent_tab, weather_type_tab, shap_tab, condition_tab = st.tabs(
-        ["空间泛化验证", "透明解释对照", "天气型机制", "SHAP 稳定性", "条件误差"]
+    validation_tab, extension_tab, transparent_tab, weather_type_tab, shap_tab, condition_tab = st.tabs(
+        ["空间泛化验证", "组合外推与消融", "透明解释对照", "天气型机制", "SHAP 稳定性", "条件误差"]
     )
 
     with validation_tab:
@@ -1544,6 +1690,31 @@ def render_research_validation_section(assets: Assets) -> None:
         lv_col_a.plotly_chart(leave_city_r2_chart(assets), use_container_width=True)
         lv_col_b.plotly_chart(leave_city_detail_chart(assets), use_container_width=True)
         st.dataframe(leave_city_summary_table(assets), use_container_width=True, hide_index=True)
+
+    with extension_tab:
+        st.markdown(
+            """
+            <div class="explain-band amber">
+              <h4>补充验证的研究含义</h4>
+              <p>组合外推验证同时留出城市和后段时间，用于检查模型在更严格条件下是否仍保留区域气象规律。该结果不替代主模型的时间阻塞测试，而是用于说明空间外推边界。</p>
+              <p>特征组消融按时间/城市基线、基础气象、PBLH、风场输送、滞后滚动与静稳过程逐步加入特征，用于回答模型解释力是否只是来自季节和城市背景。</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        ext_col_a, ext_col_b = st.columns([0.45, 0.55])
+        ext_col_a.plotly_chart(combined_extrapolation_summary_chart(assets), use_container_width=True)
+        ext_col_b.plotly_chart(combined_extrapolation_city_chart(assets), use_container_width=True)
+        st.dataframe(combined_extrapolation_summary_table(assets), use_container_width=True, hide_index=True)
+        st.caption("组合外推结果显示，疫情前和疫情期仍保留中等解释力；疫情后异常目标的空间外推边界更明显。")
+
+        ab_col_a, ab_col_b = st.columns([0.52, 0.48])
+        ab_col_a.plotly_chart(feature_group_ablation_chart(assets), use_container_width=True)
+        ab_col_b.plotly_chart(feature_group_delta_chart(assets), use_container_width=True)
+        st.dataframe(feature_group_ablation_table(assets), use_container_width=True, hide_index=True)
+        st.caption(
+            "消融结果显示，滞后滚动与静稳过程在三个时期均提供明确增量；天气型标签在完整过程特征已经存在时增量较小，更适合作为机制解释和分层讨论工具。"
+        )
 
     with transparent_tab:
         st.markdown(
@@ -3599,15 +3770,6 @@ def main() -> None:
     metadata = assets["metadata"]
 
     st.title("京津冀 PM2.5 浓度预测与气象贡献度分析")
-    st.markdown(
-        """
-        <div class="explain-band green">
-          <h4>当前版本说明</h4>
-          <p>本页已按研究报告口径重写模型说明。项目保留高精度预测模型、旧版基础气象归因模型和 v2 过程型气象贡献模型三条线索：高精度模型用于 PM2.5 短时预测，旧版基础气象归因模型作为早期 weather-only 对照，本轮实际完成重训的是 v2-core 过程型气象贡献模型。该重训覆盖疫情前、疫情期、疫情后三个时期，并分别尝试 raw、log1p、anomaly 三种目标形式，共 9 套候选模型，每套 60 轮 Optuna trial；旧版基础气象归因模型为 12 轮/时期，分时期高精度模型为 25 轮/时期。</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
     left, right = st.columns([0.78, 0.22])
     with right:

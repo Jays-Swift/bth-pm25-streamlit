@@ -1,0 +1,19 @@
+{
+  "data": "/Users/jaysdon/ml/基于机器学习的京津冀 PM2.5 浓度预测与气象贡献度分析/data/processed/bth_pm25_meteorology_attribution_v2_features.parquet",
+  "rows": 958711,
+  "feature_count": 248,
+  "representative_targets": {
+    "pre_covid_2018_2019": "log1p",
+    "covid_2020_2022": "raw",
+    "post_covid_2023_plus": "anomaly"
+  },
+  "period_holdout_start": {
+    "pre_covid_2018_2019": "2019-01-01 00:00:00",
+    "covid_2020_2022": "2022-01-01 00:00:00",
+    "post_covid_2023_plus": "2025-06-01 00:00:00"
+  },
+  "cluster_sample": 80000,
+  "n_estimators_cap": 600,
+  "quick": false,
+  "trials_source": "meteorology_attribution_v2_core_*_metrics.json"
+}
