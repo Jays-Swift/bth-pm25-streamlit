@@ -387,7 +387,56 @@ def metric_badges_from_test(test: dict[str, float]) -> str:
 def section_bridge_html(kicker: str, title: str, body: str, theme: str = "blue") -> str:
     return f"""
     <section class="section-bridge {theme}">
+      <div class="section-bridge-kicker">{kicker}</div>
       <div class="section-bridge-title">{title}</div>
+      <p>{body}</p>
+    </section>
+    """
+
+
+def app_overview_html(metadata: dict[str, Any]) -> str:
+    start_date = str(metadata.get("start_time", "2018+"))[:10]
+    end_date = str(metadata.get("end_time", "2026"))[:10]
+    return f"""
+    <section class="app-hero">
+      <div class="app-hero-main">
+        <div class="app-kicker">京津冀城市小时尺度 PM2.5 研究型网页</div>
+        <h2>用机器学习同时回答“能否准确预测”和“气象条件解释了什么”</h2>
+        <p>本网页面向老师快速查看项目成果：预测台用于输入城市与气象情景并获得当前小时 PM2.5 估计；模型介绍说明高精度预测模型与气象-only 解释模型的分工；训练策略交代数据、特征、时间切分和调参口径；研究验证集中呈现空间外推、特征组消融、天气型机制和 SHAP 稳定性证据。</p>
+        <div class="app-chip-row">
+          <span>{start_date} 至 {end_date}</span>
+          <span>{metadata.get("cities", 13)} 个城市</span>
+          <span>{int(metadata.get("rows", 0)):,} 条 city-hour 样本</span>
+          <span>LightGBM + SHAP</span>
+        </div>
+      </div>
+      <div class="app-hero-side">
+        <div class="app-side-step"><b>1</b><span>先看预测台，理解输入情景与模型输出。</span></div>
+        <div class="app-side-step"><b>2</b><span>再看模型介绍，区分预测精度和气象解释。</span></div>
+        <div class="app-side-step"><b>3</b><span>最后看研究验证，判断结论可推广到哪里。</span></div>
+      </div>
+    </section>
+    """
+
+
+def page_guide_html(kicker: str, title: str, body: str, items: list[tuple[str, str]], theme: str = "blue") -> str:
+    item_html = "".join(
+        (
+            '<div class="page-guide-item">'
+            f"<b>{item_title}</b>"
+            f"<span>{item_body}</span>"
+            "</div>"
+        )
+        for item_title, item_body in items
+    )
+    return f"""
+    <section class="page-guide {theme}">
+      <div class="page-guide-main">
+        <div class="page-guide-kicker">{kicker}</div>
+        <h3>{title}</h3>
+        <p>{body}</p>
+      </div>
+      <div class="page-guide-grid">{item_html}</div>
     </section>
     """
 
@@ -2515,6 +2564,25 @@ def style_page() -> None:
     st.markdown(
         """
         <style>
+        :root {
+            --google-blue:#1a73e8;
+            --google-green:#188038;
+            --google-yellow:#fbbc04;
+            --google-red:#d93025;
+            --google-teal:#0f766e;
+            --app-bg:#f8fafd;
+            --surface:#ffffff;
+            --surface-soft:#f1f5ff;
+            --border:#dadce0;
+            --border-soft:#e8eaed;
+            --text:#202124;
+            --muted:#5f6368;
+            --muted-2:#80868b;
+            --shadow-sm:0 1px 2px rgba(60,64,67,0.12),0 1px 3px rgba(60,64,67,0.08);
+            --shadow-md:0 2px 6px rgba(60,64,67,0.12),0 4px 12px rgba(60,64,67,0.08);
+            --radius:10px;
+            --radius-sm:8px;
+        }
         .stApp {background:#f5f7fb;}
         header {visibility:hidden;}
         #MainMenu {visibility:hidden;}
@@ -3697,6 +3765,422 @@ def style_page() -> None:
             font-size:0.76rem;
             line-height:1.55;
         }
+        /* Unified Material-like layer */
+        .stApp {
+            background:
+                linear-gradient(180deg, #ffffff 0, var(--app-bg) 240px),
+                var(--app-bg);
+            color:var(--text);
+            font-family: Arial, "Helvetica Neue", sans-serif;
+        }
+        .block-container {
+            max-width:1320px;
+            padding-top:1.05rem;
+            padding-left:2.2rem;
+            padding-right:2.2rem;
+        }
+        h1 {
+            color:var(--text);
+            font-size:1.9rem !important;
+            line-height:1.25 !important;
+            font-weight:700 !important;
+            margin:0 0 0.7rem 0 !important;
+        }
+        h2, h3, h4 {
+            color:var(--text);
+            letter-spacing:0;
+        }
+        p, li, span {
+            letter-spacing:0;
+        }
+        .app-hero {
+            display:grid;
+            grid-template-columns:minmax(0,1.35fr) minmax(320px,0.65fr);
+            gap:18px;
+            align-items:stretch;
+            margin:4px 0 18px 0;
+        }
+        .app-hero-main,
+        .app-hero-side,
+        .page-guide,
+        .forecast-panel,
+        .forecast-metric,
+        .model-hero-card,
+        .intro-hero-main,
+        .intro-score-panel,
+        .intro-model-card,
+        .training-hero,
+        .training-score-card,
+        .training-family-card,
+        .flow-step,
+        .training-period-card,
+        .method-panel,
+        .tuning-main,
+        .tuning-side,
+        .training-detail-card,
+        .period-conclusion-card,
+        .research-brief,
+        .research-upgrade-main,
+        .research-upgrade-side,
+        .research-evidence-panel,
+        .factor-card,
+        div[data-testid="stMetric"] {
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow-sm);
+        }
+        .app-hero-main {
+            padding:24px 26px;
+            border-top:4px solid var(--google-blue);
+        }
+        .app-hero-side {
+            padding:18px;
+            display:grid;
+            gap:10px;
+            background:#ffffff;
+        }
+        .app-kicker,
+        .page-guide-kicker,
+        .section-bridge-kicker {
+            display:inline-flex;
+            width:fit-content;
+            border-radius:999px;
+            padding:5px 10px;
+            background:#e8f0fe;
+            color:var(--google-blue);
+            font-size:0.76rem;
+            line-height:1.2;
+            font-weight:700;
+            margin-bottom:10px;
+        }
+        .app-hero h2 {
+            margin:0 0 10px 0;
+            color:var(--text);
+            font-size:1.45rem;
+            line-height:1.35;
+            font-weight:750;
+        }
+        .app-hero p {
+            margin:0;
+            max-width:980px;
+            color:var(--muted);
+            font-size:0.96rem;
+            line-height:1.78;
+        }
+        .app-chip-row {
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            margin-top:16px;
+        }
+        .app-chip-row span,
+        .training-chip-row span,
+        .intro-chip-row span,
+        .forecast-chip-row span {
+            border:1px solid #d2e3fc;
+            background:#ffffff;
+            color:#3c4043;
+            border-radius:999px;
+            padding:6px 10px;
+            font-size:0.8rem;
+            font-weight:700;
+        }
+        .app-side-step {
+            display:flex;
+            gap:10px;
+            align-items:flex-start;
+            border:1px solid var(--border-soft);
+            border-radius:8px;
+            padding:12px;
+            background:#fafcff;
+        }
+        .app-side-step b {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            flex:0 0 26px;
+            width:26px;
+            height:26px;
+            border-radius:999px;
+            background:#e8f0fe;
+            color:var(--google-blue);
+            font-size:0.86rem;
+        }
+        .app-side-step span {
+            color:var(--muted);
+            font-size:0.88rem;
+            line-height:1.55;
+            font-weight:600;
+        }
+        .page-guide {
+            display:grid;
+            grid-template-columns:minmax(0,1.1fr) minmax(420px,0.9fr);
+            gap:18px;
+            align-items:stretch;
+            padding:20px 22px;
+            margin:10px 0 16px 0;
+            border-top:4px solid var(--guide-color);
+        }
+        .page-guide.blue {--guide-color:var(--google-blue);--guide-soft:#e8f0fe;--guide-text:var(--google-blue);}
+        .page-guide.green {--guide-color:var(--google-green);--guide-soft:#e6f4ea;--guide-text:var(--google-green);}
+        .page-guide.amber {--guide-color:var(--google-yellow);--guide-soft:#fef7e0;--guide-text:#b06000;}
+        .page-guide.teal {--guide-color:var(--google-teal);--guide-soft:#e6f4f1;--guide-text:var(--google-teal);}
+        .page-guide .page-guide-kicker {
+            background:var(--guide-soft);
+            color:var(--guide-text);
+        }
+        .page-guide h3 {
+            margin:0 0 9px 0;
+            color:var(--text);
+            font-size:1.22rem;
+            line-height:1.38;
+            font-weight:750;
+        }
+        .page-guide p {
+            margin:0;
+            color:var(--muted);
+            font-size:0.94rem;
+            line-height:1.72;
+        }
+        .page-guide-grid {
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:10px;
+        }
+        .page-guide-item {
+            border:1px solid var(--border-soft);
+            border-radius:8px;
+            background:#fafcff;
+            padding:12px 13px;
+            min-height:118px;
+        }
+        .page-guide-item b {
+            display:block;
+            color:var(--text);
+            font-size:0.88rem;
+            line-height:1.35;
+            margin-bottom:6px;
+        }
+        .page-guide-item span {
+            display:block;
+            color:var(--muted);
+            font-size:0.82rem;
+            line-height:1.58;
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            gap:6px;
+            background:#ffffff;
+            border:1px solid var(--border);
+            border-radius:10px;
+            padding:5px;
+            box-shadow:var(--shadow-sm);
+        }
+        .stTabs [data-baseweb="tab"] {
+            height:38px;
+            border:0;
+            border-radius:8px;
+            background:transparent;
+            color:var(--muted);
+            padding:7px 14px;
+            font-weight:700;
+        }
+        .stTabs [aria-selected="true"] {
+            background:#e8f0fe !important;
+            color:var(--google-blue) !important;
+        }
+        section[data-testid="stSidebar"] {
+            background:#ffffff;
+            border-right:1px solid var(--border-soft);
+        }
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            color:var(--text);
+        }
+        .stButton > button,
+        button[kind="primary"],
+        div[data-testid="stFormSubmitButton"] button {
+            border-radius:8px !important;
+            border:1px solid #d2e3fc !important;
+            background:#ffffff !important;
+            color:var(--google-blue) !important;
+            font-weight:700 !important;
+            box-shadow:none !important;
+        }
+        div[data-testid="stFormSubmitButton"] button,
+        button[kind="primary"] {
+            background:var(--google-blue) !important;
+            color:#ffffff !important;
+            border-color:var(--google-blue) !important;
+        }
+        .stButton > button:hover,
+        div[data-testid="stFormSubmitButton"] button:hover {
+            box-shadow:var(--shadow-sm) !important;
+            border-color:var(--google-blue) !important;
+        }
+        div[data-testid="stMetric"] {
+            padding:13px 14px 10px 14px;
+            box-shadow:var(--shadow-sm);
+        }
+        div[data-testid="stMetricLabel"] {
+            color:var(--muted);
+            font-weight:700;
+        }
+        div[data-testid="stMetricValue"] {
+            color:var(--text);
+            font-size:1.62rem;
+            font-weight:750;
+        }
+        div[data-testid="stPlotlyChart"],
+        div[data-testid="stDataFrame"] {
+            border:1px solid var(--border);
+            border-radius:10px;
+            background:#ffffff;
+            box-shadow:var(--shadow-sm);
+            padding:6px;
+        }
+        div[data-testid="stExpander"] {
+            border:1px solid var(--border) !important;
+            border-radius:10px !important;
+            background:#ffffff !important;
+            box-shadow:var(--shadow-sm);
+            overflow:hidden;
+        }
+        div[data-testid="stExpander"] summary {
+            color:var(--text);
+            font-weight:700;
+            background:#fafcff;
+        }
+        .section-bridge {
+            border:1px solid var(--border);
+            border-left:4px solid var(--bridge-accent);
+            border-radius:10px;
+            background:#ffffff;
+            padding:15px 17px;
+            box-shadow:var(--shadow-sm);
+        }
+        .section-bridge-title {
+            color:var(--text);
+            font-size:1.08rem;
+            font-weight:750;
+            margin-bottom:6px;
+        }
+        .section-bridge p {
+            margin:0;
+            color:var(--muted);
+            font-size:0.9rem;
+            line-height:1.65;
+        }
+        .forecast-overview {
+            gap:10px;
+        }
+        .forecast-metric {
+            min-height:120px;
+            border-radius:10px;
+            box-shadow:var(--shadow-sm);
+        }
+        .forecast-metric-label,
+        .factor-title,
+        .scenario-label,
+        .training-score-label,
+        .research-stat-tile span {
+            color:var(--muted);
+        }
+        .forecast-metric-value,
+        .scenario-value,
+        .factor-value,
+        .model-hero-card h3,
+        .intro-hero h3,
+        .intro-model-card h4,
+        .training-hero h3,
+        .training-family-card h4,
+        .flow-step h4,
+        .research-brief-head h3,
+        .research-note h4 {
+            color:var(--text);
+        }
+        .forecast-panel {
+            border-radius:12px;
+            box-shadow:var(--shadow-md);
+        }
+        .forecast-panel-main,
+        .scenario-item,
+        .param-row,
+        .tuning-stat,
+        .research-stat-tile,
+        .forecast-side-item {
+            background:#fafcff;
+            border-color:var(--border-soft);
+            border-radius:8px;
+        }
+        .score-pill {
+            border-color:#d2e3fc;
+            background:#ffffff;
+            color:var(--text);
+            box-shadow:none;
+        }
+        .score-pill b {
+            color:var(--google-blue);
+        }
+        .explain-band,
+        .v2-card-note {
+            border-color:var(--border);
+            border-radius:10px;
+            background:#ffffff;
+            box-shadow:var(--shadow-sm);
+        }
+        .explain-band p,
+        .v2-card-note,
+        .model-hero-card p,
+        .intro-hero p,
+        .intro-model-card p,
+        .training-hero p,
+        .training-score-card p,
+        .training-family-card p,
+        .flow-step p,
+        .method-panel p,
+        .tuning-main p,
+        .training-detail-card p,
+        .period-conclusion-card p,
+        .research-brief-head p,
+        .research-note p,
+        .research-boundary-panel p,
+        .research-upgrade-main p,
+        .research-upgrade-side p,
+        .research-evidence-item p {
+            color:var(--muted);
+        }
+        .model-kicker,
+        .training-kicker,
+        .method-kicker,
+        .intro-kicker,
+        .intro-score-label {
+            background:#e8f0fe;
+            color:var(--google-blue);
+            font-weight:700;
+        }
+        .research-kicker,
+        .model-card-tag,
+        .family-index,
+        .period-tag,
+        .method-band-kicker,
+        .route-badge {
+            font-weight:700;
+        }
+        .research-kicker {
+            background:#e6f4ea;
+            color:var(--google-green);
+        }
+        .research-kicker.muted {
+            background:#f1f3f4;
+            color:var(--muted);
+        }
+        .period-conclusion-card,
+        .training-family-card,
+        .intro-model-card,
+        .factor-card {
+            overflow:hidden;
+        }
         .model-hero-card,
         .intro-hero-main,
         .intro-score-panel,
@@ -3712,9 +4196,13 @@ def style_page() -> None:
         .research-upgrade-main,
         .research-upgrade-side,
         .research-evidence-panel {
-            box-shadow:0 4px 14px rgba(24,39,75,0.03);
+            box-shadow:var(--shadow-sm);
         }
         @media (max-width: 900px) {
+            .block-container {padding-left:1rem;padding-right:1rem;}
+            .app-hero {grid-template-columns:1fr;}
+            .page-guide {grid-template-columns:1fr;}
+            .page-guide-grid {grid-template-columns:1fr;}
             .forecast-overview {grid-template-columns:repeat(2,minmax(0,1fr));}
             .forecast-panel {grid-template-columns:1fr;}
             .scenario-strip {grid-template-columns:repeat(2,minmax(0,1fr));}
@@ -3756,6 +4244,10 @@ def style_page() -> None:
             .research-stat-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
         }
         @media (max-width: 620px) {
+            h1 {font-size:1.5rem !important;}
+            .app-hero-main,
+            .page-guide {padding:17px 16px;}
+            .app-hero h2 {font-size:1.18rem;}
             .forecast-overview {grid-template-columns:1fr;}
             .forecast-number {font-size:2.5rem;}
             .model-route-grid {grid-template-columns:1fr;}
@@ -3786,11 +4278,7 @@ def main() -> None:
     metadata = assets["metadata"]
 
     st.title("京津冀 PM2.5 浓度预测与气象贡献度分析")
-
-    left, right = st.columns([0.78, 0.22])
-    with right:
-        st.caption(f"训练数据: {metadata['start_time']} 至 {metadata['end_time']}")
-        st.caption(f"城市数: {metadata['cities']} | ERA5 PBLH 缺失率: {metadata['pblh_missing_rate']:.2%}")
+    st.markdown(app_overview_html(metadata), unsafe_allow_html=True)
 
     with st.sidebar:
         st.header("输入")
@@ -3915,6 +4403,20 @@ def main() -> None:
 
     with tab_predict:
         st.markdown(
+            page_guide_html(
+                "预测台",
+                "从一个城市小时情景出发，查看 PM2.5 预测值和扩散条件",
+                "本页不是单纯展示一个数值，而是把城市、日期、气象输入、边界层高度、逆温和风输送条件组织成一个可解释的预测情景。当前小时输出用于查看模型估计，24 小时结果只作为趋势参考。",
+                [
+                    ("输入情景", "侧栏选择城市、日期、小时和气象条件，提交后主面板统一更新。"),
+                    ("模型输出", "四个摘要块给出当前浓度、24 小时趋势、逆温指数和 PBLH。"),
+                    ("机制提示", "风险卡片和图组用于判断低边界层、弱风、高湿或输送条件是否支撑污染累积。"),
+                ],
+                "blue",
+            ),
+            unsafe_allow_html=True,
+        )
+        st.markdown(
             scenario_summary_html(
                 city,
                 selected_date,
@@ -4001,6 +4503,20 @@ def main() -> None:
         )
 
     with tab_results:
+        st.markdown(
+            page_guide_html(
+                "模型介绍",
+                "先区分两条模型主线，再阅读指标和 SHAP 解释",
+                "高精度预测模型回答“在完整环境信息下 PM2.5 能预测到什么程度”；气象模型体系回答“剔除污染历史和共污染物后，气象过程还能解释多少变化”。这一区分是避免把预测精度误读为气象因果贡献的关键。",
+                [
+                    ("高精度预测", "保留 PM2.5 时滞、滚动均值和共污染物，作为短时浓度预测上限。"),
+                    ("气象贡献", "使用 weather-only 变量约束，重点讨论 PBLH、湿度、风输送和通风条件。"),
+                    ("解释边界", "SHAP 和响应曲线均作为模型解释证据，不直接表述为严格因果效应。"),
+                ],
+                "green",
+            ),
+            unsafe_allow_html=True,
+        )
         high_accuracy_tab, attribution_tab = st.tabs(["高精度预测模型", "气象模型体系"])
 
         with high_accuracy_tab:
@@ -4268,6 +4784,20 @@ def main() -> None:
             )
 
     with tab_training:
+        st.markdown(
+            page_guide_html(
+                "训练策略",
+                "用时间后置验证和变量准入规则控制研究结论的可信度",
+                "训练部分重点说明数据如何进入模型、哪些变量允许用于预测、哪些变量必须从气象贡献模型中剔除，以及测试集为什么必须后置。读者可据此判断模型指标是否来自合理验证，而非随机切分下的信息泄漏。",
+                [
+                    ("数据层", "空气质量、ERA5 气象和 PBLH 合并为 city-hour 监督学习表。"),
+                    ("特征层", "预测模型允许强预测变量；气象贡献模型剔除污染持续性和共污染物。"),
+                    ("验证层", "调参只使用验证集，最终测试集保留到模型确定后报告一次。"),
+                ],
+                "amber",
+            ),
+            unsafe_allow_html=True,
+        )
         training_prediction_tab, training_attribution_tab = st.tabs(["高精度预测模型", "气象模型体系"])
 
         with training_prediction_tab:
@@ -4309,6 +4839,20 @@ def main() -> None:
             st.markdown(meteorology_tuning_html(assets), unsafe_allow_html=True)
 
     with tab_validation:
+        st.markdown(
+            page_guide_html(
+                "研究验证",
+                "把模型结果放回空间外推、过程机制和解释稳定性中检验",
+                "本页用于回答更接近研究报告的问题：模型是否只是记住城市和季节背景，气象过程是否带来增量解释力，结论能否推广到未参与训练的城市，以及 SHAP 排名是否稳定。",
+                [
+                    ("外推边界", "留城市和组合外推用于判断跨城市、跨时间泛化能力。"),
+                    ("消融证据", "逐步加入气象过程特征，检验解释力是否来自真实过程增量。"),
+                    ("机制互证", "天气型、透明对照和条件误差共同约束解释口径。"),
+                ],
+                "teal",
+            ),
+            unsafe_allow_html=True,
+        )
         render_research_validation_section(assets)
 
 if __name__ == "__main__":
