@@ -1229,10 +1229,26 @@ def research_conclusion_html(assets: Assets) -> str:
     south_post = _first_matching(weather_types, period_label="疫情后", weather_type_label="强南风输送型")
 
     headline_stats = [
-        ("气象-only 解释力", f"R2 {_fmt_number(pre.get('r2'))} / {_fmt_number(covid.get('r2'))} / {_fmt_number(post.get('r2'))}", "疫情前、疫情期、疫情后代表模型"),
-        ("留城市泛化", f"平均 R2 {_fmt_number(pre_leave.get('mean_r2'))} / {_fmt_number(covid_leave.get('mean_r2'))}", "疫情前与疫情期具有较稳定空间外推能力"),
-        ("静稳高湿污染型", f"中位数 {_fmt_pm25(pre_highlight.get('highest_pm25_median'))} / {_fmt_pm25(covid_highlight.get('highest_pm25_median'))} / {_fmt_pm25(post_highlight.get('highest_pm25_median'))}", "三个时期最高 PM2.5 天气型均为极低边界层静稳高湿型"),
-        ("SHAP 结构差异", f"Jaccard {_fmt_number(covid_post_sim.get('top20_jaccard'))}", "疫情期与疫情后 Top20 贡献结构差异明显"),
+        (
+            "研究任务",
+            "区分浓度预测与气象解释",
+            "高精度模型用于评估 PM2.5 短时预测能力；气象-only 模型用于讨论气象、边界层和输送条件的相对独立解释贡献。",
+        ),
+        (
+            "气象解释贡献",
+            f"分时期 R2 为 {_fmt_number(pre.get('r2'))} / {_fmt_number(covid.get('r2'))} / {_fmt_number(post.get('r2'))}",
+            "该结果来自剔除 PM2.5 历史值和共污染物后的过程型模型，主要反映气象背景对浓度波动的可解释部分。",
+        ),
+        (
+            "关键气象背景",
+            "低边界层、高湿、弱风较突出",
+            f"三个时期 PM2.5 中位数最高的天气型一致，对应中位浓度约 {_fmt_pm25(pre_highlight.get('highest_pm25_median'))} / {_fmt_pm25(covid_highlight.get('highest_pm25_median'))} / {_fmt_pm25(post_highlight.get('highest_pm25_median'))} ug/m3。",
+        ),
+        (
+            "空间外推边界",
+            f"疫情前和疫情期较稳，疫情后较弱",
+            f"留城市验证中，疫情前和疫情期平均 R2 为 {_fmt_number(pre_leave.get('mean_r2'))} / {_fmt_number(covid_leave.get('mean_r2'))}；疫情后异常目标的城市外推边界更明显。",
+        ),
     ]
     stat_html = "".join(
         (
@@ -1249,33 +1265,33 @@ def research_conclusion_html(assets: Assets) -> str:
         '<div class="research-brief">'
         '<section class="research-brief-head">'
         '<div class="research-kicker">阶段性研究判断</div>'
-        "<h3>京津冀 PM2.5 的气象影响主要体现为边界层通风、湿度静稳和南北向输送的共同调制</h3>"
-        "<p>当前结果可概括为一组阶段性研究证据：高精度模型给出污染浓度短时预测的性能上限；气象-only 模型在剔除 PM2.5 滞后、滚动均值和共污染物后，用于估计气象背景对浓度波动的相对独立解释力。研究重点并非单一 R2 数值，而是不同时期的气象贡献结构及其大气环境机制。</p>"
+        "<h3>本项目关注城市小时 PM2.5 的机器学习预测能力，以及气象条件对浓度波动的相对独立解释贡献</h3>"
+        "<p>为避免把短时预测能力直接等同于气象贡献，页面将模型体系分为两条线索：高精度预测模型用于估计在多源环境信息约束下的浓度预测上限；过程型气象-only 模型剔除 PM2.5 历史值、滚动均值和共污染物，仅保留气象、边界层高度、风输送、通风和时空背景，用于讨论气象过程对 PM2.5 波动的可解释部分。</p>"
         '<div class="research-stat-grid">'
         f"{stat_html}"
         "</div>"
         "</section>"
         '<div class="research-brief-body">'
         '<section class="research-note">'
-        "<h4>气象背景的独立解释力</h4>"
-        f"<p>过程型气象-only 模型在疫情前、疫情期和疫情后测试集上的 R2 分别为 {_fmt_number(pre.get('r2'))}、{_fmt_number(covid.get('r2'))} 和 {_fmt_number(post.get('r2'))}；透明样条对照模型仍保留 {_fmt_number(pre_gam.get('r2'))}、{_fmt_number(covid_gam.get('r2'))} 和 {_fmt_number(post_gam.get('r2'))} 的解释度。由于这组模型不使用污染时滞和共污染物，上述结果说明气象、PBLH、风输送和时空背景本身能够解释相当比例的 PM2.5 波动。</p>"
+        "<h4>1. 高精度模型刻画短时预测能力</h4>"
+        f"<p>高精度模型使用 PM2.5 历史值、滚动均值、共污染物和气象变量，主要用于评估当前小时浓度的可预测性上限。该部分回答的是预测问题：在信息较充分的条件下，模型能否稳定估计 PM2.5 水平。由于污染历史和共污染物本身携带较强预测信息，其结果不直接作为气象独立贡献的证据。</p>"
         "</section>"
         '<section class="research-note">'
-        "<h4>分时期贡献结构</h4>"
-        f"<p>疫情前的前列变量集中于 {_top_feature_labels(pre_model, 5)}；疫情期集中于 {_top_feature_labels(covid_model, 5)}；疫情后集中于 {_top_feature_labels(post_model, 5)}。这一变化表明，疫情前后气象贡献结构并非简单平移，恢复期的 PBLH、露点、通风系数和风速过程更突出，提示扩散条件约束有所强化。</p>"
+        "<h4>2. 气象-only 模型评估相对独立解释力</h4>"
+        f"<p>在剔除污染历史和共污染物后，过程型气象-only 模型在疫情前、疫情期和疫情后的测试 R2 为 {_fmt_number(pre.get('r2'))}、{_fmt_number(covid.get('r2'))} 和 {_fmt_number(post.get('r2'))}。这说明边界层高度、湿度、风、通风和时空背景仍能解释相当比例的 PM2.5 波动。透明样条对照模型保留 {_fmt_number(pre_gam.get('r2'))}、{_fmt_number(covid_gam.get('r2'))} 和 {_fmt_number(post_gam.get('r2'))} 的解释度，用于辅助检查关键响应方向是否与大气过程认识一致。</p>"
         "</section>"
         '<section class="research-note">'
-        "<h4>典型天气背景</h4>"
-        f"<p>三个时期 PM2.5 中位数最高的天气型均为极低边界层静稳高湿型，对应中位浓度约 {_fmt_pm25(pre_highlight.get('highest_pm25_median'))}、{_fmt_pm25(covid_highlight.get('highest_pm25_median'))} 和 {_fmt_pm25(post_highlight.get('highest_pm25_median'))} ug/m3。该天气型同时具有低 PBLH、弱风、高湿和低通风特征，符合污染累积天气背景的物理认识。</p>"
+        "<h4>3. 典型天气型提供机制互证</h4>"
+        f"<p>三个时期 PM2.5 中位数最高的天气型均可概括为低边界层、弱风、高湿和低通风背景，对应中位浓度约 {_fmt_pm25(pre_highlight.get('highest_pm25_median'))}、{_fmt_pm25(covid_highlight.get('highest_pm25_median'))} 和 {_fmt_pm25(post_highlight.get('highest_pm25_median'))} ug/m3。这类条件不利于垂直扩散和水平输送，容易造成污染累积，因此天气型结果与大气环境机理具有一致性。</p>"
         "</section>"
         '<section class="research-note">'
-        "<h4>输送方向与空间泛化</h4>"
-        f"<p>强北风清洁输送型在三个时期均对应较低 PM2.5 中位数，约 {_fmt_pm25(north_pre.get('pm25_median'))}、{_fmt_pm25(north_covid.get('pm25_median'))} 和 {_fmt_pm25(north_post.get('pm25_median'))} ug/m3；疫情后强南风输送型频率约 {_fmt_number(south_post.get('frequency_pct'), 1)}%。留城市验证中，疫情前和疫情期平均 R2 分别为 {_fmt_number(pre_leave.get('mean_r2'))} 和 {_fmt_number(covid_leave.get('mean_r2'))}，说明模型具有一定区域泛化能力；疫情后异常量目标的留城市表现下降，提示同城气候态基准存在空间外推边界。</p>"
+        "<h4>4. 外推验证限定结论适用范围</h4>"
+        f"<p>强北风清洁输送型在三个时期均对应较低 PM2.5，中位数约 {_fmt_pm25(north_pre.get('pm25_median'))}、{_fmt_pm25(north_covid.get('pm25_median'))} 和 {_fmt_pm25(north_post.get('pm25_median'))} ug/m3。留城市验证中，疫情前和疫情期平均 R2 分别为 {_fmt_number(pre_leave.get('mean_r2'))} 和 {_fmt_number(covid_leave.get('mean_r2'))}，说明模型学习到一定区域共同规律；疫情后异常目标表现下降，提示该阶段更适合解释时期内部气象异常，不宜直接无条件外推到所有城市。</p>"
         "</section>"
         "</div>"
         '<div class="research-boundary-panel">'
         "<h4>解释边界</h4>"
-        f"<p>SHAP 排名稳定性支持分时期差异判断：疫情前与疫情期 Top20 Jaccard 为 {_fmt_number(pre_covid_sim.get('top20_jaccard'))}，疫情期与疫情后为 {_fmt_number(covid_post_sim.get('top20_jaccard'))}。但 SHAP 反映的是模型在给定特征空间下对变量的使用方式，不等同于严格因果效应。跨时期比较还应同时考虑 2023+ PM2.5 数据源与 2018-2022 不完全一致、排放活动缺少直接清单约束，以及异常量目标对城市历史基准的依赖。</p>"
+        f"<p>SHAP 排名用于描述模型在给定特征空间下主要依赖哪些变量，不构成严格因果证明。疫情前与疫情期 Top20 Jaccard 为 {_fmt_number(pre_covid_sim.get('top20_jaccard'))}，疫情期与疫情后为 {_fmt_number(covid_post_sim.get('top20_jaccard'))}，说明不同时期的变量结构存在差异。跨时期比较还应同时考虑 2023+ PM2.5 数据源与 2018-2022 不完全一致、缺少直接排放清单，以及异常量目标对城市历史基准的依赖。</p>"
         "</div>"
         "</div>"
     )
@@ -3659,27 +3675,27 @@ def style_page() -> None:
             border:1px solid #d8dee6;
             border-radius:9px;
             background:#f8fafc;
-            padding:11px 12px;
-            min-height:108px;
+            padding:13px 14px;
+            min-height:136px;
         }
         .research-stat-tile span {
             display:block;
             color:#64748b;
-            font-size:0.78rem;
+            font-size:0.76rem;
             font-weight:900;
-            margin-bottom:5px;
+            margin-bottom:7px;
         }
         .research-stat-tile b {
             display:block;
             color:#0f766e;
-            font-size:1.02rem;
-            line-height:1.32;
-            margin-bottom:6px;
+            font-size:0.98rem;
+            line-height:1.42;
+            margin-bottom:8px;
         }
         .research-stat-tile p {
             color:#64748b;
-            font-size:0.78rem;
-            line-height:1.45;
+            font-size:0.76rem;
+            line-height:1.55;
         }
         .model-hero-card,
         .intro-hero-main,
