@@ -410,11 +410,6 @@ def app_overview_html(metadata: dict[str, Any]) -> str:
           <span>LightGBM + SHAP</span>
         </div>
       </div>
-      <div class="app-hero-side">
-        <div class="app-side-step"><b>1</b><span>预测情景：城市小时尺度 PM2.5 估计及扩散条件。</span></div>
-        <div class="app-side-step"><b>2</b><span>模型体系：高精度预测模型与 weather-only 气象解释模型。</span></div>
-        <div class="app-side-step"><b>3</b><span>验证证据：空间外推、解释稳定性与结论适用范围。</span></div>
-      </div>
     </section>
     """
 
@@ -1279,11 +1274,6 @@ def research_conclusion_html(assets: Assets) -> str:
 
     headline_stats = [
         (
-            "研究任务",
-            "区分浓度预测与气象解释",
-            "高精度模型用于评估 PM2.5 短时预测能力；气象-only 模型用于讨论气象、边界层和输送条件的相对独立解释贡献。",
-        ),
-        (
             "气象解释贡献",
             f"分时期 R2 为 {_fmt_number(pre.get('r2'))} / {_fmt_number(covid.get('r2'))} / {_fmt_number(post.get('r2'))}",
             "该结果来自剔除 PM2.5 历史值和共污染物后的过程型模型，主要反映气象背景对浓度波动的可解释部分。",
@@ -1315,29 +1305,11 @@ def research_conclusion_html(assets: Assets) -> str:
         '<section class="research-brief-head">'
         '<div class="research-kicker">阶段性研究判断</div>'
         "<h3>本项目关注城市小时 PM2.5 的机器学习预测能力，以及气象条件对浓度波动的相对独立解释贡献</h3>"
-        "<p>模型体系分为两条线索：高精度预测模型估计多源环境信息约束下的浓度预测上限；过程型气象-only 模型剔除 PM2.5 历史值、滚动均值和共污染物，仅保留气象、边界层高度、风输送、通风和时空背景，用于讨论气象过程对 PM2.5 波动的可解释部分。该设置有助于避免将短时预测能力直接等同于气象贡献。</p>"
+        "<p>研究验证部分集中呈现气象-only 模型的解释能力、关键天气背景和空间外推边界。高精度预测模型仅作为短时浓度预测能力参照，气象贡献结论以过程型气象模型及其补充验证为主。</p>"
         '<div class="research-stat-grid">'
         f"{stat_html}"
         "</div>"
         "</section>"
-        '<div class="research-brief-body">'
-        '<section class="research-note">'
-        "<h4>1. 高精度模型刻画短时预测能力</h4>"
-        f"<p>高精度模型使用 PM2.5 历史值、滚动均值、共污染物和气象变量，主要用于评估当前小时浓度的可预测性上限。在信息较充分的条件下，该模型反映 LightGBM 对 PM2.5 水平的短时估计能力。由于污染历史和共污染物本身携带较强预测信息，其结果不直接作为气象独立贡献的证据。</p>"
-        "</section>"
-        '<section class="research-note">'
-        "<h4>2. 气象-only 模型评估相对独立解释力</h4>"
-        f"<p>在剔除污染历史和共污染物后，过程型气象-only 模型在疫情前、疫情期和疫情后的测试 R2 为 {_fmt_number(pre.get('r2'))}、{_fmt_number(covid.get('r2'))} 和 {_fmt_number(post.get('r2'))}。这说明边界层高度、湿度、风、通风和时空背景仍能解释相当比例的 PM2.5 波动。透明样条对照模型保留 {_fmt_number(pre_gam.get('r2'))}、{_fmt_number(covid_gam.get('r2'))} 和 {_fmt_number(post_gam.get('r2'))} 的解释度，用于辅助检查关键响应方向是否与大气过程认识一致。</p>"
-        "</section>"
-        '<section class="research-note">'
-        "<h4>3. 典型天气型提供机制互证</h4>"
-        f"<p>三个时期 PM2.5 中位数最高的天气型均可概括为低边界层、弱风、高湿和低通风背景，对应中位浓度约 {_fmt_pm25(pre_highlight.get('highest_pm25_median'))}、{_fmt_pm25(covid_highlight.get('highest_pm25_median'))} 和 {_fmt_pm25(post_highlight.get('highest_pm25_median'))} ug/m3。这类条件不利于垂直扩散和水平输送，容易造成污染累积，因此天气型结果与大气环境机理具有一致性。</p>"
-        "</section>"
-        '<section class="research-note">'
-        "<h4>4. 外推验证限定结论适用范围</h4>"
-        f"<p>强北风清洁输送型在三个时期均对应较低 PM2.5，中位数约 {_fmt_pm25(north_pre.get('pm25_median'))}、{_fmt_pm25(north_covid.get('pm25_median'))} 和 {_fmt_pm25(north_post.get('pm25_median'))} ug/m3。留城市验证中，疫情前和疫情期平均 R2 分别为 {_fmt_number(pre_leave.get('mean_r2'))} 和 {_fmt_number(covid_leave.get('mean_r2'))}，表明模型学习到一定区域共同规律；疫情后异常目标表现下降，该阶段结论更适合解释时期内部气象异常，不宜直接无条件外推到所有城市。</p>"
-        "</section>"
-        "</div>"
         '<div class="research-boundary-panel">'
         "<h4>解释边界</h4>"
         f"<p>SHAP 排名用于描述模型在给定特征空间下主要依赖哪些变量，不构成严格因果证明。疫情前与疫情期 Top20 Jaccard 为 {_fmt_number(pre_covid_sim.get('top20_jaccard'))}，疫情期与疫情后为 {_fmt_number(covid_post_sim.get('top20_jaccard'))}，说明不同时期的变量结构存在差异。跨时期比较还应同时考虑 2023+ PM2.5 数据源与 2018-2022 不完全一致、缺少直接排放清单，以及异常量目标对城市历史基准的依赖。</p>"
@@ -1735,7 +1707,6 @@ def render_research_validation_section(assets: Assets) -> None:
         return
 
     st.markdown(research_conclusion_html(assets), unsafe_allow_html=True)
-    st.markdown(research_upgrade_status_html(assets), unsafe_allow_html=True)
     validation_tab, extension_tab, transparent_tab, weather_type_tab, shap_tab, condition_tab = st.tabs(
         ["空间泛化验证", "组合外推与消融", "透明解释对照", "天气型机制", "SHAP 稳定性", "条件误差"]
     )
@@ -3794,10 +3765,7 @@ def style_page() -> None:
             letter-spacing:0;
         }
         .app-hero {
-            display:grid;
-            grid-template-columns:minmax(0,1.35fr) minmax(320px,0.65fr);
-            gap:18px;
-            align-items:stretch;
+            display:block;
             margin:4px 0 18px 0;
         }
         .app-hero-main,
@@ -4503,20 +4471,6 @@ def main() -> None:
         )
 
     with tab_results:
-        st.markdown(
-            page_guide_html(
-                "模型介绍",
-                "高精度预测模型与过程型气象贡献模型的口径区分",
-                "模型体系分为两个层次：高精度预测模型保留污染历史和共污染物，用于估计短时浓度预测上限；过程型气象贡献模型在 weather-only 约束下训练，用于讨论气象、边界层和输送条件的相对独立解释贡献。",
-                [
-                    ("预测口径", "保留 PM2.5 时滞、滚动均值和共污染物。"),
-                    ("解释口径", "采用 weather-only 变量约束，突出 PBLH、湿度、风输送和通风条件。"),
-                    ("边界说明", "SHAP 和响应曲线作为模型解释证据，不直接表述为严格因果效应。"),
-                ],
-                "green",
-            ),
-            unsafe_allow_html=True,
-        )
         high_accuracy_tab, attribution_tab = st.tabs(["高精度预测模型", "气象模型体系"])
 
         with high_accuracy_tab:
@@ -4784,20 +4738,6 @@ def main() -> None:
             )
 
     with tab_training:
-        st.markdown(
-            page_guide_html(
-                "训练策略",
-                "时间后置验证与变量准入控制",
-                "训练策略围绕数据整合、特征口径、时间切分和参数搜索展开。预测模型允许使用污染持续性和共污染物信息；气象贡献模型剔除相关强预测变量，以降低污染历史对气象解释的替代作用。测试集保持时间后置，仅用于最终评估。",
-                [
-                    ("数据整合", "空气质量、ERA5 气象和 PBLH 合并为 city-hour 监督学习表。"),
-                    ("变量准入", "预测模型与气象贡献模型采用不同特征边界。"),
-                    ("验证原则", "调参仅使用验证集，最终测试集在模型确定后报告。"),
-                ],
-                "amber",
-            ),
-            unsafe_allow_html=True,
-        )
         training_prediction_tab, training_attribution_tab = st.tabs(["高精度预测模型", "气象模型体系"])
 
         with training_prediction_tab:
@@ -4839,20 +4779,6 @@ def main() -> None:
             st.markdown(meteorology_tuning_html(assets), unsafe_allow_html=True)
 
     with tab_validation:
-        st.markdown(
-            page_guide_html(
-                "研究验证",
-                "空间外推、过程机制与解释稳定性检验",
-                "研究验证在常规时间阻塞测试之外，引入留城市验证、组合外推、特征组消融、透明模型对照、天气型机制分层和 SHAP bootstrap。该部分用于约束模型结论的空间泛化能力、气象过程增量解释力和解释稳定性。",
-                [
-                    ("外推边界", "留城市和组合外推检验跨城市、跨时间泛化能力。"),
-                    ("消融证据", "逐步加入气象过程特征，评估特征组增量解释力。"),
-                    ("机制互证", "天气型、透明对照和条件误差共同约束解释口径。"),
-                ],
-                "teal",
-            ),
-            unsafe_allow_html=True,
-        )
         render_research_validation_section(assets)
 
 if __name__ == "__main__":
