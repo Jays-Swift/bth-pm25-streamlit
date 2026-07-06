@@ -1,0 +1,685 @@
+{
+  "title": "CAMS-EAC4 化学组分机制模型",
+  "dataset": "CAMS EAC4 同源再分析化学组分 + 气象/城市/时间控制",
+  "time_min": "2018-01-01 08:00:00",
+  "time_max": "2024-11-01 05:00:00",
+  "valid_start": "2022-10-14 11:00:00",
+  "test_start": "2023-10-23 20:00:00",
+  "cities": 13,
+  "interpolated_rate": 0.666655537377717,
+  "split_embargo_hours": 24.0,
+  "model_count": 18,
+  "target_count": 9,
+  "failed_runs": 0,
+  "feature_sets": {
+    "weather_only": "气象变量 + 城市/时间控制",
+    "precursor": "weather-only + O3 + NO2 + SO2 + CO"
+  },
+  "leakage_rules": [
+    "不加入 PM2.5 lag / rolling mean",
+    "不加入 PM10、AOD、dust",
+    "不加入同小时化学目标作为特征",
+    "不加入组分插值标识和空气密度换算中间量",
+    "训练覆盖率筛选仅在训练段拟合，最低覆盖率 80%"
+  ],
+  "headline": {
+    "sna_delta_r2": 0.09051893490386065,
+    "sulfate_delta_r2": 0.10340427532383789,
+    "secondary_fraction_delta_r2": 0.14503393425178138,
+    "secondary_fraction_weather_r2": 0.1772004566529207,
+    "secondary_fraction_precursor_r2": 0.3222343909047021,
+    "negative_target": "nitrate_sulfate_ratio"
+  },
+  "targets": [
+    {
+      "target": "sulfate",
+      "target_label": "硫酸盐 sulfate",
+      "weather_only": {
+        "mae": 6.946997754391294,
+        "rmse": 10.969191808793244,
+        "r2": 0.5652557120801798,
+        "blocked_cv_r2": 0.6052743847238629,
+        "feature_count": 35,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "precursor": {
+        "mae": 6.0876584329331385,
+        "rmse": 9.576231373676755,
+        "r2": 0.6686599874040177,
+        "blocked_cv_r2": 0.6914879020342739,
+        "feature_count": 39,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "delta_r2": 0.10340427532383789,
+      "rmse_improvement_pct": 12.69884289925397,
+      "judgement": "前体物信号清晰增强",
+      "mechanism_note": "SO2 氧化、湿度条件和区域背景共同影响硫酸盐变化，前体物模型显示 CO、露点和 O3 等变量提供了气象之外的信息。",
+      "top_shap": [
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.203074819063983
+        },
+        {
+          "feature": "dew_point_2m",
+          "feature_label": "露点温度",
+          "mean_abs_shap": 0.2009934734654411
+        },
+        {
+          "feature": "latitude",
+          "feature_label": "纬度",
+          "mean_abs_shap": 0.1871426054791606
+        },
+        {
+          "feature": "dayofyear_cos",
+          "feature_label": "年内周期 cos",
+          "mean_abs_shap": 0.1404089062827968
+        },
+        {
+          "feature": "ozone",
+          "feature_label": "O3",
+          "mean_abs_shap": 0.1084815254271297
+        },
+        {
+          "feature": "hour",
+          "feature_label": "小时",
+          "mean_abs_shap": 0.1037990372104965
+        },
+        {
+          "feature": "longitude",
+          "feature_label": "经度",
+          "mean_abs_shap": 0.085078850061643
+        },
+        {
+          "feature": "relative_humidity_2m",
+          "feature_label": "相对湿度",
+          "mean_abs_shap": 0.0762238272141546
+        }
+      ]
+    },
+    {
+      "target": "nitrate",
+      "target_label": "硝酸盐 nitrate",
+      "weather_only": {
+        "mae": 3.3545922865009232,
+        "rmse": 5.681735658815667,
+        "r2": 0.592458733715246,
+        "blocked_cv_r2": 0.6282636999137179,
+        "feature_count": 35,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "precursor": {
+        "mae": 3.1197064980603497,
+        "rmse": 5.340094954643306,
+        "r2": 0.6399958554240275,
+        "blocked_cv_r2": 0.6866426360150518,
+        "feature_count": 39,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "delta_r2": 0.04753712170878144,
+      "rmse_improvement_pct": 6.012963726009983,
+      "judgement": "有稳定增益",
+      "mechanism_note": "硝酸盐对温度、季节和氧化/氮氧化物背景较敏感，前体物加入后能补充 weather-only 模型难以表达的化学转化信息。",
+      "top_shap": [
+        {
+          "feature": "temperature_2m",
+          "feature_label": "2m 气温",
+          "mean_abs_shap": 0.3029949301894181
+        },
+        {
+          "feature": "dayofyear_cos",
+          "feature_label": "年内周期 cos",
+          "mean_abs_shap": 0.2956247204151596
+        },
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.1881184810140907
+        },
+        {
+          "feature": "hour",
+          "feature_label": "小时",
+          "mean_abs_shap": 0.1344016832621787
+        },
+        {
+          "feature": "hour_sin",
+          "feature_label": "小时周期 sin",
+          "mean_abs_shap": 0.1091847893551744
+        },
+        {
+          "feature": "dayofyear",
+          "feature_label": "年内日序",
+          "mean_abs_shap": 0.1073873115312121
+        },
+        {
+          "feature": "ozone",
+          "feature_label": "O3",
+          "mean_abs_shap": 0.1008768682986074
+        },
+        {
+          "feature": "dew_point_2m",
+          "feature_label": "露点温度",
+          "mean_abs_shap": 0.0876004840989609
+        }
+      ]
+    },
+    {
+      "target": "ammonium",
+      "target_label": "铵盐 ammonium",
+      "weather_only": {
+        "mae": 1.291619444240179,
+        "rmse": 1.9463508772265037,
+        "r2": 0.5141084527469526,
+        "blocked_cv_r2": 0.5616377707702309,
+        "feature_count": 35,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "precursor": {
+        "mae": 1.163363534213092,
+        "rmse": 1.7871122329980516,
+        "r2": 0.5903615361066125,
+        "blocked_cv_r2": 0.6431192096339883,
+        "feature_count": 39,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "delta_r2": 0.07625308335965986,
+      "rmse_improvement_pct": 8.181394531255474,
+      "judgement": "前体物信号清晰增强",
+      "mechanism_note": "铵盐与硫酸盐、硝酸盐中和过程相关，前体物模型提升说明二次无机组分的协同变化可以被 O3/NO2/SO2/CO 辅助刻画。",
+      "top_shap": [
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.1641100190322817
+        },
+        {
+          "feature": "dayofyear_cos",
+          "feature_label": "年内周期 cos",
+          "mean_abs_shap": 0.1292516860537205
+        },
+        {
+          "feature": "ozone",
+          "feature_label": "O3",
+          "mean_abs_shap": 0.1093113141575897
+        },
+        {
+          "feature": "dew_point_2m",
+          "feature_label": "露点温度",
+          "mean_abs_shap": 0.0919423461338038
+        },
+        {
+          "feature": "relative_humidity_2m",
+          "feature_label": "相对湿度",
+          "mean_abs_shap": 0.0677542615653536
+        },
+        {
+          "feature": "dayofyear",
+          "feature_label": "年内日序",
+          "mean_abs_shap": 0.0675686698625176
+        },
+        {
+          "feature": "nitrogen_dioxide",
+          "feature_label": "NO2",
+          "mean_abs_shap": 0.0568586039469196
+        },
+        {
+          "feature": "hour_sin",
+          "feature_label": "小时周期 sin",
+          "mean_abs_shap": 0.0549389354191404
+        }
+      ]
+    },
+    {
+      "target": "sna",
+      "target_label": "SNA 二次无机组分",
+      "weather_only": {
+        "mae": 10.923411161344958,
+        "rmse": 16.493166840854375,
+        "r2": 0.5447465975541979,
+        "blocked_cv_r2": 0.5867683275928652,
+        "feature_count": 35,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "precursor": {
+        "mae": 9.694807229144203,
+        "rmse": 14.762702068808384,
+        "r2": 0.6352655324580585,
+        "blocked_cv_r2": 0.6744834910493289,
+        "feature_count": 39,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "delta_r2": 0.09051893490386065,
+      "rmse_improvement_pct": 10.49201035036853,
+      "judgement": "前体物信号清晰增强",
+      "mechanism_note": "SNA 汇总目标直接代表二次无机气溶胶主体，前体物增益较明显，是本层最适合写入主结论的目标之一。",
+      "top_shap": [
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.2408477505495392
+        },
+        {
+          "feature": "dayofyear_cos",
+          "feature_label": "年内周期 cos",
+          "mean_abs_shap": 0.2083600106975957
+        },
+        {
+          "feature": "latitude",
+          "feature_label": "纬度",
+          "mean_abs_shap": 0.1457319877524349
+        },
+        {
+          "feature": "dew_point_2m",
+          "feature_label": "露点温度",
+          "mean_abs_shap": 0.1351741485636296
+        },
+        {
+          "feature": "ozone",
+          "feature_label": "O3",
+          "mean_abs_shap": 0.1219443437507889
+        },
+        {
+          "feature": "relative_humidity_2m",
+          "feature_label": "相对湿度",
+          "mean_abs_shap": 0.0997185137818777
+        },
+        {
+          "feature": "longitude",
+          "feature_label": "经度",
+          "mean_abs_shap": 0.0772735470661792
+        },
+        {
+          "feature": "nitrogen_dioxide",
+          "feature_label": "NO2",
+          "mean_abs_shap": 0.0721562464708056
+        }
+      ]
+    },
+    {
+      "target": "sna_fraction",
+      "target_label": "SNA 占比",
+      "weather_only": {
+        "mae": 0.336714763940846,
+        "rmse": 0.5505846169772961,
+        "r2": 0.1131804844386069,
+        "blocked_cv_r2": 0.0766473350743997,
+        "feature_count": 35,
+        "rows": 778725,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116817
+      },
+      "precursor": {
+        "mae": 0.3014533831102403,
+        "rmse": 0.527834074297017,
+        "r2": 0.1849543376625443,
+        "blocked_cv_r2": 0.0977314337353193,
+        "feature_count": 39,
+        "rows": 778725,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116817
+      },
+      "delta_r2": 0.0717738532239374,
+      "rmse_improvement_pct": 4.132070163016785,
+      "judgement": "低解释度但方向有增益",
+      "mechanism_note": "占比型目标受分母 PM2.5 变化影响更强，前体物有增益但绝对解释度较低，适合谨慎作为辅助证据。",
+      "top_shap": [
+        {
+          "feature": "boundary_layer_height",
+          "feature_label": "边界层高度 PBLH",
+          "mean_abs_shap": 0.0592067791381921
+        },
+        {
+          "feature": "is_covid_period",
+          "feature_label": "疫情期标记",
+          "mean_abs_shap": 0.0424019346540052
+        },
+        {
+          "feature": "latitude",
+          "feature_label": "纬度",
+          "mean_abs_shap": 0.0348652787368912
+        },
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.027889759779628
+        },
+        {
+          "feature": "temperature_2m",
+          "feature_label": "2m 气温",
+          "mean_abs_shap": 0.026053437896214
+        },
+        {
+          "feature": "longitude",
+          "feature_label": "经度",
+          "mean_abs_shap": 0.0257845948526931
+        },
+        {
+          "feature": "dayofyear_cos",
+          "feature_label": "年内周期 cos",
+          "mean_abs_shap": 0.0250220115766465
+        },
+        {
+          "feature": "nitrogen_dioxide",
+          "feature_label": "NO2",
+          "mean_abs_shap": 0.0202638871246788
+        }
+      ]
+    },
+    {
+      "target": "nitrate_sulfate_ratio",
+      "target_label": "硝酸盐/硫酸盐比值",
+      "weather_only": {
+        "mae": 0.8419582108934547,
+        "rmse": 9.058660923754186,
+        "r2": -0.0033636674666939,
+        "blocked_cv_r2": -3.154092209401087,
+        "feature_count": 35,
+        "rows": 777315,
+        "train_rows": 543835,
+        "valid_rows": 116254,
+        "test_rows": 116602
+      },
+      "precursor": {
+        "mae": 0.8876740149892127,
+        "rmse": 9.606152517957092,
+        "r2": -0.1283122899026423,
+        "blocked_cv_r2": -111.62417779606923,
+        "feature_count": 39,
+        "rows": 777315,
+        "train_rows": 543835,
+        "valid_rows": 116254,
+        "test_rows": 116602
+      },
+      "delta_r2": -0.12494862243594838,
+      "rmse_improvement_pct": -6.043846864465804,
+      "judgement": "不宜作为正向机制证据",
+      "mechanism_note": "比值目标存在长尾、分母接近零和再分析偏差风险，测试 R2 为负，应作为失败案例或敏感性分析。",
+      "top_shap": [
+        {
+          "feature": "dew_point_2m",
+          "feature_label": "露点温度",
+          "mean_abs_shap": 0.1170908786326838
+        },
+        {
+          "feature": "dayofyear_sin",
+          "feature_label": "年内周期 sin",
+          "mean_abs_shap": 0.1013302052567484
+        },
+        {
+          "feature": "temperature_2m",
+          "feature_label": "2m 气温",
+          "mean_abs_shap": 0.03336744693606
+        },
+        {
+          "feature": "latitude",
+          "feature_label": "纬度",
+          "mean_abs_shap": 0.0292819611064288
+        },
+        {
+          "feature": "dayofyear",
+          "feature_label": "年内日序",
+          "mean_abs_shap": 0.026238596398115
+        },
+        {
+          "feature": "hour",
+          "feature_label": "小时",
+          "mean_abs_shap": 0.0130011290404219
+        },
+        {
+          "feature": "month_sin",
+          "feature_label": "month_sin",
+          "mean_abs_shap": 0.0043395068341653
+        },
+        {
+          "feature": "hour_cos",
+          "feature_label": "小时周期 cos",
+          "mean_abs_shap": 0.0038994967542381
+        }
+      ]
+    },
+    {
+      "target": "black_carbon",
+      "target_label": "黑碳 black carbon",
+      "weather_only": {
+        "mae": 1.8029417969140984,
+        "rmse": 2.909652338344758,
+        "r2": 0.7985354119784254,
+        "blocked_cv_r2": 0.8503573536495961,
+        "feature_count": 35,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "precursor": {
+        "mae": 1.6944721524913997,
+        "rmse": 2.773468484212787,
+        "r2": 0.8169528420661303,
+        "blocked_cv_r2": 0.8697477263441006,
+        "feature_count": 39,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "delta_r2": 0.01841743008770491,
+      "rmse_improvement_pct": 4.680416706053724,
+      "judgement": "小幅增益，偏共排放解释",
+      "mechanism_note": "黑碳主要接近一次排放和共排放信号，加入 NO2/CO 后小幅改善，更适合解释为共变化而不是二次生成机制。",
+      "top_shap": [
+        {
+          "feature": "boundary_layer_height",
+          "feature_label": "边界层高度 PBLH",
+          "mean_abs_shap": 0.262549170661939
+        },
+        {
+          "feature": "latitude",
+          "feature_label": "纬度",
+          "mean_abs_shap": 0.2588977142753152
+        },
+        {
+          "feature": "nitrogen_dioxide",
+          "feature_label": "NO2",
+          "mean_abs_shap": 0.1519635308230871
+        },
+        {
+          "feature": "dayofyear_cos",
+          "feature_label": "年内周期 cos",
+          "mean_abs_shap": 0.1363195279750383
+        },
+        {
+          "feature": "longitude",
+          "feature_label": "经度",
+          "mean_abs_shap": 0.0862261241532924
+        },
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.0689725746751903
+        },
+        {
+          "feature": "hour_cos",
+          "feature_label": "小时周期 cos",
+          "mean_abs_shap": 0.0568125212445598
+        },
+        {
+          "feature": "relative_humidity_2m",
+          "feature_label": "相对湿度",
+          "mean_abs_shap": 0.0391528070237095
+        }
+      ]
+    },
+    {
+      "target": "organic_matter",
+      "target_label": "有机质 organic matter",
+      "weather_only": {
+        "mae": 37.50976352762819,
+        "rmse": 59.35205339075869,
+        "r2": 0.8270535834088462,
+        "blocked_cv_r2": 0.8618761798848251,
+        "feature_count": 35,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "precursor": {
+        "mae": 35.3043474516696,
+        "rmse": 56.58495228422658,
+        "r2": 0.8428038234879875,
+        "blocked_cv_r2": 0.878618207358141,
+        "feature_count": 39,
+        "rows": 778726,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116818
+      },
+      "delta_r2": 0.015750240079141387,
+      "rmse_improvement_pct": 4.662182601020096,
+      "judgement": "小幅增益，偏共排放解释",
+      "mechanism_note": "有机质模型整体 R2 较高，前体物只带来小幅增益，说明空间季节背景和共排放结构已经提供较强信息。",
+      "top_shap": [
+        {
+          "feature": "latitude",
+          "feature_label": "纬度",
+          "mean_abs_shap": 0.3965646624524642
+        },
+        {
+          "feature": "boundary_layer_height",
+          "feature_label": "边界层高度 PBLH",
+          "mean_abs_shap": 0.3935433526748725
+        },
+        {
+          "feature": "nitrogen_dioxide",
+          "feature_label": "NO2",
+          "mean_abs_shap": 0.1450452791082567
+        },
+        {
+          "feature": "dayofyear_cos",
+          "feature_label": "年内周期 cos",
+          "mean_abs_shap": 0.1281908945696799
+        },
+        {
+          "feature": "longitude",
+          "feature_label": "经度",
+          "mean_abs_shap": 0.1260697688430371
+        },
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.0964527545268686
+        },
+        {
+          "feature": "hour_sin",
+          "feature_label": "小时周期 sin",
+          "mean_abs_shap": 0.079007463795231
+        },
+        {
+          "feature": "dayofyear",
+          "feature_label": "年内日序",
+          "mean_abs_shap": 0.0559566540002116
+        }
+      ]
+    },
+    {
+      "target": "secondary_fraction",
+      "target_label": "二次组分占比",
+      "weather_only": {
+        "mae": 1.995395760330808,
+        "rmse": 3.2001622136310894,
+        "r2": 0.1772004566529207,
+        "blocked_cv_r2": 0.0342119798667632,
+        "feature_count": 35,
+        "rows": 778725,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116817
+      },
+      "precursor": {
+        "mae": 1.6245892187063635,
+        "rmse": 2.904455561127703,
+        "r2": 0.3222343909047021,
+        "blocked_cv_r2": 0.3072632717529535,
+        "feature_count": 39,
+        "rows": 778725,
+        "train_rows": 544791,
+        "valid_rows": 116493,
+        "test_rows": 116817
+      },
+      "delta_r2": 0.14503393425178138,
+      "rmse_improvement_pct": 9.240364480394904,
+      "judgement": "前体物信号清晰增强",
+      "mechanism_note": "二次组分占比对前体物最敏感，R2 增量较大，但绝对 R2 仍有限，适合作为机制辅助层而非高精度预测层。",
+      "top_shap": [
+        {
+          "feature": "boundary_layer_height",
+          "feature_label": "边界层高度 PBLH",
+          "mean_abs_shap": 0.8101576609513694
+        },
+        {
+          "feature": "carbon_monoxide",
+          "feature_label": "CO",
+          "mean_abs_shap": 0.6752285462076022
+        },
+        {
+          "feature": "latitude",
+          "feature_label": "纬度",
+          "mean_abs_shap": 0.5126017864433733
+        },
+        {
+          "feature": "wind_gusts_10m",
+          "feature_label": "10m 阵风",
+          "mean_abs_shap": 0.4328117793801891
+        },
+        {
+          "feature": "sulphur_dioxide",
+          "feature_label": "SO2",
+          "mean_abs_shap": 0.3777980001165744
+        },
+        {
+          "feature": "hour",
+          "feature_label": "小时",
+          "mean_abs_shap": 0.3707261719573929
+        },
+        {
+          "feature": "longitude",
+          "feature_label": "经度",
+          "mean_abs_shap": 0.3345550484261543
+        },
+        {
+          "feature": "ozone",
+          "feature_label": "O3",
+          "mean_abs_shap": 0.2012211697169021
+        }
+      ]
+    }
+  ],
+  "report_path": "reports/chemical_composition/chemical_composition_eac4_main_complete_results_report.md",
+  "metrics_path": "reports/chemical_composition/chemical_composition_eac4_main_complete_metrics_summary_all_targets.csv"
+}

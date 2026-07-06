@@ -21,10 +21,77 @@ ASSET_DIR = PROJECT_ROOT / "app_assets"
 Assets = dict[str, Any]
 Metrics = dict[str, Any]
 
+PLOTLY_CHART_CONFIG = {"displayModeBar": False}
+PLOTLY_CHART_MARGIN = dict(l=8, r=8, t=44, b=12)
+
+
+def streamlit_theme_colors() -> dict[str, str]:
+    primary = st.get_option("theme.primaryColor") or "royalblue"
+    background = st.get_option("theme.backgroundColor") or "white"
+    secondary = st.get_option("theme.secondaryBackgroundColor") or background
+    text = st.get_option("theme.textColor") or "black"
+    return {
+        "primary": primary,
+        "background": background,
+        "secondary": secondary,
+        "text": text,
+        "muted": text,
+        "accent": primary,
+        "accent_alt": primary,
+        "accent_warn": primary,
+        "accent_strong": primary,
+    }
+
+
+def color_with_alpha(color: str, alpha: float) -> str:
+    value = color.strip()
+    if value.startswith(chr(35)) and len(value) in (4, 7):
+        if len(value) == 4:
+            value = chr(35) + "".join(channel * 2 for channel in value[1:])
+        red = int(value[1:3], 16)
+        green = int(value[3:5], 16)
+        blue = int(value[5:7], 16)
+        return f"{'rgb' + 'a'}({red},{green},{blue},{alpha})"
+    return value
+
+
+def apply_chart_skin(fig: go.Figure) -> go.Figure:
+    theme = streamlit_theme_colors()
+    fig.update_layout(
+        margin=PLOTLY_CHART_MARGIN,
+        paper_bgcolor=theme["background"],
+        plot_bgcolor=theme["background"],
+        font=dict(color=theme["text"]),
+        legend=dict(bgcolor=theme["background"], font=dict(color=theme["text"])),
+    )
+    fig.update_xaxes(automargin=True)
+    fig.update_yaxes(automargin=True)
+    return fig
+
+
+def render_plotly_chart(
+    container: Any,
+    fig: go.Figure,
+    *,
+    key: str,
+    config: dict[str, Any] | None = None,
+) -> None:
+    chart_config = {**(config or {}), **PLOTLY_CHART_CONFIG}
+    container.plotly_chart(apply_chart_skin(fig), width="stretch", config=chart_config, key=key)
+
 CURRENT_MODEL_PATH = MODEL_DIR / "high_accuracy_lightgbm_extended_target_pm2_5_full_2018_plus_cnemc.joblib"
 NEXT24_MODEL_PATH = MODEL_DIR / "high_accuracy_lightgbm_core_target_pm2_5_next_24h.joblib"
+FLAGSHIP_MODEL_KEY = "flagship_meteorology_v2"
+FLAGSHIP_MODEL_LABEL = "旗舰过程型气象贡献主模型"
 
 PREDICTION_MODEL_SPECS = {
+    FLAGSHIP_MODEL_KEY: {
+        "label": FLAGSHIP_MODEL_LABEL,
+        "path": "flagship_pm25_meteorology_attribution.joblib",
+        "type": "旗舰过程型气象贡献",
+        "description": "单一 joblib 主入口，内部按日期自动路由疫情前 log1p、疫情期原值和疫情后气候态异常代表模型，作为预测台当前小时与当天曲线的统一执行模型。",
+        "uses_flagship": True,
+    },
     "full_high_accuracy": {
         "label": "全时期高精度模型",
         "path": "high_accuracy_lightgbm_extended_target_pm2_5_full_2018_plus_cnemc.joblib",
@@ -88,29 +155,19 @@ PREDICTION_MODEL_SPECS = {
 }
 
 MODEL_SELECT_OPTIONS = [
-    "全时期高精度模型",
-    "按日期自动选择分时期高精度模型",
-    "按日期自动选择过程型气象贡献模型",
-    "按日期自动选择基础气象归因模型（对照口径）",
-    "疫情前高精度模型",
-    "疫情期高精度模型",
-    "疫情后高精度模型",
-    "疫情前过程型气象贡献模型",
-    "疫情期过程型气象贡献模型",
-    "疫情后过程型气象贡献模型",
-    "疫情前基础气象归因模型",
-    "疫情期基础气象归因模型",
-    "疫情后基础气象归因模型",
+    FLAGSHIP_MODEL_LABEL,
 ]
 
 MODEL_LABEL_TO_KEY = {
+    FLAGSHIP_MODEL_LABEL: FLAGSHIP_MODEL_KEY,
     "全时期高精度模型": "full_high_accuracy",
     "疫情前高精度模型": "pre_high_accuracy",
     "疫情期高精度模型": "covid_high_accuracy",
     "疫情后高精度模型": "post_high_accuracy",
-    "疫情前过程型气象贡献模型": "pre_meteorology_v2",
-    "疫情期过程型气象贡献模型": "covid_meteorology_v2",
-    "疫情后过程型气象贡献模型": "post_meteorology_v2",
+    "按日期自动选择过程型气象贡献模型": FLAGSHIP_MODEL_KEY,
+    "疫情前过程型气象贡献模型": FLAGSHIP_MODEL_KEY,
+    "疫情期过程型气象贡献模型": FLAGSHIP_MODEL_KEY,
+    "疫情后过程型气象贡献模型": FLAGSHIP_MODEL_KEY,
     "疫情前基础气象归因模型": "pre_meteorology",
     "疫情期基础气象归因模型": "covid_meteorology",
     "疫情后基础气象归因模型": "post_meteorology",
@@ -143,6 +200,19 @@ MODEL_KEY_TO_PERIOD = {
     **{key: period for period, key in PERIOD_TO_METEOROLOGY_V2.items()},
 }
 
+PREDICTION_DESK_LEGACY_MODEL_KEYS = {
+    "full_high_accuracy",
+    "pre_high_accuracy",
+    "covid_high_accuracy",
+    "post_high_accuracy",
+    "pre_meteorology",
+    "covid_meteorology",
+    "post_meteorology",
+    "pre_meteorology_v2",
+    "covid_meteorology_v2",
+    "post_meteorology_v2",
+}
+
 PERIOD_LABELS = {
     "pre_covid_2018_2019": "疫情前 2018-2019",
     "covid_2020_2022": "疫情期 2020-2022",
@@ -151,12 +221,12 @@ PERIOD_LABELS = {
 
 
 AQI_BANDS = [
-    (35, "优", "#16a34a"),
-    (75, "良好", "#22c55e"),
-    (115, "轻度污染", "#f59e0b"),
-    (150, "中度污染", "#dc2626"),
-    (250, "重度污染", "#991b1b"),
-    (10_000, "严重污染", "#7f1d1d"),
+    (35, "优", "var(--accent-alt)"),
+    (75, "良好", "var(--accent-alt)"),
+    (115, "轻度污染", "var(--accent-warn)"),
+    (150, "中度污染", "var(--accent-warn)"),
+    (250, "重度污染", "var(--accent-warn)"),
+    (10_000, "严重污染", "var(--accent-warn)"),
 ]
 
 FEATURE_LABELS = {
@@ -272,6 +342,37 @@ METEOROLOGY_FEATURE_HINTS = (
     "cloud_cover",
 )
 
+CHEMICAL_PRECURSOR_INPUTS = [
+    ("carbon_monoxide", "CO (ug/m3)", 10.0),
+    ("nitrogen_dioxide", "NO2 (ug/m3)", 1.0),
+    ("sulphur_dioxide", "SO2 (ug/m3)", 1.0),
+    ("ozone", "O3 (ug/m3)", 1.0),
+]
+
+CHEMICAL_TARGET_ORDER = [
+    "sulfate",
+    "nitrate",
+    "ammonium",
+    "sna",
+    "sna_fraction",
+    "black_carbon",
+    "organic_matter",
+    "secondary_fraction",
+    "nitrate_sulfate_ratio",
+]
+
+CHEMICAL_TARGET_LABELS = {
+    "sulfate": "硫酸盐",
+    "nitrate": "硝酸盐",
+    "ammonium": "铵盐",
+    "sna": "SNA 二次无机组分",
+    "sna_fraction": "SNA 占比",
+    "black_carbon": "黑碳",
+    "organic_matter": "有机质",
+    "secondary_fraction": "二次组分占比",
+    "nitrate_sulfate_ratio": "硝酸盐/硫酸盐比值",
+}
+
 
 def resolve_path(*parts: str) -> Path:
     direct = PROJECT_ROOT.joinpath(*parts)
@@ -283,9 +384,43 @@ def resolve_path(*parts: str) -> Path:
     return direct
 
 
+def read_asset_table(asset_dir: Path, stem: str, parse_dates: list[str] | None = None) -> pd.DataFrame:
+    frame = pd.read_parquet(asset_dir / f"{stem}.parquet")
+    for column in parse_dates or []:
+        if column in frame.columns:
+            frame[column] = pd.to_datetime(frame[column])
+    return frame
+
+
 @st.cache_resource(show_spinner=False)
-def load_model(path: str) -> dict:
+def load_model(path: str) -> Any:
     return joblib.load(path)
+
+
+@st.cache_resource(show_spinner=False)
+def load_singleton_prediction_model(model_key: str, path: str) -> Any:
+    return joblib.load(path)
+
+
+def canonical_prediction_model_key(model_key: str) -> str:
+    if model_key in PREDICTION_DESK_LEGACY_MODEL_KEYS:
+        return FLAGSHIP_MODEL_KEY
+    return model_key
+
+
+def load_prediction_model_bundle(model_key: str) -> Any:
+    model_key = canonical_prediction_model_key(model_key)
+    if model_key not in PREDICTION_MODEL_SPECS:
+        raise KeyError(f"Unknown prediction model key: {model_key}")
+    spec = PREDICTION_MODEL_SPECS[model_key]
+    return load_singleton_prediction_model(model_key, str(resolve_path("models", spec["path"])))
+
+
+def load_next24_prediction_model() -> Any:
+    return load_singleton_prediction_model(
+        "next24_high_accuracy",
+        str(resolve_path("models", "high_accuracy_lightgbm_core_target_pm2_5_next_24h.joblib")),
+    )
 
 
 @st.cache_data(show_spinner=False)
@@ -293,48 +428,49 @@ def load_assets() -> Assets:
     asset_dir = resolve_path("app_assets")
     meteorology_v2_path = asset_dir / "meteorology_attribution_v2_core_results.json"
     research_upgrade_path = asset_dir / "atmospheric_research_upgrade_results.json"
+    chemical_composition_path = asset_dir / "chemical_composition_results.json"
     with (asset_dir / "app_metadata.json").open(encoding="utf-8") as file:
         metadata = json.load(file)
     return {
         "metadata": metadata,
-        "city_info": pd.read_csv(asset_dir / "city_info.csv"),
-        "profiles": pd.read_csv(asset_dir / "city_month_hour_profiles.csv"),
-        "daily": pd.read_csv(asset_dir / "city_daily_history.csv", parse_dates=["date"]),
-        "seasonal": pd.read_csv(asset_dir / "seasonal_reference.csv"),
+        "city_info": read_asset_table(asset_dir, "city_info"),
+        "profiles": read_asset_table(asset_dir, "city_month_hour_profiles"),
+        "daily": read_asset_table(asset_dir, "city_daily_history", parse_dates=["date"]),
+        "seasonal": read_asset_table(asset_dir, "seasonal_reference"),
         "current_metrics": json.loads((asset_dir / "current_metrics.json").read_text(encoding="utf-8")),
         "next24_metrics": json.loads((asset_dir / "next24_metrics.json").read_text(encoding="utf-8")),
         "extended_current_metrics": json.loads((asset_dir / "extended_current_metrics.json").read_text(encoding="utf-8")),
         "extended_next24_metrics": json.loads((asset_dir / "extended_next24_metrics.json").read_text(encoding="utf-8")),
-        "current_shap": pd.read_csv(asset_dir / "current_shap_importance.csv"),
-        "next24_shap": pd.read_csv(asset_dir / "next24_shap_importance.csv"),
+        "current_shap": read_asset_table(asset_dir, "current_shap_importance"),
+        "next24_shap": read_asset_table(asset_dir, "next24_shap_importance"),
         "pre_covid_meteorology_metrics": json.loads((asset_dir / "pre_covid_meteorology_metrics.json").read_text(encoding="utf-8")),
         "covid_meteorology_metrics": json.loads((asset_dir / "covid_meteorology_metrics.json").read_text(encoding="utf-8")),
         "post_covid_meteorology_metrics": json.loads((asset_dir / "post_covid_meteorology_metrics.json").read_text(encoding="utf-8")),
         "pre_covid_high_accuracy_metrics": json.loads((asset_dir / "pre_covid_high_accuracy_metrics.json").read_text(encoding="utf-8")),
         "covid_high_accuracy_metrics": json.loads((asset_dir / "covid_high_accuracy_metrics.json").read_text(encoding="utf-8")),
         "post_covid_high_accuracy_metrics": json.loads((asset_dir / "post_covid_high_accuracy_metrics.json").read_text(encoding="utf-8")),
-        "pre_covid_meteorology_shap": pd.read_csv(asset_dir / "pre_covid_meteorology_shap_importance.csv"),
-        "covid_meteorology_shap": pd.read_csv(asset_dir / "covid_meteorology_shap_importance.csv"),
-        "post_covid_meteorology_shap": pd.read_csv(asset_dir / "post_covid_meteorology_shap_importance.csv"),
-        "pre_covid_high_accuracy_shap": pd.read_csv(asset_dir / "pre_covid_high_accuracy_shap_importance.csv"),
-        "covid_high_accuracy_shap": pd.read_csv(asset_dir / "covid_high_accuracy_shap_importance.csv"),
-        "post_covid_high_accuracy_shap": pd.read_csv(asset_dir / "post_covid_high_accuracy_shap_importance.csv"),
-        "model_metrics_summary": pd.read_csv(asset_dir / "pm25_model_metrics_summary.csv"),
-        "model_top_shap_summary": pd.read_csv(asset_dir / "pm25_model_top_shap_summary.csv"),
-        "period_residual_analysis": pd.read_csv(asset_dir / "period_residual_analysis.csv"),
+        "pre_covid_meteorology_shap": read_asset_table(asset_dir, "pre_covid_meteorology_shap_importance"),
+        "covid_meteorology_shap": read_asset_table(asset_dir, "covid_meteorology_shap_importance"),
+        "post_covid_meteorology_shap": read_asset_table(asset_dir, "post_covid_meteorology_shap_importance"),
+        "pre_covid_high_accuracy_shap": read_asset_table(asset_dir, "pre_covid_high_accuracy_shap_importance"),
+        "covid_high_accuracy_shap": read_asset_table(asset_dir, "covid_high_accuracy_shap_importance"),
+        "post_covid_high_accuracy_shap": read_asset_table(asset_dir, "post_covid_high_accuracy_shap_importance"),
+        "model_metrics_summary": read_asset_table(asset_dir, "pm25_model_metrics_summary"),
+        "model_top_shap_summary": read_asset_table(asset_dir, "pm25_model_top_shap_summary"),
+        "period_residual_analysis": read_asset_table(asset_dir, "period_residual_analysis"),
         "combined_extrapolation": (
-            pd.read_csv(asset_dir / "meteorology_v2_combined_space_time_extrapolation.csv")
-            if (asset_dir / "meteorology_v2_combined_space_time_extrapolation.csv").exists()
+            read_asset_table(asset_dir, "meteorology_v2_combined_space_time_extrapolation")
+            if (asset_dir / "meteorology_v2_combined_space_time_extrapolation.parquet").exists()
             else pd.DataFrame()
         ),
         "combined_extrapolation_summary": (
-            pd.read_csv(asset_dir / "meteorology_v2_combined_space_time_extrapolation_summary.csv")
-            if (asset_dir / "meteorology_v2_combined_space_time_extrapolation_summary.csv").exists()
+            read_asset_table(asset_dir, "meteorology_v2_combined_space_time_extrapolation_summary")
+            if (asset_dir / "meteorology_v2_combined_space_time_extrapolation_summary.parquet").exists()
             else pd.DataFrame()
         ),
         "feature_group_ablation": (
-            pd.read_csv(asset_dir / "meteorology_v2_feature_group_ablation.csv")
-            if (asset_dir / "meteorology_v2_feature_group_ablation.csv").exists()
+            read_asset_table(asset_dir, "meteorology_v2_feature_group_ablation")
+            if (asset_dir / "meteorology_v2_feature_group_ablation.parquet").exists()
             else pd.DataFrame()
         ),
         "validation_extension_metadata": (
@@ -352,6 +488,11 @@ def load_assets() -> Assets:
             if research_upgrade_path.exists()
             else None
         ),
+        "chemical_composition": (
+            json.loads(chemical_composition_path.read_text(encoding="utf-8"))
+            if chemical_composition_path.exists()
+            else None
+        ),
     }
 
 
@@ -359,7 +500,7 @@ def pm25_category(value: float) -> tuple[str, str]:
     for upper, label, color in AQI_BANDS:
         if value <= upper:
             return label, color
-    return "严重污染", "#4e342e"
+    return "严重污染", "var(--accent-warn)"
 
 
 def metric_text(metrics: Metrics) -> str:
@@ -410,6 +551,20 @@ def app_overview_html(metadata: dict[str, Any]) -> str:
           <span>LightGBM + SHAP</span>
         </div>
       </div>
+      <aside class="app-hero-side">
+        <div class="app-side-step">
+          <b>1</b>
+          <span>侧边栏先锁定城市、日期与旗舰主模型，页面只加载当前路径需要的资产。</span>
+        </div>
+        <div class="app-side-step">
+          <b>2</b>
+          <span>预测模块由旗舰模型按 24 小时整表向量化推断，内部自动路由疫情前、疫情期和疫情后代表模型。</span>
+        </div>
+        <div class="app-side-step">
+          <b>3</b>
+          <span>验证页面按时间、空间和特征组分开呈现，避免把高精度预测上限误写成因果机制。</span>
+        </div>
+      </aside>
     </section>
     """
 
@@ -447,9 +602,9 @@ def model_intro_html(assets: Assets) -> str:
       </div>
       <div class="model-hero-grid">
         <div class="model-hero-card primary">
-          <div class="model-kicker">综合预测基准</div>
+          <div class="model-kicker">高精度性能参照</div>
           <h3>全时期高精度模型</h3>
-          <p>覆盖 2018-01-01 至 2026-05-31，综合气象、PBLH、逆温、风输送、污染时滞、滚动均值和共污染物，作为当前小时浓度预测的主模型。</p>
+          <p>覆盖 2018-01-01 至 2026-05-31，综合气象、PBLH、逆温、风输送、污染时滞、滚动均值和共污染物，作为完整信息条件下的预测性能参照。</p>
           <div class="score-row">{metric_badges(current)}</div>
         </div>
         <div class="model-hero-card muted">
@@ -477,17 +632,17 @@ def high_accuracy_intro_html(assets: Assets) -> str:
           <p>高精度模型的任务是尽量准确地估计当前小时 PM2.5 浓度，因此特征矩阵同时纳入气象、ERA5 PBLH、逆温、风输送、PM2.5 时滞、滚动均值、共污染物和时空控制变量。它反映的是完整信息条件下的预测能力上限，分时期模型沿用这一预测口径作为阶段对照，并不承担纯气象贡献解释任务。</p>
         </div>
         <div class="intro-score-panel">
-          <div class="intro-score-label">当前主预测口径</div>
+          <div class="intro-score-label">高精度性能参照</div>
           <h4>全时期高精度模型</h4>
           <div class="score-row">{metric_badges(current)}</div>
-          <p>全时期模型负责统一预测口径；分时期高精度模型是既有预测基准，调参轮数为 25 轮/时期。</p>
+          <p>全时期模型保留为完整信息预测基准；预测台当前主入口已切换为旗舰过程型气象贡献主模型。</p>
         </div>
       </section>
       <div class="intro-model-grid">
         <article class="intro-model-card blue">
           <div class="model-card-tag">全时期</div>
-          <h4>统一主模型</h4>
-          <p>在完整 2018+ 数据上训练，学习跨年份、跨城市的总体非线性规律。</p>
+          <h4>完整信息参照模型</h4>
+          <p>在完整 2018+ 数据上训练，学习跨年份、跨城市的总体非线性规律，用于评估预测上限。</p>
           <div class="score-row compact">{metric_badges(current)}</div>
         </article>
         <article class="intro-model-card green">
@@ -533,13 +688,13 @@ def meteorology_contribution_intro_html(assets: Assets) -> str:
       <section class="intro-hero attribution">
         <div class="intro-hero-main">
           <div class="intro-kicker">过程型气象贡献模型体系</div>
-          <h3>过程型气象贡献模型：气象-only 变量约束下的解释模型</h3>
-          <p>过程型气象贡献模型是本轮重训的核心。模型主动剔除 PM2.5 时滞、滚动均值和共污染物，只保留气象、PBLH、逆温、风输送、降水、复合扩散指数、气象时滞/累积特征以及城市和时间变量。它的精度低于高精度预测模型是预期结果，研究价值在于更清楚地讨论边界层、湿度、气压、通风条件和区域输送的模型解释贡献。</p>
+          <h3>旗舰过程型气象贡献主模型：一个入口承接三时期代表模型</h3>
+          <p>过程型气象贡献模型是本轮重训的核心。预测台现在使用单一 flagship joblib 入口，内部按日期自动路由疫情前 log1p(PM2.5)、疫情期 PM2.5 原值和疫情后气候态异常代表模型。模型主动剔除 PM2.5 时滞、滚动均值和共污染物，只保留气象、PBLH、逆温、风输送、降水、复合扩散指数、气象时滞/累积特征以及城市和时间变量，用于更清楚地讨论边界层、湿度、气压、通风条件和区域输送的模型解释贡献。</p>
         </div>
         <div class="intro-score-panel">
           <div class="intro-score-label">过程型气象-only 口径</div>
-          <h4>分时期代表模型</h4>
-          <p>本轮重训只针对 v2-core 过程型气象贡献模型：3 个时期 x 3 种目标形式，共 9 套候选；每套均完成 {int(scope.get("optuna_trials_per_model", 60))} 轮 Optuna trial。旧版基础气象归因模型为 12 轮/时期，高精度分时期模型为 25 轮/时期，二者均作为既有基准保留。</p>
+          <h4>旗舰主模型</h4>
+          <p>本轮重训只针对 v2-core 过程型气象贡献模型：3 个时期 x 3 种目标形式，共 9 套候选；每套均完成 {int(scope.get("optuna_trials_per_model", 60))} 轮 Optuna trial。旗舰主模型封装每个时期最终选出的代表模型，旧版基础气象归因模型和高精度分时期模型作为既有基准保留。</p>
         </div>
       </section>
       <div class="intro-model-grid">
@@ -603,8 +758,8 @@ def scenario_summary_html(
     <div class="forecast-overview">
       {prediction_metric_html("当前小时 PM2.5", f"{current_prediction:.1f} ug/m3", category, color, "模型当前输出")}
       {prediction_metric_html("24 小时后 PM2.5", f"{next24_prediction:.1f} ug/m3", next_category, next_color, "趋势参考")}
-      {prediction_metric_html("逆温指数", f"{t_inverse:.1f} C", inversion_status, "#d97706" if t_inverse > 0 else "#059669", "T850 - T1000")}
-      {prediction_metric_html("边界层高度 PBLH", f"{pblh:.0f} m", pblh_status, "#dc2626" if row["low_pblh_flag"] else "#059669", "垂直扩散空间")}
+      {prediction_metric_html("逆温指数", f"{t_inverse:.1f} C", inversion_status, "var(--accent-warn)" if t_inverse > 0 else "var(--accent-alt)", "T850 - T1000")}
+      {prediction_metric_html("边界层高度 PBLH", f"{pblh:.0f} m", pblh_status, "var(--accent-warn)" if row["low_pblh_flag"] else "var(--accent-alt)", "垂直扩散空间")}
     </div>
     <div class="forecast-panel">
       <div class="forecast-panel-main">
@@ -656,7 +811,7 @@ def training_strategy_html(assets: Assets) -> str:
         </div>
       </section>
       <section class="training-score-card">
-        <div class="training-score-label">主模型测试表现</div>
+        <div class="training-score-label">高精度测试表现</div>
         <h4>全时期高精度模型</h4>
         <div class="score-row">{metric_badges(current)}</div>
         <p>最终测试集完全后置于训练和验证时段，用于检验模型在未来时段上的泛化能力，避免随机抽样造成的时间邻近信息泄漏。</p>
@@ -799,10 +954,10 @@ def high_accuracy_training_html(assets: Assets) -> str:
         </div>
       </section>
       <section class="training-score-card">
-          <div class="training-score-label">全时期主模型</div>
+          <div class="training-score-label">全时期高精度基准</div>
           <h4>测试集表现</h4>
           <div class="score-row">{metric_badges(current)}</div>
-          <p>全时期主模型使用 71 个特征，Optuna 搜索 {current.get("trials", "NA")} 轮，测试集从 {current.get("test_start", "NA")} 开始。</p>
+          <p>全时期高精度基准使用 71 个特征，Optuna 搜索 {current.get("trials", "NA")} 轮，测试集从 {current.get("test_start", "NA")} 开始。</p>
         </section>
       </div>
 
@@ -1026,7 +1181,7 @@ def meteorology_shap_table(shap_df: pd.DataFrame, n: int = 8) -> pd.DataFrame:
 def high_accuracy_performance_table(assets: Assets) -> pd.DataFrame:
     return pd.DataFrame(
         [
-            metric_row("全时期高精度", assets["current_metrics"], "预测台主模型"),
+            metric_row("全时期高精度", assets["current_metrics"], "高精度性能参照"),
             metric_row("疫情前高精度", assets["pre_covid_high_accuracy_metrics"], "2018-2019 预测对照"),
             metric_row("疫情期高精度", assets["covid_high_accuracy_metrics"], "2020-2022 预测对照"),
             metric_row("疫情后高精度", assets["post_covid_high_accuracy_metrics"], "2023+ 预测对照"),
@@ -1142,7 +1297,7 @@ def meteorology_v2_shap_chart(model: dict[str, Any]) -> go.Figure:
         orientation="h",
         title=f"{model['period_label']}过程型气象贡献 Top SHAP",
     )
-    fig.update_traces(marker_color="#059669")
+    fig.update_traces(marker_color=streamlit_theme_colors()["accent_alt"])
     fig.update_layout(height=430, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="平均绝对 SHAP", yaxis_title="")
     return fig
 
@@ -1160,6 +1315,301 @@ def meteorology_v2_r2_chart(summary: pd.DataFrame) -> go.Figure:
     fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
     fig.update_layout(height=360, margin=dict(l=10, r=10, t=50, b=20), yaxis_range=[0, 1.0], xaxis_title="")
     return fig
+
+
+def chemical_results(assets: Assets) -> dict[str, Any]:
+    return assets.get("chemical_composition") or {}
+
+
+def chemical_target_rows(assets: Assets) -> list[dict[str, Any]]:
+    return list(chemical_results(assets).get("targets", []))
+
+
+def chemical_target_by_name(assets: Assets, target: str) -> dict[str, Any]:
+    for row in chemical_target_rows(assets):
+        if row.get("target") == target:
+            return row
+    rows = chemical_target_rows(assets)
+    return rows[0] if rows else {}
+
+
+def chemical_summary_table(assets: Assets) -> pd.DataFrame:
+    rows = []
+    for row in chemical_target_rows(assets):
+        weather = row.get("weather_only", {})
+        precursor = row.get("precursor", {})
+        rows.append(
+            {
+                "目标组分": row.get("target_label", row.get("target", "")),
+                "weather-only R2": round(float(weather.get("r2", 0)), 3),
+                "前体物辅助 R2": round(float(precursor.get("r2", 0)), 3),
+                "R2 增益": round(float(row.get("delta_r2", 0)), 3),
+                "RMSE 改善": f"{float(row.get('rmse_improvement_pct', 0)):.1f}%",
+                "weather-only RMSE": round(float(weather.get("rmse", 0)), 2),
+                "前体物辅助 RMSE": round(float(precursor.get("rmse", 0)), 2),
+                "判断": row.get("judgement", ""),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def chemical_training_rows(assets: Assets) -> pd.DataFrame:
+    rows = []
+    for row in chemical_target_rows(assets):
+        for feature_set, feature_label_text in [("weather_only", "气象 + 城市/时间"), ("precursor", "气象 + 城市/时间 + 前体物")]:
+            metrics = row.get(feature_set, {})
+            rows.append(
+                {
+                    "目标组分": row.get("target_label", row.get("target", "")),
+                    "模型口径": feature_label_text,
+                    "R2": round(float(metrics.get("r2", 0)), 3),
+                    "RMSE": round(float(metrics.get("rmse", 0)), 2),
+                    "MAE": round(float(metrics.get("mae", 0)), 2),
+                    "Blocked CV R2": round(float(metrics.get("blocked_cv_r2", 0)), 3),
+                    "训练/验证/测试": f"{int(metrics.get('train_rows', 0)):,} / {int(metrics.get('valid_rows', 0)):,} / {int(metrics.get('test_rows', 0)):,}",
+                    "特征数": int(metrics.get("feature_count", 0)),
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def chemical_r2_chart(assets: Assets) -> go.Figure:
+    table = chemical_summary_table(assets)
+    if table.empty:
+        return go.Figure()
+    long = table.melt(
+        id_vars=["目标组分"],
+        value_vars=["weather-only R2", "前体物辅助 R2"],
+        var_name="模型口径",
+        value_name="R2",
+    )
+    fig = px.bar(long, x="目标组分", y="R2", color="模型口径", barmode="group", text="R2", title="化学组分目标：前体物辅助模型与 weather-only 对照")
+    fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+    fig.update_layout(height=430, margin=dict(l=10, r=10, t=50, b=120), xaxis_title="", yaxis_title="测试集 R2")
+    fig.update_xaxes(tickangle=-24)
+    return fig
+
+
+def chemical_delta_chart(assets: Assets) -> go.Figure:
+    table = chemical_summary_table(assets)
+    if table.empty:
+        return go.Figure()
+    table = table.sort_values("R2 增益")
+    theme = streamlit_theme_colors()
+    colors = [theme["accent_warn"] if value < 0 else theme["accent_alt"] for value in table["R2 增益"]]
+    fig = go.Figure(go.Bar(x=table["R2 增益"], y=table["目标组分"], orientation="h", marker_color=colors, text=table["R2 增益"]))
+    fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+    fig.add_vline(x=0, line_width=1.2, line_dash="dash", line_color=theme["muted"])
+    fig.update_layout(title="加入 O3/NO2/SO2/CO 后的 R2 增益", height=430, margin=dict(l=10, r=25, t=50, b=20), xaxis_title="R2 增益", yaxis_title="")
+    return fig
+
+
+def chemical_top_shap_table(target: dict[str, Any], n: int = 8) -> pd.DataFrame:
+    rows = []
+    for item in target.get("top_shap", [])[:n]:
+        rows.append(
+            {
+                "特征": item.get("feature_label") or feature_label(item.get("feature", "")),
+                "平均绝对 SHAP": round(float(item.get("mean_abs_shap", 0)), 3),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def chemical_top_shap_chart(target: dict[str, Any]) -> go.Figure:
+    table = chemical_top_shap_table(target, 10)
+    if table.empty:
+        return go.Figure()
+    table = table.sort_values("平均绝对 SHAP")
+    fig = px.bar(table, x="平均绝对 SHAP", y="特征", orientation="h", title=f"{target.get('target_label', '化学组分')} 前体物辅助模型 Top SHAP")
+    fig.update_traces(marker_color=streamlit_theme_colors()["accent"])
+    fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="平均绝对 SHAP", yaxis_title="")
+    return fig
+
+
+def chemical_intro_html(assets: Assets) -> str:
+    data = chemical_results(assets)
+    headline = data.get("headline", {})
+    rows = chemical_target_rows(assets)
+    first_metrics = rows[0].get("precursor", {}) if rows else {}
+    feature_sets = data.get("feature_sets", {})
+    return f"""
+    <div class="training-intro">
+      <section class="training-hero">
+        <div class="training-kicker">化学组分机制模型</div>
+        <h3>用前体物辅助信息检验复合污染对二次组分的解释增量</h3>
+        <p>化学组分 / 前体物辅助模型不是为了替代 PM2.5 高精度预测模型，而是用于检验 O3、NO2、SO2、CO 所代表的复合污染信息能否解释气象条件之外的二次组分变化。该层结果单独服务于机制讨论，与 weather-only 气象贡献模型和含 PM2.5 历史项的高精度预测模型分开解读。</p>
+        <div class="training-chip-row">
+          <span>{data.get("time_min", "2018-01-01")} 至 {data.get("time_max", "2024-11-01")}</span>
+          <span>{data.get("cities", 13)} 个城市</span>
+          <span>{data.get("model_count", 18)} 套模型</span>
+          <span>{data.get("target_count", 9)} 个化学组分目标</span>
+          <span>失败运行 {data.get("failed_runs", 0)} 个</span>
+        </div>
+      </section>
+      <section class="training-score-card">
+        <div class="training-score-label">核心增益</div>
+        <h4>SNA 与二次组分信号最清晰</h4>
+        <div class="tuning-stat"><span>SNA R2 增益</span><b>{_fmt_number(headline.get("sna_delta_r2"))}</b></div>
+        <div class="tuning-stat"><span>硫酸盐 R2 增益</span><b>{_fmt_number(headline.get("sulfate_delta_r2"))}</b></div>
+        <div class="tuning-stat"><span>二次组分占比 R2 增益</span><b>{_fmt_number(headline.get("secondary_fraction_delta_r2"))}</b></div>
+        <p>正式训练使用 {int(first_metrics.get("rows", 0)):,} 条有效 city-hour 组分样本；时间范围受 CAMS EAC4 产品限制，未覆盖完整 2025-2026。</p>
+      </section>
+    </div>
+
+    <div class="training-detail-grid">
+      <section class="training-detail-card">
+        <h4>weather-only 基线</h4>
+        <p>{feature_sets.get("weather_only", "气象变量 + 城市/时间控制")}。该口径用于回答在不引入共污染物的情况下，气象与时空背景能解释多少组分变化。</p>
+      </section>
+      <section class="training-detail-card">
+        <h4>前体物辅助口径</h4>
+        <p>{feature_sets.get("precursor", "weather-only + O3 + NO2 + SO2 + CO")}。它用于衡量复合污染和前体物信息的增量解释力，而不是追求 PM2.5 当前小时预测上限。</p>
+      </section>
+      <section class="training-detail-card">
+        <h4>解释边界</h4>
+        <p>前体物 SHAP 反映模型在给定特征空间中使用的信息量，不直接等同于化学反应速率或严格因果效应。硝酸盐/硫酸盐比值在测试集上表现较弱，应作为敏感性与局限性报告。</p>
+      </section>
+    </div>
+    """
+
+
+def chemical_training_html(assets: Assets) -> str:
+    data = chemical_results(assets)
+    rows = chemical_target_rows(assets)
+    weather_features = rows[0].get("weather_only", {}).get("feature_count", 35) if rows else 35
+    precursor_features = rows[0].get("precursor", {}).get("feature_count", 39) if rows else 39
+    leakage_rules = "".join(f"<li>{rule}</li>" for rule in data.get("leakage_rules", []))
+    return f"""
+    <div class="training-intro">
+      <section class="training-hero">
+        <div class="training-kicker">化学组分训练策略</div>
+        <h3>固定时间切分，逐目标比较 weather-only 与前体物辅助模型</h3>
+        <p>训练矩阵按 9 个化学组分目标分别建立 weather-only 基线和 precursor 辅助模型，共 18 套 LightGBM 模型。验证集用于调参和 early stopping，测试集只用于最终报告；两种特征口径使用相同时间切分，以便直接比较 O3、NO2、SO2、CO 的增量解释力。</p>
+        <div class="training-chip-row">
+          <span>训练覆盖 {data.get("time_min", "2018-01-01")} 至 {data.get("time_max", "2024-11-01")}</span>
+          <span>验证起点 {data.get("valid_start", "NA")}</span>
+          <span>测试起点 {data.get("test_start", "NA")}</span>
+          <span>embargo {data.get("split_embargo_hours", 0)} 小时</span>
+          <span>插补率 {_fmt_number(float(data.get("interpolated_rate", 0)) * 100, 2)}%</span>
+        </div>
+      </section>
+      <section class="training-score-card">
+        <div class="training-score-label">特征规模</div>
+        <h4>克制加入前体物，避免泄漏项</h4>
+        <div class="tuning-stat"><span>weather-only 特征</span><b>{weather_features} 个</b></div>
+        <div class="tuning-stat"><span>precursor 特征</span><b>{precursor_features} 个</b></div>
+        <div class="tuning-stat"><span>模型总数</span><b>{data.get("model_count", 18)} 套</b></div>
+        <div class="tuning-stat"><span>失败运行</span><b>{data.get("failed_runs", 0)} 个</b></div>
+      </section>
+    </div>
+
+    <div class="training-detail-grid">
+      <section class="training-detail-card">
+        <h4>避免信息泄漏</h4>
+        <ul>{leakage_rules}</ul>
+      </section>
+      <section class="training-detail-card">
+        <h4>为什么不放 PM2.5 历史项</h4>
+        <p>PM2.5 lag、rolling mean、PM10、AOD 和 dust 会强烈吸收组分与污染过程信息，使 O3、NO2、SO2、CO 的解释空间被压缩，因此保留给高精度预测上限模型，不进入本机制层。</p>
+      </section>
+      <section class="training-detail-card">
+        <h4>结果阅读顺序</h4>
+        <p>先看每个目标的 R2 增益和 RMSE 改善，再看前体物模型 Top SHAP 是否出现 O3、NO2、SO2、CO 或湿度、露点等机制相关变量，最后报告无法支持正向机制解释的目标。</p>
+      </section>
+    </div>
+    """
+
+
+def chemical_validation_html(assets: Assets) -> str:
+    data = chemical_results(assets)
+    headline = data.get("headline", {})
+    return f"""
+    <div class="research-brief">
+      <section class="research-brief-head">
+        <div class="research-kicker">化学组分机制验证</div>
+        <h3>复合污染信息对二次无机组分有明确辅助解释价值</h3>
+        <p>SNA、硫酸盐、硝酸盐和铵盐在加入前体物后均获得稳定提升，其中二次组分占比从 R2 {_fmt_number(headline.get("secondary_fraction_weather_r2"))} 提升到 {_fmt_number(headline.get("secondary_fraction_precursor_r2"))}。这说明 O3、NO2、SO2、CO 所代表的氧化性、前体物和共排放背景能够补充气象变量未覆盖的二次生成信息。</p>
+        <div class="research-stat-grid">
+          <div class="research-stat-tile"><span>SNA</span><b>+{_fmt_number(headline.get("sna_delta_r2"))}</b><p>二次无机组分总量的前体物增益清晰。</p></div>
+          <div class="research-stat-tile"><span>硫酸盐</span><b>+{_fmt_number(headline.get("sulfate_delta_r2"))}</b><p>SO2 氧化、湿度和区域背景共同提供增量信息。</p></div>
+          <div class="research-stat-tile"><span>二次组分占比</span><b>+{_fmt_number(headline.get("secondary_fraction_delta_r2"))}</b><p>比例型二次信息对前体物更敏感。</p></div>
+        </div>
+      </section>
+      <div class="research-boundary-panel">
+        <h4>必须单独说明的边界</h4>
+        <p>CAMS EAC4 组分层正式覆盖 {data.get("time_min", "2018-01-01")} 至 {data.get("time_max", "2024-11-01")}，不能写成完整 2018-2026。硝酸盐/硫酸盐比值目标在测试集上 R2 为负，说明比值型目标受到长尾分布、分母接近零和再分析偏差影响，不宜作为正向机制证据。</p>
+      </div>
+    </div>
+    """
+
+
+def render_chemical_model_section(assets: Assets) -> None:
+    if not chemical_results(assets):
+        st.warning("尚未检索到化学组分模型结果文件。")
+        return
+    st.markdown(chemical_intro_html(assets), unsafe_allow_html=True)
+    st.subheader("组分目标模型表现")
+    st.caption("每个目标均用同一时间切分比较 weather-only 与加入 O3、NO2、SO2、CO 的前体物辅助口径。")
+    chem_col_a, chem_col_b = st.columns([0.55, 0.45])
+    render_plotly_chart(chem_col_a, chemical_r2_chart(assets), key="chemical_model_r2_chart")
+    render_plotly_chart(chem_col_b, chemical_delta_chart(assets), key="chemical_model_delta_chart")
+    st.dataframe(chemical_summary_table(assets), width="stretch", hide_index=True)
+
+    st.markdown(
+        """
+        <div class="explain-band green">
+          <h4>结果解读口径</h4>
+          <p>SNA、硫酸盐、硝酸盐、铵盐和二次组分占比的提升可以作为复合污染信息有助于解释二次组分变化的模型证据。黑碳和有机质的增益较小，更适合解释为共排放或共变背景，不宜写成直接化学生成因果。</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    options = [row.get("target", "") for row in chemical_target_rows(assets)]
+    default_index = options.index("sna") if "sna" in options else 0
+    selected_target = st.selectbox(
+        "查看单个组分的前体物模型 SHAP",
+        options,
+        index=default_index,
+        format_func=lambda value: chemical_target_by_name(assets, value).get("target_label", value),
+        key="chemical_model_target",
+    )
+    target = chemical_target_by_name(assets, selected_target)
+    shap_col_a, shap_col_b = st.columns([0.58, 0.42])
+    render_plotly_chart(
+        shap_col_a,
+        chemical_top_shap_chart(target),
+        key=f"chemical_model_shap_chart_{selected_target}",
+    )
+    with shap_col_b:
+        st.markdown(f"**{target.get('target_label', selected_target)} 机制说明**")
+        st.write(target.get("mechanism_note", ""))
+        st.dataframe(chemical_top_shap_table(target, 8), width="stretch", hide_index=True)
+
+
+def render_chemical_training_section(assets: Assets) -> None:
+    if not chemical_results(assets):
+        st.warning("尚未检索到化学组分模型训练结果文件。")
+        return
+    st.markdown(chemical_training_html(assets), unsafe_allow_html=True)
+    st.subheader("化学组分模型训练明细")
+    st.caption("weather-only 与前体物辅助模型使用相同样本和时间切分；差值用于评估复合污染信息的增量解释力。")
+    st.dataframe(chemical_training_rows(assets), width="stretch", hide_index=True)
+    with st.expander("变量排除规则", expanded=False):
+        st.write("该层模型为了保留 O3、NO2、SO2、CO 的解释空间，主动排除了 PM2.5 时滞、PM2.5 滚动均值、PM10、AOD、dust、同小时目标组分和插值标识等变量。")
+
+
+def render_chemical_validation_section(assets: Assets) -> None:
+    if not chemical_results(assets):
+        st.warning("尚未检索到化学组分机制模型结果文件。")
+        return
+    st.markdown(chemical_validation_html(assets), unsafe_allow_html=True)
+    val_col_a, val_col_b = st.columns([0.5, 0.5])
+    render_plotly_chart(val_col_a, chemical_delta_chart(assets), key="chemical_validation_delta_chart")
+    render_plotly_chart(val_col_b, chemical_r2_chart(assets), key="chemical_validation_r2_chart")
+    st.dataframe(chemical_summary_table(assets), width="stretch", hide_index=True)
+    st.caption("结论优先依据二次无机组分和二次组分占比；硝酸盐/硫酸盐比值作为局限性和敏感性结果保留。")
 
 
 def research_frame(assets: Assets, key: str) -> pd.DataFrame:
@@ -1366,7 +1816,7 @@ def leave_city_detail_chart(assets: Assets) -> go.Figure:
         hover_data={"rmse": ":.2f", "mae": ":.2f", "bias": ":.2f"},
         title="13 城市逐一留出验证 R2",
     )
-    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color=streamlit_theme_colors()["muted"])
     fig.update_layout(height=410, margin=dict(l=10, r=10, t=50, b=20), yaxis_title="R2", xaxis_title="留出城市")
     return fig
 
@@ -1401,7 +1851,7 @@ def combined_extrapolation_summary_chart(assets: Assets) -> go.Figure:
         return go.Figure()
     long = table.melt(id_vars=["时期"], value_vars=["平均 R2", "中位 R2"], var_name="指标", value_name="R2")
     fig = px.bar(long, x="时期", y="R2", color="指标", barmode="group", text="R2", title="组合外推验证：平均与中位 R2")
-    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color=streamlit_theme_colors()["muted"])
     fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
     fig.update_layout(height=360, margin=dict(l=10, r=10, t=50, b=20), yaxis_range=[-0.1, 0.8], xaxis_title="")
     return fig
@@ -1422,7 +1872,7 @@ def combined_extrapolation_city_chart(assets: Assets) -> go.Figure:
         hover_data={"rmse": ":.2f", "mae": ":.2f", "bias": ":.2f", "test_rows": True},
         title="组合外推逐城市 R2",
     )
-    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color=streamlit_theme_colors()["muted"])
     fig.update_layout(height=430, margin=dict(l=10, r=10, t=50, b=20), yaxis_title="R2", xaxis_title="留出城市")
     return fig
 
@@ -1465,7 +1915,7 @@ def feature_group_ablation_chart(assets: Assets) -> go.Figure:
         category_orders={"特征组": group_order},
         title="特征组消融：逐步加入气象过程信息后的 R2",
     )
-    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color=streamlit_theme_colors()["muted"])
     fig.update_traces(line=dict(width=3), marker=dict(size=8))
     fig.update_layout(height=430, margin=dict(l=10, r=10, t=50, b=105), xaxis_title="", yaxis_title="测试 R2")
     fig.update_xaxes(tickangle=-22)
@@ -1490,7 +1940,7 @@ def feature_group_delta_chart(assets: Assets) -> go.Figure:
         text="R2 增量",
         title="相对上一特征组的 R2 增量",
     )
-    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="#64748b")
+    fig.add_hline(y=0, line_width=1, line_dash="dash", line_color=streamlit_theme_colors()["muted"])
     fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
     fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=105), xaxis_title="", yaxis_title="R2 增量")
     fig.update_xaxes(tickangle=-22)
@@ -1682,13 +2132,14 @@ def shap_stability_period_chart(assets: Assets, period_label: str) -> go.Figure:
     table = table.sort_values("平均绝对 SHAP")
     error_plus = table["95% CI 上限"] - table["平均绝对 SHAP"]
     error_minus = table["平均绝对 SHAP"] - table["95% CI 下限"]
+    theme = streamlit_theme_colors()
     fig = go.Figure(
         go.Bar(
             x=table["平均绝对 SHAP"],
             y=table["特征"],
             orientation="h",
-            marker_color="#0f766e",
-            error_x=dict(type="data", symmetric=False, array=error_plus, arrayminus=error_minus, color="#334155"),
+            marker_color=theme["accent_alt"],
+            error_x=dict(type="data", symmetric=False, array=error_plus, arrayminus=error_minus, color=theme["text"]),
         )
     )
     fig.update_layout(
@@ -1707,8 +2158,8 @@ def render_research_validation_section(assets: Assets) -> None:
         return
 
     st.markdown(research_conclusion_html(assets), unsafe_allow_html=True)
-    validation_tab, extension_tab, transparent_tab, weather_type_tab, shap_tab, condition_tab = st.tabs(
-        ["空间泛化验证", "组合外推与消融", "透明解释对照", "天气型机制", "SHAP 稳定性", "条件误差"]
+    validation_tab, extension_tab, transparent_tab, weather_type_tab, shap_tab, condition_tab, chemical_tab = st.tabs(
+        ["空间泛化验证", "组合外推与消融", "透明解释对照", "天气型机制", "SHAP 稳定性", "条件误差", "化学组分机制"]
     )
 
     with validation_tab:
@@ -1723,9 +2174,9 @@ def render_research_validation_section(assets: Assets) -> None:
             unsafe_allow_html=True,
         )
         lv_col_a, lv_col_b = st.columns([0.45, 0.55])
-        lv_col_a.plotly_chart(leave_city_r2_chart(assets), use_container_width=True)
-        lv_col_b.plotly_chart(leave_city_detail_chart(assets), use_container_width=True)
-        st.dataframe(leave_city_summary_table(assets), use_container_width=True, hide_index=True)
+        render_plotly_chart(lv_col_a, leave_city_r2_chart(assets), key="research_leave_city_r2")
+        render_plotly_chart(lv_col_b, leave_city_detail_chart(assets), key="research_leave_city_detail")
+        st.dataframe(leave_city_summary_table(assets), width="stretch", hide_index=True)
 
     with extension_tab:
         st.markdown(
@@ -1739,15 +2190,31 @@ def render_research_validation_section(assets: Assets) -> None:
             unsafe_allow_html=True,
         )
         ext_col_a, ext_col_b = st.columns([0.45, 0.55])
-        ext_col_a.plotly_chart(combined_extrapolation_summary_chart(assets), use_container_width=True)
-        ext_col_b.plotly_chart(combined_extrapolation_city_chart(assets), use_container_width=True)
-        st.dataframe(combined_extrapolation_summary_table(assets), use_container_width=True, hide_index=True)
+        render_plotly_chart(
+            ext_col_a,
+            combined_extrapolation_summary_chart(assets),
+            key="research_extrapolation_summary",
+        )
+        render_plotly_chart(
+            ext_col_b,
+            combined_extrapolation_city_chart(assets),
+            key="research_extrapolation_city",
+        )
+        st.dataframe(combined_extrapolation_summary_table(assets), width="stretch", hide_index=True)
         st.caption("组合外推结果显示，疫情前和疫情期仍保留中等解释力；疫情后异常目标的空间外推边界更明显。")
 
         ab_col_a, ab_col_b = st.columns([0.52, 0.48])
-        ab_col_a.plotly_chart(feature_group_ablation_chart(assets), use_container_width=True)
-        ab_col_b.plotly_chart(feature_group_delta_chart(assets), use_container_width=True)
-        st.dataframe(feature_group_ablation_table(assets), use_container_width=True, hide_index=True)
+        render_plotly_chart(
+            ab_col_a,
+            feature_group_ablation_chart(assets),
+            key="research_feature_group_ablation",
+        )
+        render_plotly_chart(
+            ab_col_b,
+            feature_group_delta_chart(assets),
+            key="research_feature_group_delta",
+        )
+        st.dataframe(feature_group_ablation_table(assets), width="stretch", hide_index=True)
         st.caption(
             "消融结果显示，滞后滚动与静稳过程在三个时期均提供明确增量；天气型标签在完整过程特征已经存在时增量较小，更适合作为机制解释和分层讨论工具。"
         )
@@ -1763,7 +2230,7 @@ def render_research_validation_section(assets: Assets) -> None:
             unsafe_allow_html=True,
         )
         gam_col_a, gam_col_b = st.columns([0.48, 0.52])
-        gam_col_a.plotly_chart(gam_like_compare_chart(assets), use_container_width=True)
+        render_plotly_chart(gam_col_a, gam_like_compare_chart(assets), key="research_gam_compare")
         with gam_col_b:
             response_feature = st.selectbox(
                 "响应曲线变量",
@@ -1777,8 +2244,12 @@ def render_research_validation_section(assets: Assets) -> None:
                 ],
                 format_func=feature_label,
             )
-            st.plotly_chart(gam_response_chart(assets, response_feature), use_container_width=True)
-        st.dataframe(gam_like_compare_table(assets), use_container_width=True, hide_index=True)
+            render_plotly_chart(
+                st,
+                gam_response_chart(assets, response_feature),
+                key=f"research_gam_response_{response_feature}",
+            )
+        st.dataframe(gam_like_compare_table(assets), width="stretch", hide_index=True)
         st.caption("透明对照模型的精度通常低于过程型 LightGBM；其主要价值在于提供可解释响应形态，而非追求最高 R2。")
 
     with weather_type_tab:
@@ -1793,10 +2264,14 @@ def render_research_validation_section(assets: Assets) -> None:
             unsafe_allow_html=True,
         )
         wt_col_a, wt_col_b = st.columns(2)
-        wt_col_a.plotly_chart(weather_type_frequency_chart(assets), use_container_width=True)
-        wt_col_b.plotly_chart(weather_type_pm25_chart(assets), use_container_width=True)
+        render_plotly_chart(
+            wt_col_a,
+            weather_type_frequency_chart(assets),
+            key="research_weather_type_frequency",
+        )
+        render_plotly_chart(wt_col_b, weather_type_pm25_chart(assets), key="research_weather_type_pm25")
         with st.expander("天气型机制明细", expanded=False):
-            st.dataframe(weather_type_table(assets), use_container_width=True, hide_index=True)
+            st.dataframe(weather_type_table(assets), width="stretch", hide_index=True)
 
     with shap_tab:
         st.markdown(
@@ -1809,13 +2284,17 @@ def render_research_validation_section(assets: Assets) -> None:
             unsafe_allow_html=True,
         )
         shap_col_a, shap_col_b = st.columns([0.46, 0.54])
-        shap_col_a.plotly_chart(shap_similarity_chart(assets), use_container_width=True)
+        render_plotly_chart(shap_col_a, shap_similarity_chart(assets), key="research_shap_similarity")
         with shap_col_b:
             shap_period = st.selectbox("SHAP 时期", ["疫情前", "疫情期", "疫情后"], index=1)
-            st.plotly_chart(shap_stability_period_chart(assets, shap_period), use_container_width=True)
-        st.dataframe(shap_similarity_table(assets), use_container_width=True, hide_index=True)
+            render_plotly_chart(
+                st,
+                shap_stability_period_chart(assets, shap_period),
+                key=f"research_shap_stability_{shap_period}",
+            )
+        st.dataframe(shap_similarity_table(assets), width="stretch", hide_index=True)
         with st.expander("所选时期 Top SHAP 置信区间", expanded=False):
-            st.dataframe(shap_stability_period_table(assets, shap_period, 20), use_container_width=True, hide_index=True)
+            st.dataframe(shap_stability_period_table(assets, shap_period, 20), width="stretch", hide_index=True)
 
     with condition_tab:
         st.markdown(
@@ -1827,9 +2306,12 @@ def render_research_validation_section(assets: Assets) -> None:
             """,
             unsafe_allow_html=True,
         )
-        st.plotly_chart(condition_rmse_chart(assets), use_container_width=True)
+        render_plotly_chart(st, condition_rmse_chart(assets), key="research_condition_rmse")
         with st.expander("关键气象条件误差明细", expanded=False):
-            st.dataframe(condition_metrics_table(assets), use_container_width=True, hide_index=True)
+            st.dataframe(condition_metrics_table(assets), width="stretch", hide_index=True)
+
+    with chemical_tab:
+        render_chemical_validation_section(assets)
 
 
 def v2_period_narrative(model: dict[str, Any]) -> str:
@@ -1897,13 +2379,13 @@ def render_model_card(spec: dict, assets: Assets) -> None:
         st.caption(spec["note"])
         detail_a, detail_b = st.columns([0.42, 0.58])
         with detail_a:
-            st.dataframe(metrics_overview(metrics), use_container_width=True, hide_index=True)
+            st.dataframe(metrics_overview(metrics), width="stretch", hide_index=True)
         with detail_b:
             if shap_df is not None:
                 st.markdown("**总体 Top SHAP**")
-                st.dataframe(top_shap_table(shap_df, 8), use_container_width=True, hide_index=True)
+                st.dataframe(top_shap_table(shap_df, 8), width="stretch", hide_index=True)
                 st.markdown("**气象因子 Top SHAP**")
-                st.dataframe(meteorology_shap_table(shap_df, 8), use_container_width=True, hide_index=True)
+                st.dataframe(meteorology_shap_table(shap_df, 8), width="stretch", hide_index=True)
                 st.caption("总体表会包含时间周期、城市/经纬度、污染滞后等控制变量；气象因子表只保留温度、湿度、气压、PBLH、逆温、风输送、降水和云量等气象变量。")
 
 
@@ -2081,25 +2563,18 @@ def period_for_datetime(selected_date: date, hour: int) -> str:
 
 
 def resolve_prediction_model_key(choice: str, selected_date: date, hour: int) -> str:
-    period = period_for_datetime(selected_date, hour)
+    if choice == FLAGSHIP_MODEL_LABEL:
+        return FLAGSHIP_MODEL_KEY
     if choice == "按日期自动选择分时期高精度模型":
-        return PERIOD_TO_HIGH_ACCURACY[period]
+        return FLAGSHIP_MODEL_KEY
     if choice == "按日期自动选择过程型气象贡献模型":
-        return PERIOD_TO_METEOROLOGY_V2[period]
+        return FLAGSHIP_MODEL_KEY
     if choice in {
         "按日期自动选择基础气象归因模型",
         "按日期自动选择基础气象归因模型（对照口径）",
     }:
-        return PERIOD_TO_METEOROLOGY[period]
-    return MODEL_LABEL_TO_KEY[choice]
-
-
-@st.cache_resource(show_spinner=False)
-def load_prediction_models() -> dict[str, dict]:
-    return {
-        key: load_model(str(resolve_path("models", spec["path"])))
-        for key, spec in PREDICTION_MODEL_SPECS.items()
-    }
+        return FLAGSHIP_MODEL_KEY
+    return canonical_prediction_model_key(MODEL_LABEL_TO_KEY[choice])
 
 
 def add_derived_features(row: dict, pblh_reference: float) -> None:
@@ -2225,29 +2700,179 @@ def add_v2_meteorology_features(row: dict, pblh_reference: float) -> None:
     row["baseline_pm2_5"] = float(row.get("pm2_5", row.get("baseline_pm2_5", 35.0)))
 
 
-def complete_row(features: list[str], row: dict) -> pd.DataFrame:
-    completed = {feature: row.get(feature, 0) for feature in features}
-    return pd.DataFrame([completed])
+def complete_rows(features: list[str], rows: list[dict]) -> pd.DataFrame:
+    completed_rows = [{feature: row.get(feature, 0) for feature in features} for row in rows]
+    return pd.DataFrame(completed_rows)
 
 
-def predict(bundle: dict, row: dict) -> float:
+def transformed_feature_frame(bundle: dict, frame: pd.DataFrame) -> pd.DataFrame:
+    matrix = bundle["preprocessor"].transform(frame[bundle["features"]])
+    model_features = list(getattr(bundle["model"], "feature_name_", []) or [])
+    if not model_features or len(model_features) != matrix.shape[1]:
+        model_features = [f"Column_{index}" for index in range(matrix.shape[1])]
+    if hasattr(matrix, "toarray"):
+        return pd.DataFrame.sparse.from_spmatrix(matrix, index=frame.index, columns=model_features)
+    return pd.DataFrame(matrix, index=frame.index, columns=model_features)
+
+
+def is_flagship_prediction_model(bundle: Any) -> bool:
+    return callable(getattr(bundle, "predict_frame", None))
+
+
+def predict_many(bundle: Any, rows: list[dict]) -> list[float]:
+    if not rows:
+        return []
+    if is_flagship_prediction_model(bundle):
+        frame = pd.DataFrame(rows)
+        predictions = bundle.predict_frame(frame)
+        values = pd.to_numeric(predictions["predicted_pm2_5"], errors="coerce")
+        if values.isna().any():
+            missing_count = int(values.isna().sum())
+            raise ValueError(
+                f"旗舰主模型有 {missing_count} 条样本未能换算为 PM2.5；请确认预测样本包含 baseline_pm2_5。"
+            )
+        return values.clip(lower=0.0).astype(float).tolist()
     features = bundle["features"]
-    frame = complete_row(features, row)
-    matrix = bundle["preprocessor"].transform(frame[features])
-    prediction = float(bundle["model"].predict(matrix)[0])
+    frame = complete_rows(features, rows)
+    transformed = transformed_feature_frame(bundle, frame)
+    predictions = pd.Series(bundle["model"].predict(transformed), index=frame.index, dtype="float64")
     target_kind = bundle.get("target_kind", bundle.get("target_meta", {}).get("target_kind", "raw"))
     if target_kind == "log1p":
-        return max(math.expm1(prediction), 0.0)
-    if target_kind == "anomaly":
+        predictions = predictions.map(math.expm1)
+    elif target_kind == "anomaly":
         target_meta = bundle.get("target_meta", {})
-        baseline = float(
-            row.get(
-                "baseline_pm2_5",
-                target_meta.get("climatology_global_train_valid", target_meta.get("climatology_global_train", 0.0)),
-            )
+        fallback = float(target_meta.get("climatology_global_train_valid", target_meta.get("climatology_global_train", 0.0)))
+        baselines = pd.Series(
+            [float(row.get("baseline_pm2_5", fallback)) for row in rows],
+            index=frame.index,
+            dtype="float64",
         )
-        return max(baseline + prediction, 0.0)
-    return max(prediction, 0.0)
+        predictions = baselines + predictions
+    return predictions.clip(lower=0.0).tolist()
+
+
+def predict(bundle: Any, row: dict) -> float:
+    return predict_many(bundle, [row])[0]
+
+
+def has_chemical_diagnostics(bundle: Any) -> bool:
+    return callable(getattr(bundle, "predict_chemical_frame", None))
+
+
+def chemical_summary_lookup(bundle: Any) -> dict[str, dict[str, Any]]:
+    if not callable(getattr(bundle, "chemical_target_summary", None)):
+        return {}
+    try:
+        summary = bundle.chemical_target_summary()
+    except Exception:
+        return {}
+    if summary.empty:
+        return {}
+    return {str(row["target"]): row for row in summary.to_dict(orient="records")}
+
+
+def format_chemical_prediction(value: float, unit: str) -> str:
+    if unit == "fraction":
+        return f"{value * 100:.1f}%"
+    if unit == "ratio":
+        return f"{value:.2f}"
+    return f"{value:.2f}"
+
+
+def chemical_prediction_table(bundle: Any, prediction: pd.Series) -> pd.DataFrame:
+    metadata = chemical_summary_lookup(bundle)
+    available_targets = [
+        target
+        for target in CHEMICAL_TARGET_ORDER
+        if f"predicted_{target}" in prediction.index
+    ]
+    available_targets.extend(
+        sorted(
+            {
+                column.removeprefix("predicted_")
+                for column in prediction.index
+                if column.startswith("predicted_")
+            }
+            - set(available_targets)
+        )
+    )
+    rows = []
+    for target in available_targets:
+        value = float(prediction[f"predicted_{target}"])
+        info = metadata.get(target, {})
+        unit = str(info.get("value_unit", ""))
+        unit_label = "比例" if unit == "fraction" else ("比值" if unit == "ratio" else unit)
+        test_r2 = info.get("test_r2")
+        rows.append(
+            {
+                "组分目标": info.get("target_label") or CHEMICAL_TARGET_LABELS.get(target, target),
+                "诊断值": format_chemical_prediction(value, unit),
+                "单位": unit_label,
+                "模型类型": info.get("target_kind", "diagnostic"),
+                "测试 R2": round(float(test_r2), 3) if test_r2 is not None and pd.notna(test_r2) else None,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def chemical_precursor_table(row: dict, custom_enabled: bool) -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "输入项": label.split(" ")[0],
+                "数值": round(float(row.get(key, 0.0)), 2),
+                "单位": "ug/m3",
+                "来源": "用户自定义" if custom_enabled else "城市历史画像",
+            }
+            for key, label, _ in CHEMICAL_PRECURSOR_INPUTS
+        ]
+    )
+
+
+def chemical_concentration_chart(table: pd.DataFrame) -> go.Figure:
+    concentration = table[table["单位"] == "ug/m3"].copy()
+    concentration["数值"] = pd.to_numeric(concentration["诊断值"], errors="coerce")
+    fig = px.bar(concentration, x="组分目标", y="数值", text="诊断值", title="化学组分浓度诊断")
+    fig.update_traces(marker_color=streamlit_theme_colors()["accent_alt"])
+    fig.update_layout(height=320, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="", yaxis_title="ug/m3")
+    return fig
+
+
+def render_chemical_diagnostics(bundle: Any, row: dict, custom_precursors_enabled: bool) -> None:
+    if not has_chemical_diagnostics(bundle):
+        return
+    try:
+        prediction = bundle.predict_chemical_frame(pd.DataFrame([row])).iloc[0]
+    except Exception as error:
+        st.warning(f"化学组分机制诊断暂不可用：{error}")
+        return
+
+    table = chemical_prediction_table(bundle, prediction)
+    if table.empty:
+        return
+
+    st.markdown("### 化学组分机制诊断")
+    st.caption(
+        "该区块由同一个旗舰主模型的化学机制头执行；它诊断组分和二次生成信号，不替代上方 PM2.5 主预测。"
+    )
+    source_text = "用户自定义前体物输入" if custom_precursors_enabled else "城市-月份-小时历史画像前体物"
+    st.caption(f"当前化学机制输入来源：{source_text}。")
+
+    input_col, output_col = st.columns([0.34, 0.66])
+    with input_col:
+        st.dataframe(chemical_precursor_table(row, custom_precursors_enabled), width="stretch", hide_index=True)
+    with output_col:
+        st.dataframe(table, width="stretch", hide_index=True)
+
+    if not table[table["单位"] == "ug/m3"].empty:
+        render_plotly_chart(
+            st,
+            chemical_concentration_chart(table),
+            key=(
+                f"chemical_diagnostics_{row.get('city', 'city')}_"
+                f"{row.get('year', 0)}{row.get('month', 0):02d}{row.get('dayofyear', 0):03d}_{row.get('hour', 0)}"
+            ),
+        )
 
 
 def scenario_row(
@@ -2282,18 +2907,19 @@ def shap_chart(shap_df: pd.DataFrame, title: str) -> go.Figure:
     top["特征"] = top["feature"].map(feature_label)
     top = top.sort_values("mean_abs_shap")
     fig = px.bar(top, x="mean_abs_shap", y="特征", orientation="h", title=title)
-    fig.update_traces(marker_color="#2563eb")
+    fig.update_traces(marker_color=streamlit_theme_colors()["accent"])
     fig.update_layout(height=440, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="平均绝对 SHAP", yaxis_title="")
     return fig
 
 
 def add_pm25_bands(fig: go.Figure, y_max: float) -> None:
+    theme = streamlit_theme_colors()
     bands = [
-        (0, 35, "优", "rgba(22, 163, 74, 0.10)"),
-        (35, 75, "良好", "rgba(34, 197, 94, 0.10)"),
-        (75, 115, "轻度", "rgba(245, 158, 11, 0.13)"),
-        (115, 150, "中度", "rgba(220, 38, 38, 0.11)"),
-        (150, max(250, y_max), "重度+", "rgba(153, 27, 27, 0.10)"),
+        (0, 35, "优", color_with_alpha(theme["accent_alt"], 0.10)),
+        (35, 75, "良好", color_with_alpha(theme["accent_alt"], 0.10)),
+        (75, 115, "轻度", color_with_alpha(theme["accent_warn"], 0.12)),
+        (115, 150, "中度", color_with_alpha(theme["accent_warn"], 0.14)),
+        (150, max(250, y_max), "重度+", color_with_alpha(theme["accent_warn"], 0.16)),
     ]
     for y0, y1, label, color in bands:
         fig.add_hrect(y0=y0, y1=y1, fillcolor=color, line_width=0, annotation_text=label, annotation_position="left")
@@ -2302,23 +2928,23 @@ def add_pm25_bands(fig: go.Figure, y_max: float) -> None:
 def risk_items(row: dict, current_prediction: float) -> list[dict[str, str]]:
     items = []
     if row["low_pblh_flag"]:
-        items.append({"title": "垂直扩散", "value": "偏弱", "detail": "PBLH 低，污染物更容易堆积", "color": "#c62828"})
+        items.append({"title": "垂直扩散", "value": "偏弱", "detail": "PBLH 低，污染物更容易堆积", "color": "var(--accent-warn)"})
     else:
-        items.append({"title": "垂直扩散", "value": "较好", "detail": "PBLH 不低，垂直混合空间较充足", "color": "#2e7d32"})
+        items.append({"title": "垂直扩散", "value": "较好", "detail": "PBLH 不低，垂直混合空间较充足", "color": "var(--accent-alt)"})
     if row["t_inverse_850_1000"] > 0:
-        items.append({"title": "热力稳定度", "value": "逆温", "detail": "上暖下冷，扩散受抑制", "color": "#ef6c00"})
+        items.append({"title": "热力稳定度", "value": "逆温", "detail": "上暖下冷，扩散受抑制", "color": "var(--accent-warn)"})
     else:
-        items.append({"title": "热力稳定度", "value": "无逆温", "detail": "热力层结相对有利扩散", "color": "#2e7d32"})
+        items.append({"title": "热力稳定度", "value": "无逆温", "detail": "热力层结相对有利扩散", "color": "var(--accent-alt)"})
     if row["southerly_transport_10m"] > 1:
-        items.append({"title": "区域输送", "value": "南风输送", "detail": "京津冀南向输送贡献可能增强", "color": "#ef6c00"})
+        items.append({"title": "区域输送", "value": "南风输送", "detail": "京津冀南向输送贡献可能增强", "color": "var(--accent-warn)"})
     elif row["northerly_cleaning_10m"] > 1:
-        items.append({"title": "区域输送", "value": "北风清除", "detail": "北风条件通常更利于清洁空气输入", "color": "#2e7d32"})
+        items.append({"title": "区域输送", "value": "北风清除", "detail": "北风条件通常更利于清洁空气输入", "color": "var(--accent-alt)"})
     else:
-        items.append({"title": "区域输送", "value": "弱风", "detail": "水平输送弱，局地累积更重要", "color": "#b7791f"})
+        items.append({"title": "区域输送", "value": "弱风", "detail": "水平输送弱，局地累积更重要", "color": "var(--accent-warn)"})
     if current_prediction > 75:
-        items.append({"title": "污染水平", "value": "需关注", "detail": "预测值超过良级上限", "color": "#c62828"})
+        items.append({"title": "污染水平", "value": "需关注", "detail": "预测值超过良级上限", "color": "var(--accent-warn)"})
     else:
-        items.append({"title": "污染水平", "value": "可接受", "detail": "预测值处于优良范围", "color": "#2e7d32"})
+        items.append({"title": "污染水平", "value": "可接受", "detail": "预测值处于优良范围", "color": "var(--accent-alt)"})
     return items
 
 
@@ -2352,6 +2978,7 @@ def r2_chart(performance: pd.DataFrame) -> go.Figure:
 
 def seasonal_chart(seasonal: pd.DataFrame, city: str, month: int) -> go.Figure:
     data = seasonal[seasonal["city"] == city].sort_values("month")
+    theme = streamlit_theme_colors()
     fig = go.Figure()
     fig.add_trace(
         go.Scatter(
@@ -2369,23 +2996,24 @@ def seasonal_chart(seasonal: pd.DataFrame, city: str, month: int) -> go.Figure:
             fill="tonexty",
             line=dict(width=0),
             name="P25-P75",
-            fillcolor="rgba(37, 99, 235, 0.16)",
+            fillcolor=color_with_alpha(theme["accent"], 0.16),
         )
     )
     fig.add_trace(go.Scatter(x=data["month"], y=data["pm2_5_median"], mode="lines+markers", name="PM2.5 中位数"))
-    fig.add_vline(x=month, line_width=2, line_dash="dash", line_color="#c62828")
+    fig.add_vline(x=month, line_width=2, line_dash="dash", line_color=theme["accent_warn"])
     fig.update_layout(height=330, margin=dict(l=10, r=10, t=50, b=20), title=f"{city} 月尺度 PM2.5 季节参考", xaxis_title="月份", yaxis_title="ug/m3")
     return fig
 
 
 def wind_polar(speed: float, direction: float) -> go.Figure:
+    theme = streamlit_theme_colors()
     fig = go.Figure(
         go.Barpolar(
             r=[speed],
             theta=[direction],
             width=[24],
-            marker_color=["#1976d2"],
-            marker_line_color="#0d47a1",
+            marker_color=[theme["accent"]],
+            marker_line_color=theme["accent_strong"],
             marker_line_width=1,
             opacity=0.82,
         )
@@ -2401,20 +3029,24 @@ def wind_polar(speed: float, direction: float) -> go.Figure:
 
 
 def build_daily_prediction(
-    current_bundle: dict,
+    current_bundle: Any,
     city_info: pd.DataFrame,
     profiles: pd.DataFrame,
     city: str,
     selected_date: date,
     overrides: dict,
 ) -> pd.DataFrame:
-    rows = []
+    scenario_rows = []
     for hour in range(24):
         row = scenario_row(city_info, profiles, city, selected_date, hour, overrides)
+        scenario_rows.append(row)
+    predictions = predict_many(current_bundle, scenario_rows)
+    rows = []
+    for hour, row, prediction in zip(range(24), scenario_rows, predictions):
         rows.append(
             {
                 "hour": hour,
-                "predicted_pm2_5": predict(current_bundle, row),
+                "predicted_pm2_5": prediction,
                 "temperature_2m": row["temperature_2m"],
                 "wind_speed_10m": row["wind_speed_10m"],
                 "boundary_layer_height": row["boundary_layer_height"],
@@ -2426,7 +3058,7 @@ def build_daily_prediction(
 def render_weather_context(
     seasonal: pd.DataFrame,
     daily: pd.DataFrame,
-    current_bundle: dict,
+    current_bundle: Any,
     city_info: pd.DataFrame,
     profiles: pd.DataFrame,
     city: str,
@@ -2434,12 +3066,17 @@ def render_weather_context(
     overrides: dict,
     wind_speed: float,
     wind_direction: float,
+    daily_prediction: pd.DataFrame | None = None,
 ) -> None:
     st.markdown("### 气象背景与扩散条件")
     st.caption("图组用于刻画当前预测情景的气象背景：左侧呈现季节参考，右侧呈现历史 PM2.5 与 PBLH，下方给出输入风场和当天气象剖面。")
     seasonal_col, hist_col = st.columns([0.42, 0.58])
     with seasonal_col:
-        st.plotly_chart(seasonal_chart(seasonal, city, selected_date.month), use_container_width=True)
+        render_plotly_chart(
+            st,
+            seasonal_chart(seasonal, city, selected_date.month),
+            key=f"weather_context_seasonal_{city}_{selected_date:%Y%m}",
+        )
 
     hist = daily[daily["city"] == city].sort_values("date").tail(240)
     fig_hist = go.Figure()
@@ -2453,12 +3090,20 @@ def render_weather_context(
         yaxis2=dict(title="PBLH m", overlaying="y", side="right"),
     )
     with hist_col:
-        st.plotly_chart(fig_hist, use_container_width=True)
+        render_plotly_chart(st, fig_hist, key=f"weather_context_history_{city}_{selected_date:%Y%m%d}")
 
     w1, w2 = st.columns([0.38, 0.62])
     with w1:
-        st.plotly_chart(wind_polar(wind_speed, wind_direction), use_container_width=True)
-    weather_df = build_daily_prediction(current_bundle, city_info, profiles, city, selected_date, overrides)
+        render_plotly_chart(
+            st,
+            wind_polar(wind_speed, wind_direction),
+            key=f"weather_context_wind_{city}_{selected_date:%Y%m%d}_{wind_speed:.2f}_{wind_direction:.1f}",
+        )
+    weather_df = (
+        daily_prediction
+        if daily_prediction is not None
+        else build_daily_prediction(current_bundle, city_info, profiles, city, selected_date, overrides)
+    )
     fig_weather = px.line(
         weather_df,
         x="hour",
@@ -2468,7 +3113,7 @@ def render_weather_context(
     fig_weather.update_layout(height=330, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="小时", yaxis_title="")
     fig_weather.update_traces(line=dict(width=3))
     with w2:
-        st.plotly_chart(fig_weather, use_container_width=True)
+        render_plotly_chart(st, fig_weather, key=f"weather_context_profile_{city}_{selected_date:%Y%m%d}")
 
 
 def input_defaults(profile: dict) -> dict[str, float]:
@@ -2490,6 +3135,11 @@ def input_defaults(profile: dict) -> dict[str, float]:
         "pm2_5_lag_1h": float(profile.get("pm2_5_lag_1h", 35.0)),
         "pm2_5_lag_3h": float(profile.get("pm2_5_lag_3h", 35.0)),
         "pm2_5_lag_24h": float(profile.get("pm2_5_lag_24h", 35.0)),
+        "carbon_monoxide": float(profile.get("carbon_monoxide", 1000.0)),
+        "nitrogen_dioxide": float(profile.get("nitrogen_dioxide", 40.0)),
+        "sulphur_dioxide": float(profile.get("sulphur_dioxide", 15.0)),
+        "ozone": float(profile.get("ozone", 80.0)),
+        "use_custom_chemical_precursors": False,
     }
 
 
@@ -2504,7 +3154,7 @@ def make_overrides(values: dict[str, float]) -> dict[str, float]:
     precipitation = float(values["precipitation"])
     wind_speed = float(values["wind_speed_10m"])
     dew_point = temperature - (100 - humidity) / 5
-    return {
+    overrides = {
         "temperature_2m": temperature,
         "relative_humidity_2m": humidity,
         "dew_point_2m": dew_point,
@@ -2528,6 +3178,10 @@ def make_overrides(values: dict[str, float]) -> dict[str, float]:
         "wind_speed_10m_lag_3h": wind_speed,
         "wind_speed_10m_lag_24h": wind_speed,
     }
+    if values.get("use_custom_chemical_precursors"):
+        for key, _, _ in CHEMICAL_PRECURSOR_INPUTS:
+            overrides[key] = float(values[key])
+    return overrides
 
 
 def style_page() -> None:
@@ -2536,51 +3190,146 @@ def style_page() -> None:
         """
         <style>
         :root {
-            --google-blue:#1a73e8;
-            --google-green:#188038;
-            --google-yellow:#fbbc04;
-            --google-red:#d93025;
-            --google-teal:#0f766e;
-            --app-bg:#f8fafd;
-            --surface:#ffffff;
-            --surface-soft:#f1f5ff;
-            --border:#dadce0;
-            --border-soft:#e8eaed;
-            --text:#202124;
-            --muted:#5f6368;
-            --muted-2:#80868b;
-            --shadow-sm:0 1px 2px rgba(60,64,67,0.12),0 1px 3px rgba(60,64,67,0.08);
-            --shadow-md:0 2px 6px rgba(60,64,67,0.12),0 4px 12px rgba(60,64,67,0.08);
-            --radius:10px;
+            --theme-bg:var(--background-color, Canvas);
+            --theme-secondary-bg:var(--secondary-background-color, color-mix(in srgb, Canvas 94%, CanvasText));
+            --theme-text:var(--text-color, CanvasText);
+            --theme-primary:var(--primary-color, Highlight);
+            --app-bg:var(--theme-secondary-bg);
+            --surface:var(--theme-bg);
+            --surface-elevated:color-mix(in srgb, var(--theme-bg) 94%, var(--theme-text));
+            --surface-soft:color-mix(in srgb, var(--theme-bg) 88%, var(--theme-primary));
+            --surface-muted:color-mix(in srgb, var(--theme-secondary-bg) 82%, var(--theme-bg));
+            --border:color-mix(in srgb, var(--theme-text) 26%, transparent);
+            --border-soft:color-mix(in srgb, var(--theme-text) 17%, transparent);
+            --border-strong:color-mix(in srgb, var(--theme-text) 34%, transparent);
+            --text:var(--theme-text);
+            --muted:color-mix(in srgb, var(--theme-text) 72%, var(--theme-bg));
+            --muted-2:color-mix(in srgb, var(--theme-text) 48%, var(--theme-bg));
+            --accent:var(--theme-primary);
+            --accent-strong:color-mix(in srgb, var(--theme-primary) 78%, var(--theme-text));
+            --accent-soft:color-mix(in srgb, var(--theme-primary) 14%, var(--theme-bg));
+            --accent-softer:color-mix(in srgb, var(--theme-primary) 8%, var(--theme-bg));
+            --accent-alt:color-mix(in srgb, var(--theme-primary) 66%, var(--theme-text));
+            --accent-warn:color-mix(in srgb, var(--theme-primary) 42%, var(--theme-text));
+            --accent-purple:color-mix(in srgb, var(--theme-primary) 58%, var(--theme-text));
+            --google-blue:var(--theme-primary);
+            --google-green:var(--accent-alt);
+            --google-yellow:var(--accent-warn);
+            --google-red:var(--accent-warn);
+            --google-teal:var(--accent-alt);
+            --shadow-sm:0 1px 2px color-mix(in srgb, var(--theme-text) 16%, transparent),0 2px 5px color-mix(in srgb, var(--theme-text) 9%, transparent);
+            --shadow-md:0 2px 7px color-mix(in srgb, var(--theme-text) 16%, transparent),0 10px 24px color-mix(in srgb, var(--theme-text) 10%, transparent);
+            --shadow-lg:0 3px 10px color-mix(in srgb, var(--theme-text) 16%, transparent),0 18px 42px color-mix(in srgb, var(--theme-text) 12%, transparent);
+            --radius:8px;
             --radius-sm:8px;
         }
-        .stApp {background:#f5f7fb;}
-        header {visibility:hidden;}
+        .stApp {background:var(--app-bg);}
+        header,
+        [data-testid="stHeader"] {
+            background:transparent !important;
+            height:2.75rem !important;
+            visibility:visible !important;
+            pointer-events:none !important;
+        }
         #MainMenu {visibility:hidden;}
         footer {visibility:hidden;}
-        [data-testid="stToolbar"] {visibility:hidden; height:0;}
+        [data-testid="stToolbar"] {
+            visibility:visible !important;
+            height:0 !important;
+            pointer-events:none !important;
+            overflow:visible !important;
+        }
+        [data-testid="stToolbar"] > div {
+            visibility:hidden !important;
+        }
+        [data-testid="stToolbar"] div:has(button[data-testid="stExpandSidebarButton"]),
+        [data-testid="stToolbar"] div:has(button[data-testid="stSidebarCollapseButton"]),
+        [data-testid="stToolbar"] div:has(button[data-testid="stBaseButton-headerNoPadding"]) {
+            visibility:visible !important;
+            display:flex !important;
+            pointer-events:none !important;
+        }
+        [data-testid="stToolbar"] button[data-testid="stBaseButton-headerNoPadding"] {
+            visibility:visible !important;
+            opacity:1 !important;
+            pointer-events:auto !important;
+            border:1px solid var(--border) !important;
+            border-radius:var(--radius) !important;
+            background:var(--surface) !important;
+            color:var(--text) !important;
+            box-shadow:var(--shadow-sm) !important;
+        }
+        [data-testid="stSidebarHeader"] [data-testid="stSidebarCollapseButton"],
+        [data-testid="stSidebarHeader"] [data-testid="stSidebarCollapseButton"] button,
+        [data-testid="stSidebarHeader"] button[data-testid="stBaseButton-headerNoPadding"] {
+            visibility:visible !important;
+            opacity:1 !important;
+            pointer-events:auto !important;
+        }
+        [data-testid="stSidebarHeader"] button[data-testid="stBaseButton-headerNoPadding"] {
+            border:1px solid var(--border) !important;
+            border-radius:var(--radius) !important;
+            background:var(--surface) !important;
+            color:var(--text) !important;
+            box-shadow:var(--shadow-sm) !important;
+        }
+        [data-testid="collapsedControl"],
+        button[data-testid="collapsedControl"],
+        button[data-testid="stExpandSidebarButton"],
+        button[data-testid="stSidebarCollapseButton"],
+        button[title*="sidebar" i],
+        button[aria-label*="sidebar" i],
+        button[title*="侧边栏"],
+        button[aria-label*="侧边栏"] {
+            visibility:visible !important;
+            display:flex !important;
+            opacity:1 !important;
+            position:fixed !important;
+            top:0.75rem !important;
+            left:0.75rem !important;
+            z-index:999999 !important;
+            pointer-events:auto !important;
+            width:2.25rem !important;
+            height:2.25rem !important;
+            align-items:center !important;
+            justify-content:center !important;
+            border:1px solid var(--border) !important;
+            border-radius:var(--radius) !important;
+            background:var(--surface) !important;
+            color:var(--text) !important;
+            box-shadow:var(--shadow-md) !important;
+        }
         .block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
         div[data-testid="stMetricValue"] {font-size: 1.85rem;}
         div[data-testid="stMetric"] {
-            background:#ffffff;
-            border:1px solid #d8dee6;
+            background:var(--surface);
+            border:1px solid var(--border);
             border-radius:8px;
             padding:14px 14px 10px 14px;
-            box-shadow:0 8px 24px rgba(24,39,75,0.06);
+            box-shadow:0 8px 24px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .stTabs [data-baseweb="tab-list"] {gap: 8px;}
         .stTabs [data-baseweb="tab"] {
-            background:#ffffff;
-            border:1px solid #d8dee6;
+            background:var(--surface);
+            border:1px solid var(--border);
             border-radius:8px;
             padding:8px 14px;
         }
+        /* 统一下拉菜单浮层的前端圆角与阴影 */
+        div[data-baseweb="menu"] {
+            border-radius:var(--radius) !important;
+            box-shadow:var(--shadow-md) !important;
+            border:1px solid var(--border-soft) !important;
+        }
+        div[data-baseweb="popover"] {
+            border-radius:var(--radius) !important;
+        }
         .prediction-card {
-            border: 1px solid #d8dee6;
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 18px 18px 12px 18px;
-            background: #ffffff;
-            box-shadow:0 8px 24px rgba(24,39,75,0.06);
+            background: var(--surface);
+            box-shadow:0 8px 24px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .forecast-overview {
             display:grid;
@@ -2591,12 +3340,12 @@ def style_page() -> None:
         .forecast-metric {
             position:relative;
             overflow:hidden;
-            background:#ffffff;
-            border:1px solid #d8dee6;
+            background:var(--surface);
+            border:1px solid var(--border);
             border-radius:10px;
             padding:15px 16px 14px 16px;
             min-height:132px;
-            box-shadow:0 10px 28px rgba(24,39,75,0.055);
+            box-shadow:0 10px 28px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .forecast-metric::before {
             content:"";
@@ -2608,13 +3357,13 @@ def style_page() -> None:
             background:var(--metric-color);
         }
         .forecast-metric-label {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.84rem;
             font-weight:800;
             margin-bottom:8px;
         }
         .forecast-metric-value {
-            color:#132033;
+            color:var(--text);
             font-size:1.72rem;
             font-weight:900;
             line-height:1.15;
@@ -2626,7 +3375,7 @@ def style_page() -> None:
             gap:6px;
             border-radius:999px;
             padding:5px 9px;
-            background:color-mix(in srgb, var(--metric-color) 12%, white);
+            background:color-mix(in srgb, var(--metric-color) 12%, var(--surface));
             color:var(--metric-color);
             font-size:0.86rem;
             font-weight:850;
@@ -2639,7 +3388,7 @@ def style_page() -> None:
         }
         .forecast-metric-detail {
             margin-top:8px;
-            color:#94a3b8;
+            color:var(--muted-2);
             font-size:0.78rem;
             font-weight:700;
         }
@@ -2648,23 +3397,23 @@ def style_page() -> None:
             grid-template-columns:minmax(0,1.45fr) minmax(280px,0.75fr);
             gap:18px;
             align-items:stretch;
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:12px;
-            background:#ffffff;
+            background:var(--surface);
             padding:18px;
-            box-shadow:0 14px 34px rgba(24,39,75,0.065);
+            box-shadow:0 14px 34px color-mix(in srgb, var(--text) 7%, transparent);
             margin:6px 0 14px 0;
         }
         .forecast-panel-main {
             border-radius:10px;
-            background:#f8fafc;
+            background:var(--surface-muted);
             padding:18px 20px;
-            border:1px solid #e5eaf0;
+            border:1px solid var(--border-soft);
             display:flex;
             flex-direction:column;
         }
         .forecast-place {
-            color:#475569;
+            color:var(--muted);
             font-size:0.96rem;
             font-weight:800;
             margin-bottom:8px;
@@ -2676,31 +3425,31 @@ def style_page() -> None:
             margin-bottom:10px;
         }
         .forecast-number span {
-            color:#64748b;
+            color:var(--muted);
             font-size:1.15rem;
             font-weight:800;
             margin-left:8px;
         }
         .forecast-model-line {
-            color:#475569;
+            color:var(--muted);
             font-size:0.95rem;
             line-height:1.55;
         }
         .forecast-model-line b {
-            color:#132033;
+            color:var(--text);
         }
         .forecast-model-line span {
             display:inline-flex;
             margin-left:8px;
             border-radius:999px;
             padding:3px 8px;
-            color:#1d4ed8;
-            background:#dbeafe;
+            color:var(--accent-strong);
+            background:var(--accent-soft);
             font-size:0.78rem;
             font-weight:800;
         }
         .forecast-main-note {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.9rem;
             line-height:1.55;
             margin:10px 0 14px 0;
@@ -2715,11 +3464,11 @@ def style_page() -> None:
         }
         .forecast-chip-row span {
             display:inline-flex;
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:999px;
             padding:6px 9px;
-            background:#ffffff;
-            color:#334155;
+            background:var(--surface);
+            color:var(--text);
             font-size:0.8rem;
             font-weight:800;
         }
@@ -2728,23 +3477,23 @@ def style_page() -> None:
             gap:10px;
         }
         .forecast-side-item {
-            border:1px solid #e5eaf0;
+            border:1px solid var(--border-soft);
             border-radius:10px;
             padding:12px 13px;
-            background:#ffffff;
+            background:var(--surface);
         }
         .forecast-side-item div {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.8rem;
             font-weight:800;
             margin-bottom:4px;
         }
         .forecast-side-item strong {
-            color:#132033;
+            color:var(--text);
             font-size:1.02rem;
             line-height:1.35;
         }
-        .small-note {color: #5f6b7a; font-size: 0.9rem;}
+        .small-note {color: var(--muted); font-size: 0.9rem;}
         .scenario-strip {
             display:grid;
             grid-template-columns:repeat(6,minmax(0,1fr));
@@ -2752,22 +3501,22 @@ def style_page() -> None:
             margin:12px 0 16px 0;
         }
         .scenario-item {
-            background:#f8fafc;
-            border:1px solid #e5eaf0;
+            background:var(--surface-muted);
+            border:1px solid var(--border-soft);
             border-radius:10px;
             padding:11px 12px;
         }
         .scenario-item.wide {
-            background:#eef6ff;
-            border-color:#bfdbfe;
+            background:var(--accent-soft);
+            border-color:var(--border-soft);
         }
         .scenario-label {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.82rem;
             margin-bottom:4px;
         }
         .scenario-value {
-            color:#132033;
+            color:var(--text);
             font-weight:700;
             font-size:1rem;
         }
@@ -2778,26 +3527,26 @@ def style_page() -> None:
             margin:14px 0;
         }
         .factor-card {
-            background:#ffffff;
-            border:1px solid #d8dee6;
-            border-top:4px solid #2563eb;
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-top:4px solid var(--accent);
             border-radius:8px;
             padding:12px;
             min-height:112px;
-            box-shadow:0 8px 24px rgba(24,39,75,0.05);
+            box-shadow:0 8px 24px color-mix(in srgb, var(--text) 5%, transparent);
         }
-        .factor-title {color:#64748b;font-size:0.86rem;margin-bottom:6px;}
+        .factor-title {color:var(--muted);font-size:0.86rem;margin-bottom:6px;}
         .factor-value {font-size:1.15rem;font-weight:800;margin-bottom:6px;}
-        .factor-detail {color:#475569;font-size:0.88rem;line-height:1.45;}
+        .factor-detail {color:var(--muted);font-size:0.88rem;line-height:1.45;}
         .model-card {
-            background:#ffffff;
-            border:1px solid #d8dee6;
+            background:var(--surface);
+            border:1px solid var(--border);
             border-radius:8px;
             padding:14px;
             min-height:130px;
         }
         .model-card b {display:block;margin-bottom:6px;}
-        .model-card p {color:#475569;margin:0;line-height:1.55;}
+        .model-card p {color:var(--muted);margin:0;line-height:1.55;}
         .model-intro {
             margin:4px 0 20px 0;
         }
@@ -2810,43 +3559,43 @@ def style_page() -> None:
         .model-hero-card {
             position:relative;
             overflow:hidden;
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:12px;
             padding:20px 22px 18px 22px;
             min-height:190px;
-            box-shadow:0 4px 14px rgba(24,39,75,0.03);
+            box-shadow:0 4px 14px color-mix(in srgb, var(--text) 3%, transparent);
         }
         .model-hero-card.primary {
-            background:#ffffff;
-            border-color:#bfdbfe;
+            background:var(--surface);
+            border-color:var(--border-soft);
         }
         .model-hero-card.muted {
-            background:#ffffff;
+            background:var(--surface);
         }
         .model-kicker {
             display:inline-flex;
             align-items:center;
             border-radius:999px;
             padding:4px 10px;
-            background:#dbeafe;
-            color:#1d4ed8;
+            background:var(--accent-soft);
+            color:var(--accent-strong);
             font-size:0.78rem;
             font-weight:800;
             margin-bottom:10px;
         }
         .model-hero-card.muted .model-kicker {
-            background:#e2e8f0;
-            color:#475569;
+            background:var(--surface-muted);
+            color:var(--muted);
         }
         .model-hero-card h3 {
             margin:0 0 10px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.25rem;
             line-height:1.35;
         }
         .model-hero-card p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.72;
             font-size:0.96rem;
             max-width:760px;
@@ -2861,16 +3610,16 @@ def style_page() -> None:
             display:inline-flex;
             align-items:baseline;
             gap:6px;
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:999px;
             padding:7px 11px;
-            background:rgba(255,255,255,0.78);
-            color:#132033;
+            background:color-mix(in srgb, var(--surface) 78%, transparent);
+            color:var(--text);
             font-weight:800;
-            box-shadow:0 6px 18px rgba(24,39,75,0.05);
+            box-shadow:0 6px 18px color-mix(in srgb, var(--text) 5%, transparent);
         }
         .score-pill b {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.72rem;
             letter-spacing:0;
         }
@@ -2882,12 +3631,12 @@ def style_page() -> None:
         }
         .model-route-card {
             position:relative;
-            background:#ffffff;
-            border:1px solid #d8dee6;
+            background:var(--surface);
+            border:1px solid var(--border);
             border-radius:10px;
             padding:15px 15px 14px 15px;
             min-height:210px;
-            box-shadow:0 10px 26px rgba(24,39,75,0.055);
+            box-shadow:0 10px 26px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .model-route-card::before {
             content:"";
@@ -2898,10 +3647,10 @@ def style_page() -> None:
             height:4px;
             background:var(--route-color);
         }
-        .model-route-card.accent-blue {--route-color:#2563eb;--route-soft:#eff6ff;--route-text:#1d4ed8;}
-        .model-route-card.accent-green {--route-color:#059669;--route-soft:#ecfdf5;--route-text:#047857;}
-        .model-route-card.accent-amber {--route-color:#d97706;--route-soft:#fffbeb;--route-text:#b45309;}
-        .model-route-card.accent-purple {--route-color:#7c3aed;--route-soft:#f5f3ff;--route-text:#6d28d9;}
+        .model-route-card.accent-blue {--route-color:var(--accent);--route-soft:var(--accent-soft);--route-text:var(--accent-strong);}
+        .model-route-card.accent-green {--route-color:var(--accent-alt);--route-soft:var(--accent-soft);--route-text:var(--accent-alt);}
+        .model-route-card.accent-amber {--route-color:var(--accent-warn);--route-soft:var(--accent-soft);--route-text:var(--accent-warn);}
+        .model-route-card.accent-purple {--route-color:var(--accent-purple);--route-soft:var(--accent-soft);--route-text:var(--accent-purple);}
         .route-badge {
             display:inline-flex;
             border-radius:999px;
@@ -2914,21 +3663,21 @@ def style_page() -> None:
         }
         .model-route-card h4 {
             margin:0 0 9px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.02rem;
             line-height:1.38;
         }
         .model-route-card p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.62;
             font-size:0.92rem;
         }
         .route-meta {
             margin-top:12px;
             padding-top:10px;
-            border-top:1px solid #e5eaf0;
-            color:#64748b;
+            border-top:1px solid var(--border-soft);
+            color:var(--muted);
             font-size:0.82rem;
             line-height:1.45;
             font-weight:700;
@@ -2945,10 +3694,10 @@ def style_page() -> None:
         }
         .intro-hero-main,
         .intro-score-panel {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:8px;
-            background:#ffffff;
-            box-shadow:0 12px 30px rgba(24,39,75,0.06);
+            background:var(--surface);
+            box-shadow:0 12px 30px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .intro-hero-main {
             padding:22px 24px 20px 24px;
@@ -2956,11 +3705,11 @@ def style_page() -> None:
         }
         .intro-score-panel {
             padding:20px;
-            background:#f8fafc;
+            background:var(--surface-muted);
             border-top:4px solid var(--intro-accent);
         }
-        .intro-hero.prediction {--intro-accent:#2563eb;--intro-soft:#eff6ff;--intro-text:#1d4ed8;}
-        .intro-hero.attribution {--intro-accent:#059669;--intro-soft:#ecfdf5;--intro-text:#047857;}
+        .intro-hero.prediction {--intro-accent:var(--accent);--intro-soft:var(--accent-soft);--intro-text:var(--accent-strong);}
+        .intro-hero.attribution {--intro-accent:var(--accent-alt);--intro-soft:var(--accent-soft);--intro-text:var(--accent-alt);}
         .intro-kicker,
         .intro-score-label,
         .model-card-tag,
@@ -2980,19 +3729,19 @@ def style_page() -> None:
         }
         .intro-hero h3 {
             margin:0 0 10px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.36rem;
             line-height:1.35;
         }
         .intro-hero h4 {
             margin:0 0 10px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.06rem;
             line-height:1.35;
         }
         .intro-hero p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.76;
             font-size:0.96rem;
         }
@@ -3003,10 +3752,10 @@ def style_page() -> None:
             margin-top:16px;
         }
         .intro-chip-row span {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:999px;
-            background:#ffffff;
-            color:#334155;
+            background:var(--surface);
+            color:var(--text);
             padding:6px 10px;
             font-size:0.8rem;
             font-weight:850;
@@ -3016,11 +3765,11 @@ def style_page() -> None:
             padding:0 0 0 14px;
             margin:26px 0 12px 0;
         }
-        .section-bridge.blue {--bridge-accent:#2563eb;}
-        .section-bridge.green {--bridge-accent:#059669;}
-        .section-bridge.slate {--bridge-accent:#64748b;}
+        .section-bridge.blue {--bridge-accent:var(--accent);}
+        .section-bridge.green {--bridge-accent:var(--accent-alt);}
+        .section-bridge.slate {--bridge-accent:var(--muted);}
         .section-bridge-title {
-            color:#132033;
+            color:var(--text);
             font-size:1.22rem;
             line-height:1.35;
             font-weight:900;
@@ -3033,18 +3782,18 @@ def style_page() -> None:
         }
         .intro-model-card {
             position:relative;
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:8px;
-            background:#ffffff;
+            background:var(--surface);
             padding:16px;
             min-height:238px;
-            box-shadow:0 9px 24px rgba(24,39,75,0.05);
+            box-shadow:0 9px 24px color-mix(in srgb, var(--text) 5%, transparent);
             border-top:4px solid var(--card-accent);
         }
-        .intro-model-card.blue {--card-accent:#2563eb;--card-soft:#eff6ff;--card-text:#1d4ed8;}
-        .intro-model-card.green {--card-accent:#059669;--card-soft:#ecfdf5;--card-text:#047857;}
-        .intro-model-card.amber {--card-accent:#d97706;--card-soft:#fffbeb;--card-text:#b45309;}
-        .intro-model-card.teal {--card-accent:#0f766e;--card-soft:#ecfdf5;--card-text:#0f766e;}
+        .intro-model-card.blue {--card-accent:var(--accent);--card-soft:var(--accent-soft);--card-text:var(--accent-strong);}
+        .intro-model-card.green {--card-accent:var(--accent-alt);--card-soft:var(--accent-soft);--card-text:var(--accent-alt);}
+        .intro-model-card.amber {--card-accent:var(--accent-warn);--card-soft:var(--accent-soft);--card-text:var(--accent-warn);}
+        .intro-model-card.teal {--card-accent:var(--accent-alt);--card-soft:var(--accent-soft);--card-text:var(--accent-alt);}
         .model-card-tag {
             background:var(--card-soft);
             color:var(--card-text);
@@ -3052,13 +3801,13 @@ def style_page() -> None:
         }
         .intro-model-card h4 {
             margin:0 0 9px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1rem;
             line-height:1.35;
         }
         .intro-model-card p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.62;
             font-size:0.9rem;
         }
@@ -3081,59 +3830,59 @@ def style_page() -> None:
             grid-template-columns:repeat(3,minmax(0,1fr));
         }
         .method-band > div {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:8px;
-            background:#ffffff;
+            background:var(--surface);
             padding:17px;
-            box-shadow:0 8px 22px rgba(24,39,75,0.045);
+            box-shadow:0 8px 22px color-mix(in srgb, var(--text) 5%, transparent);
         }
         .method-band-kicker {
-            background:#f1f5f9;
-            color:#475569;
+            background:var(--surface-muted);
+            color:var(--muted);
             margin-bottom:10px;
         }
         .method-band h4 {
             margin:0 0 9px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1rem;
             line-height:1.38;
         }
         .method-band p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.7;
             font-size:0.91rem;
         }
         .explain-band {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-left:4px solid var(--explain-accent);
             border-radius:8px;
-            background:#ffffff;
+            background:var(--surface);
             padding:17px 18px;
             margin:12px 0 16px 0;
-            box-shadow:0 8px 22px rgba(24,39,75,0.045);
+            box-shadow:0 8px 22px color-mix(in srgb, var(--text) 5%, transparent);
         }
-        .explain-band.blue {--explain-accent:#2563eb;}
-        .explain-band.green {--explain-accent:#059669;}
-        .explain-band.amber {--explain-accent:#d97706;}
+        .explain-band.blue {--explain-accent:var(--accent);}
+        .explain-band.green {--explain-accent:var(--accent-alt);}
+        .explain-band.amber {--explain-accent:var(--accent-warn);}
         .explain-band h4 {
             margin:0 0 8px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.04rem;
         }
         .explain-band p {
             margin:0 0 8px 0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.7;
             font-size:0.92rem;
         }
         .explain-band p:last-child {margin-bottom:0;}
         .v2-card-note {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:8px;
-            background:#f8fafc;
+            background:var(--surface-muted);
             padding:13px 14px;
-            color:#475569;
+            color:var(--muted);
             line-height:1.65;
             font-size:0.91rem;
             margin:8px 0 12px 0;
@@ -3148,36 +3897,36 @@ def style_page() -> None:
         .training-score-card {
             position:relative;
             overflow:hidden;
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:12px;
-            background:#ffffff;
-            box-shadow:0 4px 14px rgba(24,39,75,0.03);
+            background:var(--surface);
+            box-shadow:0 4px 14px color-mix(in srgb, var(--text) 3%, transparent);
         }
         .training-hero {
             padding:22px 24px 20px 24px;
-            background:#ffffff;
-            border-color:#bfdbfe;
+            background:var(--surface);
+            border-color:var(--border-soft);
         }
         .training-kicker {
             display:inline-flex;
             border-radius:999px;
             padding:5px 10px;
-            background:#dbeafe;
-            color:#1d4ed8;
+            background:var(--accent-soft);
+            color:var(--accent-strong);
             font-size:0.78rem;
             font-weight:900;
             margin-bottom:10px;
         }
         .training-hero h3 {
             margin:0 0 10px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.28rem;
             line-height:1.35;
         }
         .training-hero p,
         .training-score-card p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.72;
             font-size:0.96rem;
         }
@@ -3189,27 +3938,27 @@ def style_page() -> None:
         }
         .training-chip-row span {
             display:inline-flex;
-            border:1px solid #c7d2fe;
+            border:1px solid var(--border);
             border-radius:999px;
             padding:6px 10px;
-            background:#ffffff;
-            color:#334155;
+            background:var(--surface);
+            color:var(--text);
             font-size:0.8rem;
             font-weight:850;
         }
         .training-score-card {
             padding:20px;
-            background:#ffffff;
+            background:var(--surface);
         }
         .training-score-label {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.82rem;
             font-weight:900;
             margin-bottom:10px;
         }
         .training-score-card h4 {
             margin:0 0 12px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.05rem;
         }
         .training-family-grid {
@@ -3220,12 +3969,12 @@ def style_page() -> None:
         }
         .training-family-card {
             position:relative;
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:16px 16px 14px 16px;
             min-height:188px;
-            box-shadow:0 10px 26px rgba(24,39,75,0.055);
+            box-shadow:0 10px 26px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .training-family-card::before {
             content:"";
@@ -3236,9 +3985,9 @@ def style_page() -> None:
             height:4px;
             background:var(--family-color);
         }
-        .training-family-card.blue {--family-color:#2563eb;--family-soft:#eff6ff;--family-text:#1d4ed8;}
-        .training-family-card.green {--family-color:#059669;--family-soft:#ecfdf5;--family-text:#047857;}
-        .training-family-card.amber {--family-color:#d97706;--family-soft:#fffbeb;--family-text:#b45309;}
+        .training-family-card.blue {--family-color:var(--accent);--family-soft:var(--accent-soft);--family-text:var(--accent-strong);}
+        .training-family-card.green {--family-color:var(--accent-alt);--family-soft:var(--accent-soft);--family-text:var(--accent-alt);}
+        .training-family-card.amber {--family-color:var(--accent-warn);--family-soft:var(--accent-soft);--family-text:var(--accent-warn);}
         .family-index {
             display:inline-flex;
             border-radius:999px;
@@ -3251,20 +4000,20 @@ def style_page() -> None:
         }
         .training-family-card h4 {
             margin:0 0 9px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.02rem;
         }
         .training-family-card p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.62;
             font-size:0.92rem;
         }
         .family-foot {
             margin-top:12px;
             padding-top:10px;
-            border-top:1px solid #e5eaf0;
-            color:#64748b;
+            border-top:1px solid var(--border-soft);
+            color:var(--muted);
             font-size:0.82rem;
             font-weight:850;
         }
@@ -3275,20 +4024,20 @@ def style_page() -> None:
             margin:12px 0 18px 0;
         }
         .flow-step {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:14px;
             min-height:170px;
-            box-shadow:0 8px 22px rgba(24,39,75,0.045);
+            box-shadow:0 8px 22px color-mix(in srgb, var(--text) 5%, transparent);
         }
         .flow-step b {
             display:inline-flex;
             align-items:center;
             justify-content:center;
             border-radius:999px;
-            background:#eef6ff;
-            color:#2563eb;
+            background:var(--accent-soft);
+            color:var(--accent);
             font-size:0.78rem;
             line-height:1.2;
             padding:5px 9px;
@@ -3297,12 +4046,12 @@ def style_page() -> None:
         }
         .flow-step h4 {
             margin:0 0 8px 0;
-            color:#132033;
+            color:var(--text);
             font-size:0.98rem;
         }
         .flow-step p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             font-size:0.86rem;
             line-height:1.58;
         }
@@ -3313,20 +4062,20 @@ def style_page() -> None:
             margin:12px 0 16px 0;
         }
         .training-period-card {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:15px;
-            box-shadow:0 8px 22px rgba(24,39,75,0.045);
+            box-shadow:0 8px 22px color-mix(in srgb, var(--text) 5%, transparent);
         }
         .training-period-card h4 {
             margin:0 0 8px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1rem;
         }
         .training-period-card p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.6;
             font-size:0.9rem;
         }
@@ -3337,18 +4086,18 @@ def style_page() -> None:
             margin:12px 0 16px 0;
         }
         .method-panel {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:17px;
-            box-shadow:0 8px 22px rgba(24,39,75,0.045);
+            box-shadow:0 8px 22px color-mix(in srgb, var(--text) 5%, transparent);
         }
         .method-kicker {
             display:inline-flex;
             border-radius:999px;
             padding:4px 9px;
-            background:#eef6ff;
-            color:#2563eb;
+            background:var(--accent-soft);
+            color:var(--accent);
             font-size:0.76rem;
             font-weight:900;
             margin-bottom:10px;
@@ -3357,14 +4106,14 @@ def style_page() -> None:
         .tuning-main h4,
         .tuning-side h4 {
             margin:0 0 9px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.04rem;
             line-height:1.38;
         }
         .method-panel p,
         .tuning-main p {
             margin:0 0 9px 0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.68;
             font-size:0.92rem;
         }
@@ -3376,17 +4125,17 @@ def style_page() -> None:
         }
         .tuning-main,
         .tuning-side {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:17px;
-            box-shadow:0 10px 26px rgba(24,39,75,0.055);
+            box-shadow:0 10px 26px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .tuning-main {
-            border-top:4px solid #2563eb;
+            border-top:4px solid var(--accent);
         }
         .tuning-side {
-            border-top:4px solid #059669;
+            border-top:4px solid var(--accent-alt);
         }
         .param-grid {
             display:grid;
@@ -3395,20 +4144,20 @@ def style_page() -> None:
             margin-top:12px;
         }
         .param-row {
-            border:1px solid #e5eaf0;
+            border:1px solid var(--border-soft);
             border-radius:9px;
-            background:#f8fafc;
+            background:var(--surface-muted);
             padding:10px 11px;
             min-height:74px;
         }
         .param-row b {
             display:block;
-            color:#132033;
+            color:var(--text);
             font-size:0.86rem;
             margin-bottom:4px;
         }
         .param-row span {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.82rem;
             line-height:1.45;
         }
@@ -3417,19 +4166,19 @@ def style_page() -> None:
             align-items:center;
             justify-content:space-between;
             gap:12px;
-            border:1px solid #e5eaf0;
+            border:1px solid var(--border-soft);
             border-radius:9px;
-            background:#f8fafc;
+            background:var(--surface-muted);
             padding:10px 11px;
             margin-top:8px;
         }
         .tuning-stat span {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.84rem;
             font-weight:800;
         }
         .tuning-stat b {
-            color:#132033;
+            color:var(--text);
             font-size:0.95rem;
             white-space:nowrap;
         }
@@ -3440,20 +4189,20 @@ def style_page() -> None:
             margin:12px 0 16px 0;
         }
         .training-detail-card {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:15px;
-            box-shadow:0 8px 22px rgba(24,39,75,0.045);
+            box-shadow:0 8px 22px color-mix(in srgb, var(--text) 5%, transparent);
         }
         .training-detail-card h4 {
             margin:0 0 8px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1rem;
         }
         .training-detail-card p {
             margin:0 0 8px 0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.6;
             font-size:0.9rem;
         }
@@ -3464,18 +4213,18 @@ def style_page() -> None:
             margin:12px 0 4px 0;
         }
         .artifact-card {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#f8fafc;
+            background:var(--surface-muted);
             padding:13px;
         }
         .artifact-card b {
             display:block;
-            color:#132033;
+            color:var(--text);
             margin-bottom:5px;
         }
         .artifact-card span {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.86rem;
             line-height:1.5;
         }
@@ -3488,12 +4237,12 @@ def style_page() -> None:
         .period-conclusion-card {
             position:relative;
             overflow:hidden;
-            background:#ffffff;
-            border:1px solid #d8dee6;
+            background:var(--surface);
+            border:1px solid var(--border);
             border-radius:8px;
             padding:16px 16px 15px 16px;
             min-height:188px;
-            box-shadow:0 10px 28px rgba(24,39,75,0.06);
+            box-shadow:0 10px 28px color-mix(in srgb, var(--text) 6%, transparent);
         }
         .period-conclusion-card::before {
             content:"";
@@ -3517,7 +4266,7 @@ def style_page() -> None:
         }
         .period-conclusion-card h4 {
             margin:0 0 10px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.05rem;
             line-height:1.35;
         }
@@ -3528,17 +4277,17 @@ def style_page() -> None:
             margin:0 0 12px 0;
         }
         .period-factor {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:999px;
             padding:3px 8px;
-            color:#334155;
-            background:#f8fafc;
+            color:var(--text);
+            background:var(--surface-muted);
             font-size:0.78rem;
             font-weight:700;
         }
         .period-conclusion-card p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.68;
             font-size:0.93rem;
         }
@@ -3546,8 +4295,8 @@ def style_page() -> None:
             margin-top:10px;
             padding:8px 10px;
             border-radius:8px;
-            background:#fff7ed;
-            color:#9a3412;
+            background:var(--accent-soft);
+            color:var(--accent-warn);
             font-size:0.82rem;
             line-height:1.5;
         }
@@ -3559,35 +4308,35 @@ def style_page() -> None:
         }
         .research-upgrade-main,
         .research-upgrade-side {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
-            box-shadow:0 10px 26px rgba(24,39,75,0.055);
+            background:var(--surface);
+            box-shadow:0 10px 26px color-mix(in srgb, var(--text) 6%, transparent);
             padding:18px 20px;
-            border-top:4px solid #0f766e;
+            border-top:4px solid var(--accent-alt);
         }
         .research-upgrade-side {
-            background:#f8fafc;
-            border-top-color:#64748b;
+            background:var(--surface-muted);
+            border-top-color:var(--muted);
         }
         .research-kicker {
             display:inline-flex;
             border-radius:999px;
             padding:5px 10px;
-            background:#ecfdf5;
-            color:#0f766e;
+            background:var(--accent-soft);
+            color:var(--accent-alt);
             font-size:0.76rem;
             font-weight:900;
             margin-bottom:10px;
         }
         .research-kicker.muted {
-            background:#e2e8f0;
-            color:#475569;
+            background:var(--surface-muted);
+            color:var(--muted);
         }
         .research-upgrade-main h3,
         .research-upgrade-side h4 {
             margin:0 0 10px 0;
-            color:#132033;
+            color:var(--text);
             line-height:1.35;
         }
         .research-upgrade-main h3 {font-size:1.22rem;}
@@ -3595,21 +4344,21 @@ def style_page() -> None:
         .research-upgrade-main p,
         .research-upgrade-side p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.7;
             font-size:0.93rem;
         }
         .research-evidence-panel {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:8px;
-            background:#ffffff;
+            background:var(--surface);
             padding:17px 18px 15px 18px;
             margin:12px 0 16px 0;
-            box-shadow:0 4px 14px rgba(24,39,75,0.03);
+            box-shadow:0 4px 14px color-mix(in srgb, var(--text) 3%, transparent);
         }
         .research-evidence-panel h4 {
             margin:0 0 12px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.04rem;
             line-height:1.35;
         }
@@ -3621,7 +4370,7 @@ def style_page() -> None:
         .research-evidence-item {
             position:relative;
             padding:0 0 12px 16px;
-            border-bottom:1px solid #e5eaf0;
+            border-bottom:1px solid var(--border-soft);
         }
         .research-evidence-item:nth-last-child(-n+2) {
             border-bottom:0;
@@ -3634,30 +4383,30 @@ def style_page() -> None:
             width:5px;
             height:5px;
             border-radius:999px;
-            background:#0f766e;
+            background:var(--accent-alt);
         }
         .research-evidence-item p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.68;
             font-size:0.9rem;
         }
         .research-brief {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:20px 22px;
             margin:10px 0 18px 0;
-            box-shadow:0 6px 18px rgba(24,39,75,0.035);
+            box-shadow:0 6px 18px color-mix(in srgb, var(--text) 4%, transparent);
         }
         .research-brief-head {
-            border-bottom:1px solid #e5eaf0;
+            border-bottom:1px solid var(--border-soft);
             padding-bottom:16px;
             margin-bottom:16px;
         }
         .research-brief-head h3 {
             margin:0 0 10px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.26rem;
             line-height:1.38;
         }
@@ -3665,7 +4414,7 @@ def style_page() -> None:
         .research-note p,
         .research-boundary-panel p {
             margin:0;
-            color:#475569;
+            color:var(--muted);
             line-height:1.76;
             font-size:0.94rem;
         }
@@ -3673,16 +4422,16 @@ def style_page() -> None:
             display:grid;
             grid-template-columns:repeat(2,minmax(0,1fr));
             gap:0;
-            border:1px solid #e5eaf0;
+            border:1px solid var(--border-soft);
             border-radius:8px;
             overflow:hidden;
             margin-top:14px;
         }
         .research-note {
             padding:15px 16px;
-            border-right:1px solid #e5eaf0;
-            border-bottom:1px solid #e5eaf0;
-            background:#ffffff;
+            border-right:1px solid var(--border-soft);
+            border-bottom:1px solid var(--border-soft);
+            background:var(--surface);
         }
         .research-note:nth-child(2n) {
             border-right:0;
@@ -3693,15 +4442,15 @@ def style_page() -> None:
         .research-note h4,
         .research-boundary-panel h4 {
             margin:0 0 8px 0;
-            color:#132033;
+            color:var(--text);
             font-size:1.02rem;
             line-height:1.36;
         }
         .research-boundary-panel {
             margin-top:14px;
             padding:14px 16px;
-            border-left:3px solid #64748b;
-            background:#f8fafc;
+            border-left:3px solid var(--muted);
+            background:var(--surface-muted);
             border-radius:8px;
         }
         .research-stat-grid {
@@ -3711,36 +4460,34 @@ def style_page() -> None:
             margin-top:16px;
         }
         .research-stat-tile {
-            border:1px solid #d8dee6;
+            border:1px solid var(--border);
             border-radius:9px;
-            background:#f8fafc;
+            background:var(--surface-muted);
             padding:13px 14px;
             min-height:136px;
         }
         .research-stat-tile span {
             display:block;
-            color:#64748b;
+            color:var(--muted);
             font-size:0.76rem;
             font-weight:900;
             margin-bottom:7px;
         }
         .research-stat-tile b {
             display:block;
-            color:#0f766e;
+            color:var(--accent-alt);
             font-size:0.98rem;
             line-height:1.42;
             margin-bottom:8px;
         }
         .research-stat-tile p {
-            color:#64748b;
+            color:var(--muted);
             font-size:0.76rem;
             line-height:1.55;
         }
         /* Unified Material-like layer */
         .stApp {
-            background:
-                linear-gradient(180deg, #ffffff 0, var(--app-bg) 240px),
-                var(--app-bg);
+            background:var(--app-bg);
             color:var(--text);
             font-family: Arial, "Helvetica Neue", sans-serif;
         }
@@ -3765,8 +4512,11 @@ def style_page() -> None:
             letter-spacing:0;
         }
         .app-hero {
-            display:block;
-            margin:4px 0 18px 0;
+            display:grid;
+            grid-template-columns:minmax(0,1.35fr) minmax(300px,0.65fr);
+            gap:16px;
+            align-items:stretch;
+            margin:8px 0 18px 0;
         }
         .app-hero-main,
         .app-hero-side,
@@ -3796,17 +4546,19 @@ def style_page() -> None:
             background:var(--surface);
             border:1px solid var(--border);
             border-radius:var(--radius);
-            box-shadow:var(--shadow-sm);
+            box-shadow:var(--shadow-md);
         }
         .app-hero-main {
             padding:24px 26px;
             border-top:4px solid var(--google-blue);
+            box-shadow:var(--shadow-lg);
         }
         .app-hero-side {
             padding:18px;
             display:grid;
             gap:10px;
-            background:#ffffff;
+            background:var(--surface);
+            box-shadow:var(--shadow-lg);
         }
         .app-kicker,
         .page-guide-kicker,
@@ -3815,7 +4567,7 @@ def style_page() -> None:
             width:fit-content;
             border-radius:999px;
             padding:5px 10px;
-            background:#e8f0fe;
+            background:var(--accent-soft);
             color:var(--google-blue);
             font-size:0.76rem;
             line-height:1.2;
@@ -3846,9 +4598,9 @@ def style_page() -> None:
         .training-chip-row span,
         .intro-chip-row span,
         .forecast-chip-row span {
-            border:1px solid #d2e3fc;
-            background:#ffffff;
-            color:#3c4043;
+            border:1px solid var(--border);
+            background:var(--surface-muted);
+            color:var(--text);
             border-radius:999px;
             padding:6px 10px;
             font-size:0.8rem;
@@ -3858,10 +4610,11 @@ def style_page() -> None:
             display:flex;
             gap:10px;
             align-items:flex-start;
-            border:1px solid var(--border-soft);
+            border:1px solid var(--border);
             border-radius:8px;
             padding:12px;
-            background:#fafcff;
+            background:var(--surface-muted);
+            box-shadow:var(--shadow-sm);
         }
         .app-side-step b {
             display:inline-flex;
@@ -3871,7 +4624,7 @@ def style_page() -> None:
             width:26px;
             height:26px;
             border-radius:999px;
-            background:#e8f0fe;
+            background:var(--accent-soft);
             color:var(--google-blue);
             font-size:0.86rem;
         }
@@ -3890,10 +4643,10 @@ def style_page() -> None:
             margin:10px 0 16px 0;
             border-top:4px solid var(--guide-color);
         }
-        .page-guide.blue {--guide-color:var(--google-blue);--guide-soft:#e8f0fe;--guide-text:var(--google-blue);}
-        .page-guide.green {--guide-color:var(--google-green);--guide-soft:#e6f4ea;--guide-text:var(--google-green);}
-        .page-guide.amber {--guide-color:var(--google-yellow);--guide-soft:#fef7e0;--guide-text:#b06000;}
-        .page-guide.teal {--guide-color:var(--google-teal);--guide-soft:#e6f4f1;--guide-text:var(--google-teal);}
+        .page-guide.blue {--guide-color:var(--google-blue);--guide-soft:var(--accent-soft);--guide-text:var(--google-blue);}
+        .page-guide.green {--guide-color:var(--google-green);--guide-soft:var(--accent-soft);--guide-text:var(--google-green);}
+        .page-guide.amber {--guide-color:var(--google-yellow);--guide-soft:var(--accent-soft);--guide-text:var(--accent-warn);}
+        .page-guide.teal {--guide-color:var(--google-teal);--guide-soft:var(--accent-soft);--guide-text:var(--google-teal);}
         .page-guide .page-guide-kicker {
             background:var(--guide-soft);
             color:var(--guide-text);
@@ -3917,9 +4670,9 @@ def style_page() -> None:
             gap:10px;
         }
         .page-guide-item {
-            border:1px solid var(--border-soft);
+            border:1px solid var(--border);
             border-radius:8px;
-            background:#fafcff;
+            background:var(--surface-muted);
             padding:12px 13px;
             min-height:118px;
         }
@@ -3938,15 +4691,15 @@ def style_page() -> None:
         }
         .stTabs [data-baseweb="tab-list"] {
             gap:6px;
-            background:#ffffff;
-            border:1px solid var(--border);
+            background:var(--surface);
+            border:1px solid var(--border-strong);
             border-radius:10px;
             padding:5px;
             box-shadow:var(--shadow-sm);
         }
         .stTabs [data-baseweb="tab"] {
             height:38px;
-            border:0;
+            border:1px solid transparent;
             border-radius:8px;
             background:transparent;
             color:var(--muted);
@@ -3954,12 +4707,14 @@ def style_page() -> None:
             font-weight:700;
         }
         .stTabs [aria-selected="true"] {
-            background:#e8f0fe !important;
+            background:var(--accent-soft) !important;
+            border-color:var(--border-soft) !important;
             color:var(--google-blue) !important;
         }
         section[data-testid="stSidebar"] {
-            background:#ffffff;
-            border-right:1px solid var(--border-soft);
+            background:var(--surface);
+            border-right:1px solid var(--border-strong);
+            box-shadow:var(--shadow-sm);
         }
         section[data-testid="stSidebar"] h2,
         section[data-testid="stSidebar"] h3 {
@@ -3969,8 +4724,8 @@ def style_page() -> None:
         button[kind="primary"],
         div[data-testid="stFormSubmitButton"] button {
             border-radius:8px !important;
-            border:1px solid #d2e3fc !important;
-            background:#ffffff !important;
+            border:1px solid var(--border) !important;
+            background:var(--surface) !important;
             color:var(--google-blue) !important;
             font-weight:700 !important;
             box-shadow:none !important;
@@ -3978,7 +4733,7 @@ def style_page() -> None:
         div[data-testid="stFormSubmitButton"] button,
         button[kind="primary"] {
             background:var(--google-blue) !important;
-            color:#ffffff !important;
+            color:var(--surface) !important;
             border-color:var(--google-blue) !important;
         }
         .stButton > button:hover,
@@ -4001,29 +4756,29 @@ def style_page() -> None:
         }
         div[data-testid="stPlotlyChart"],
         div[data-testid="stDataFrame"] {
-            border:1px solid var(--border);
+            border:1px solid var(--border-strong);
             border-radius:10px;
-            background:#ffffff;
-            box-shadow:var(--shadow-sm);
-            padding:6px;
+            background:var(--surface);
+            box-shadow:var(--shadow-md);
+            padding:8px;
         }
         div[data-testid="stExpander"] {
-            border:1px solid var(--border) !important;
+            border:1px solid var(--border-strong) !important;
             border-radius:10px !important;
-            background:#ffffff !important;
-            box-shadow:var(--shadow-sm);
+            background:var(--surface) !important;
+            box-shadow:var(--shadow-md);
             overflow:hidden;
         }
         div[data-testid="stExpander"] summary {
             color:var(--text);
             font-weight:700;
-            background:#fafcff;
+            background:var(--surface-muted);
         }
         .section-bridge {
             border:1px solid var(--border);
             border-left:4px solid var(--bridge-accent);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             padding:15px 17px;
             box-shadow:var(--shadow-sm);
         }
@@ -4069,7 +4824,7 @@ def style_page() -> None:
         }
         .forecast-panel {
             border-radius:12px;
-            box-shadow:var(--shadow-md);
+            box-shadow:var(--shadow-lg);
         }
         .forecast-panel-main,
         .scenario-item,
@@ -4077,13 +4832,13 @@ def style_page() -> None:
         .tuning-stat,
         .research-stat-tile,
         .forecast-side-item {
-            background:#fafcff;
-            border-color:var(--border-soft);
+            background:var(--surface-muted);
+            border-color:var(--border);
             border-radius:8px;
         }
         .score-pill {
-            border-color:#d2e3fc;
-            background:#ffffff;
+            border-color:var(--border-soft);
+            background:var(--surface);
             color:var(--text);
             box-shadow:none;
         }
@@ -4094,7 +4849,7 @@ def style_page() -> None:
         .v2-card-note {
             border-color:var(--border);
             border-radius:10px;
-            background:#ffffff;
+            background:var(--surface);
             box-shadow:var(--shadow-sm);
         }
         .explain-band p,
@@ -4123,7 +4878,7 @@ def style_page() -> None:
         .method-kicker,
         .intro-kicker,
         .intro-score-label {
-            background:#e8f0fe;
+            background:var(--accent-soft);
             color:var(--google-blue);
             font-weight:700;
         }
@@ -4136,11 +4891,11 @@ def style_page() -> None:
             font-weight:700;
         }
         .research-kicker {
-            background:#e6f4ea;
+            background:var(--accent-soft);
             color:var(--google-green);
         }
         .research-kicker.muted {
-            background:#f1f3f4;
+            background:var(--surface-muted);
             color:var(--muted);
         }
         .period-conclusion-card,
@@ -4164,6 +4919,29 @@ def style_page() -> None:
         .research-upgrade-main,
         .research-upgrade-side,
         .research-evidence-panel {
+            box-shadow:var(--shadow-md);
+        }
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="textarea"] textarea,
+        div[data-baseweb="base-input"] {
+            border-color:var(--border) !important;
+            background:var(--surface) !important;
+            border-radius:8px !important;
+            box-shadow:inset 0 0 0 1px var(--border-soft) !important;
+        }
+        div[data-baseweb="slider"] [role="slider"] {
+            box-shadow:var(--shadow-sm) !important;
+        }
+        div[data-testid="stForm"] {
+            border-color:var(--border-strong) !important;
+            border-radius:10px !important;
+            background:var(--surface) !important;
+            box-shadow:var(--shadow-md);
+        }
+        div[data-testid="stAlert"] {
+            border:1px solid var(--border) !important;
+            border-radius:10px !important;
             box-shadow:var(--shadow-sm);
         }
         @media (max-width: 900px) {
@@ -4172,6 +4950,16 @@ def style_page() -> None:
             .page-guide {grid-template-columns:1fr;}
             .page-guide-grid {grid-template-columns:1fr;}
             .forecast-overview {grid-template-columns:repeat(2,minmax(0,1fr));}
+            .forecast-metric {
+                min-height:auto !important;
+                padding:12px;
+            }
+            .forecast-metric-value {
+                font-size:clamp(1.24rem, 4.6vw, 1.62rem);
+            }
+            .forecast-number {
+                font-size:clamp(2rem, 9vw, 3rem);
+            }
             .forecast-panel {grid-template-columns:1fr;}
             .scenario-strip {grid-template-columns:repeat(2,minmax(0,1fr));}
             .factor-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
@@ -4194,7 +4982,7 @@ def style_page() -> None:
             .research-upgrade-hero {grid-template-columns:1fr;}
             .research-evidence-list {grid-template-columns:1fr;}
             .research-evidence-item:nth-last-child(-n+2) {
-                border-bottom:1px solid #e5eaf0;
+                border-bottom:1px solid var(--border-soft);
                 padding-bottom:12px;
             }
             .research-evidence-item:last-child {
@@ -4206,7 +4994,7 @@ def style_page() -> None:
             .research-note:nth-child(2n),
             .research-note:nth-last-child(-n+2) {
                 border-right:0;
-                border-bottom:1px solid #e5eaf0;
+                border-bottom:1px solid var(--border-soft);
             }
             .research-note:last-child {border-bottom:0;}
             .research-stat-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
@@ -4217,7 +5005,7 @@ def style_page() -> None:
             .page-guide {padding:17px 16px;}
             .app-hero h2 {font-size:1.18rem;}
             .forecast-overview {grid-template-columns:1fr;}
-            .forecast-number {font-size:2.5rem;}
+            .forecast-number {font-size:clamp(2rem, 12vw, 2.5rem);}
             .model-route-grid {grid-template-columns:1fr;}
             .model-hero-card {padding:18px 16px;}
             .intro-model-grid {grid-template-columns:1fr;}
@@ -4236,8 +5024,6 @@ def style_page() -> None:
 def main() -> None:
     style_page()
     assets = load_assets()
-    prediction_models = load_prediction_models()
-    next24_bundle = load_model(str(resolve_path("models", "high_accuracy_lightgbm_core_target_pm2_5_next_24h.joblib")))
 
     city_info = assets["city_info"]
     profiles = assets["profiles"]
@@ -4265,7 +5051,7 @@ def main() -> None:
         if "input_temperature_2m" not in st.session_state:
             write_input_state(defaults)
 
-        if st.button("载入城市历史气象画像", use_container_width=True):
+        if st.button("载入城市历史气象画像", width="stretch"):
             write_input_state(defaults)
             st.session_state["input_confirmed"] = False
             st.rerun()
@@ -4275,12 +5061,12 @@ def main() -> None:
             if st.session_state.get("selected_prediction_model") not in MODEL_SELECT_OPTIONS:
                 st.session_state["selected_prediction_model"] = MODEL_SELECT_OPTIONS[0]
             model_choice = st.selectbox(
-                "当前小时预测模型",
+                "当前小时主模型",
                 MODEL_SELECT_OPTIONS,
                 index=0,
                 key="selected_prediction_model",
             )
-            st.caption("高精度模型用于浓度估计；过程型气象贡献模型用于气象-only 解释；基础气象归因模型作为方法对照保留。")
+            st.caption("预测台当前小时输出和当天逐小时曲线统一由旗舰过程型气象贡献主模型执行；高精度与基础气象模型保留在模型介绍中作为参照。")
             st.subheader("近地面气象")
             c1, c2 = st.columns(2)
             with c1:
@@ -4307,7 +5093,21 @@ def main() -> None:
             lag1 = st.number_input("前 1 小时 PM2.5 (ug/m3)", min_value=0.0, step=1.0, key="input_pm2_5_lag_1h")
             lag3 = st.number_input("前 3 小时 PM2.5 (ug/m3)", min_value=0.0, step=1.0, key="input_pm2_5_lag_3h")
             lag24 = st.number_input("前 24 小时 PM2.5 (ug/m3)", min_value=0.0, step=1.0, key="input_pm2_5_lag_24h")
-            submitted = st.form_submit_button("确认输入并预测", type="primary", use_container_width=True)
+
+            st.subheader("化学机制输入")
+            use_custom_chemical_precursors = st.checkbox(
+                "使用自定义 O3 / NO2 / SO2 / CO 输入",
+                key="input_use_custom_chemical_precursors",
+            )
+            st.caption("未勾选时，化学机制头使用城市-月份-小时历史画像；勾选后，下方数值会覆盖默认前体物输入。")
+            chem_a, chem_b = st.columns(2)
+            with chem_a:
+                carbon_monoxide = st.number_input("CO (ug/m3)", min_value=0.0, step=10.0, key="input_carbon_monoxide")
+                nitrogen_dioxide = st.number_input("NO2 (ug/m3)", min_value=0.0, step=1.0, key="input_nitrogen_dioxide")
+            with chem_b:
+                sulphur_dioxide = st.number_input("SO2 (ug/m3)", min_value=0.0, step=1.0, key="input_sulphur_dioxide")
+                ozone = st.number_input("O3 (ug/m3)", min_value=0.0, step=1.0, key="input_ozone")
+            submitted = st.form_submit_button("锁定模型并预测", type="primary", width="stretch")
 
         form_values = {
             "temperature_2m": temperature,
@@ -4325,47 +5125,42 @@ def main() -> None:
             "pm2_5_lag_1h": lag1,
             "pm2_5_lag_3h": lag3,
             "pm2_5_lag_24h": lag24,
+            "carbon_monoxide": carbon_monoxide,
+            "nitrogen_dioxide": nitrogen_dioxide,
+            "sulphur_dioxide": sulphur_dioxide,
+            "ozone": ozone,
+            "use_custom_chemical_precursors": use_custom_chemical_precursors,
         }
-        if submitted or "confirmed_inputs" not in st.session_state:
+        if submitted:
+            locked_model_key = canonical_prediction_model_key(resolve_prediction_model_key(model_choice, selected_date, hour))
             st.session_state["confirmed_inputs"] = {
                 "city": city,
                 "date": selected_date,
                 "hour": hour,
                 "model_choice": model_choice,
+                "model_key": locked_model_key,
                 "values": form_values,
             }
+            st.session_state["locked_prediction_model_key"] = locked_model_key
+            st.session_state["locked_prediction_model_label"] = PREDICTION_MODEL_SPECS[locked_model_key]["label"]
             st.session_state["input_confirmed"] = True
 
-        confirmed = st.session_state["confirmed_inputs"]
-        changed = (
-            confirmed["city"] != city
-            or confirmed["date"] != selected_date
-            or confirmed["hour"] != hour
-            or confirmed.get("model_choice", MODEL_SELECT_OPTIONS[0]) != model_choice
-            or any(float(confirmed["values"][key]) != float(form_values[key]) for key in form_values)
-        )
-        if changed:
-            st.info("当前表单包含尚未确认的修改；提交后主面板将按新输入重新计算。")
-        elif st.session_state.get("input_confirmed", False):
-            st.success("输入已确认，结果来自当前表单。")
-
-    city = confirmed["city"]
-    selected_date = confirmed["date"]
-    hour = confirmed["hour"]
-    model_choice = confirmed.get("model_choice", MODEL_SELECT_OPTIONS[0])
-    overrides = make_overrides(confirmed["values"])
-    pblh = overrides["boundary_layer_height"]
-    wind_speed = overrides["wind_speed_10m"]
-    wind_direction = overrides["wind_direction_10m"]
-    row = scenario_row(city_info, profiles, city, selected_date, hour, overrides)
-    selected_model_key = resolve_prediction_model_key(model_choice, selected_date, hour)
-    selected_model = PREDICTION_MODEL_SPECS[selected_model_key]
-    current_bundle = prediction_models[selected_model_key]
-    current_prediction = predict(current_bundle, row)
-    next24_prediction = predict(next24_bundle, row)
-    category, color = pm25_category(current_prediction)
-    next_category, next_color = pm25_category(next24_prediction)
-    t_inverse = row["t_inverse_850_1000"]
+        confirmed = st.session_state.get("confirmed_inputs")
+        if confirmed is None:
+            st.info("模型尚未锁定。选择模型后点击“锁定模型并预测”，才会从磁盘载入对应模型。")
+        else:
+            changed = (
+                confirmed["city"] != city
+                or confirmed["date"] != selected_date
+                or confirmed["hour"] != hour
+                or confirmed.get("model_choice", MODEL_SELECT_OPTIONS[0]) != model_choice
+                or any(float(confirmed["values"][key]) != float(form_values[key]) for key in form_values)
+            )
+            if changed:
+                st.info("当前表单包含尚未确认的修改；提交后主面板将按新输入重新计算。")
+            elif st.session_state.get("input_confirmed", False):
+                locked_label = st.session_state.get("locked_prediction_model_label", "当前模型")
+                st.success(f"输入已确认，已锁定：{locked_label}。")
 
     tab_predict, tab_results, tab_training, tab_validation = st.tabs(["预测台", "模型介绍", "训练策略", "研究验证"])
 
@@ -4374,104 +5169,151 @@ def main() -> None:
             page_guide_html(
                 "预测台",
                 "城市小时尺度 PM2.5 情景预测与扩散条件诊断",
-                "该模块以城市、日期、小时和近地面气象输入构成单一预测情景，同时给出边界层高度、逆温指数和风输送条件。当前小时结果作为主要预测输出，24 小时后结果作为提前量趋势参照。",
+                "该模块以城市、日期、小时和近地面气象输入构成单一预测情景。当前小时结果和当天曲线由旗舰过程型气象贡献主模型统一执行，24 小时后结果作为提前量趋势参照。",
                 [
                     ("情景变量", "城市、日期、小时和气象输入共同确定预测样本。"),
-                    ("预测输出", "摘要指标包括当前浓度、24 小时趋势、逆温指数和 PBLH。"),
+                    ("主模型输出", "旗舰模型内部按日期路由三时期代表模型，摘要指标包括当前浓度、逆温指数和 PBLH。"),
+                    ("趋势参照", "24 小时后结果仍作为独立提前量辅助，不纳入旗舰气象贡献主模型。"),
                     ("扩散条件", "低边界层、弱风、高湿和输送条件作为污染累积背景进行展示。"),
                 ],
                 "blue",
             ),
             unsafe_allow_html=True,
         )
-        st.markdown(
-            scenario_summary_html(
+        confirmed = st.session_state.get("confirmed_inputs")
+        if confirmed is None:
+            st.info("系统初始化已完成基础资产加载。请在侧边栏选择城市、日期、小时和模型，并点击“锁定模型并预测”后查看预测结果。")
+            st.caption("模型文件采用按需单例加载：未锁定前不会读取 joblib；锁定后同一模型由 st.cache_resource 复用。")
+        else:
+            city = confirmed["city"]
+            selected_date = confirmed["date"]
+            hour = confirmed["hour"]
+            model_choice = confirmed.get("model_choice", MODEL_SELECT_OPTIONS[0])
+            overrides = make_overrides(confirmed["values"])
+            pblh = overrides["boundary_layer_height"]
+            wind_speed = overrides["wind_speed_10m"]
+            wind_direction = overrides["wind_direction_10m"]
+            row = scenario_row(city_info, profiles, city, selected_date, hour, overrides)
+            selected_model_key = canonical_prediction_model_key(
+                confirmed.get("model_key") or resolve_prediction_model_key(model_choice, selected_date, hour)
+            )
+            selected_model = PREDICTION_MODEL_SPECS[selected_model_key]
+            with st.spinner(f"正在载入单例模型：{selected_model['label']}"):
+                current_bundle = load_prediction_model_bundle(selected_model_key)
+            with st.spinner("正在载入 24 小时提前量参照模型"):
+                next24_bundle = load_next24_prediction_model()
+            current_prediction = predict(current_bundle, row)
+            next24_prediction = predict(next24_bundle, row)
+            category, color = pm25_category(current_prediction)
+            next_category, next_color = pm25_category(next24_prediction)
+            t_inverse = row["t_inverse_850_1000"]
+            custom_precursors_enabled = bool(confirmed["values"].get("use_custom_chemical_precursors", False))
+
+            st.markdown(
+                scenario_summary_html(
+                    city,
+                    selected_date,
+                    hour,
+                    selected_model,
+                    current_prediction,
+                    next24_prediction,
+                    category,
+                    next_category,
+                    color,
+                    next_color,
+                    t_inverse,
+                    pblh,
+                    row,
+                    overrides,
+                    wind_speed,
+                    wind_direction,
+                ),
+                unsafe_allow_html=True,
+            )
+            st.caption(selected_model["description"])
+            selected_period = period_for_datetime(selected_date, hour)
+            expected_period = MODEL_KEY_TO_PERIOD.get(selected_model_key)
+            if expected_period and expected_period != selected_period:
+                st.warning(
+                    f"当前日期属于{PERIOD_LABELS[selected_period]}，但你选择的是{PERIOD_LABELS[expected_period]}模型。"
+                    "这属于跨时期外推，结果更适合作为敏感性对照，不作为主预测依据。"
+                )
+            if "气象" in selected_model["type"]:
+                st.info("当前选择气象侧模型：该类模型弱化或排除污染持续性和共污染物信息，适合解释气象贡献，预测精度通常低于高精度模型。")
+            if selected_model.get("uses_flagship") or selected_model["type"] == "过程型气象贡献":
+                st.caption("过程型气象贡献模型需要长时滞、滚动和复合扩散特征；预测台根据当前输入和城市月小时历史画像补齐气象过程变量。")
+            st.markdown(risk_cards_html(risk_items(row, current_prediction)), unsafe_allow_html=True)
+            render_chemical_diagnostics(current_bundle, row, custom_precursors_enabled)
+
+            chart_col, map_col = st.columns([0.62, 0.38])
+            with chart_col:
+                day_pred = build_daily_prediction(current_bundle, city_info, profiles, city, selected_date, overrides)
+                theme = streamlit_theme_colors()
+                fig = px.line(day_pred, x="hour", y="predicted_pm2_5", markers=True, title="当天逐小时 PM2.5 预测曲线")
+                add_pm25_bands(fig, float(day_pred["predicted_pm2_5"].max()))
+                fig.add_vline(x=hour, line_width=2, line_dash="dash", line_color=theme["accent_warn"])
+                fig.update_traces(line=dict(width=3, color=theme["accent"]), marker=dict(size=7, color=theme["accent"]))
+                fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=20), yaxis_title="ug/m3", xaxis_title="小时")
+                render_plotly_chart(st, fig, key=f"prediction_hourly_curve_{city}_{selected_date:%Y%m%d}_{hour}")
+            with map_col:
+                city_month = seasonal[seasonal["month"] == selected_date.month][["city", "pm2_5_median"]]
+                map_data = city_info.merge(city_month, on="city", how="left")
+                fig = px.scatter_mapbox(
+                    map_data,
+                    lon="longitude",
+                    lat="latitude",
+                    size="pm2_5_median",
+                    color="pm2_5_median",
+                    hover_name="city",
+                    color_continuous_scale="RdYlGn_r",
+                    zoom=5.7,
+                    center={"lat": 39.6, "lon": 116.4},
+                    title="京津冀城市历史 PM2.5 中位数",
+                )
+                selected = map_data[map_data["city"] == city]
+                fig.add_trace(
+                    go.Scattermapbox(
+                        lon=selected["longitude"],
+                        lat=selected["latitude"],
+                        mode="markers+text",
+                        text=selected["city"],
+                        textposition="top center",
+                        marker=dict(size=18, color=theme["text"], opacity=0.95),
+                        name="当前城市",
+                    )
+                )
+                for trace in fig.data:
+                    if getattr(trace, "name", "") != "当前城市" and hasattr(trace, "marker"):
+                        trace.marker.opacity = 0.82
+                fig.update_layout(
+                    height=390,
+                    margin=dict(l=10, r=10, t=50, b=20),
+                    dragmode=False,
+                    mapbox=dict(
+                        style="open-street-map",
+                        center=dict(lat=39.6, lon=116.4),
+                        zoom=5.7,
+                    ),
+                    coloraxis_colorbar=dict(title="ug/m3"),
+                )
+                render_plotly_chart(st, fig, key=f"prediction_city_map_{city}_{selected_date:%Y%m}", config={"scrollZoom": False})
+
+            render_weather_context(
+                seasonal,
+                daily,
+                current_bundle,
+                city_info,
+                profiles,
                 city,
                 selected_date,
-                hour,
-                selected_model,
-                current_prediction,
-                next24_prediction,
-                category,
-                next_category,
-                color,
-                next_color,
-                t_inverse,
-                pblh,
-                row,
                 overrides,
                 wind_speed,
                 wind_direction,
-            ),
-            unsafe_allow_html=True,
-        )
-        st.caption(selected_model["description"])
-        selected_period = period_for_datetime(selected_date, hour)
-        expected_period = MODEL_KEY_TO_PERIOD.get(selected_model_key)
-        if expected_period and expected_period != selected_period:
-            st.warning(
-                f"当前日期属于{PERIOD_LABELS[selected_period]}，但你选择的是{PERIOD_LABELS[expected_period]}模型。"
-                "这属于跨时期外推，结果更适合作为敏感性对照，不作为主预测依据。"
+                day_pred,
             )
-        if "气象" in selected_model["type"]:
-            st.info("当前选择气象侧模型：该类模型弱化或排除污染持续性和共污染物信息，适合解释气象贡献，预测精度通常低于高精度模型。")
-        if selected_model["type"] == "过程型气象贡献":
-            st.caption("过程型气象贡献模型需要长时滞、滚动和复合扩散特征；预测台根据当前输入和城市月小时历史画像补齐气象过程变量。")
-        st.markdown(risk_cards_html(risk_items(row, current_prediction)), unsafe_allow_html=True)
-
-        chart_col, map_col = st.columns([0.62, 0.38])
-        with chart_col:
-            day_pred = build_daily_prediction(current_bundle, city_info, profiles, city, selected_date, overrides)
-            fig = px.line(day_pred, x="hour", y="predicted_pm2_5", markers=True, title="当天逐小时 PM2.5 预测曲线")
-            add_pm25_bands(fig, float(day_pred["predicted_pm2_5"].max()))
-            fig.add_vline(x=hour, line_width=2, line_dash="dash", line_color="#c62828")
-            fig.update_traces(line=dict(width=3, color="#2563eb"), marker=dict(size=7, color="#2563eb"))
-            fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=20), yaxis_title="ug/m3", xaxis_title="小时")
-            st.plotly_chart(fig, use_container_width=True)
-        with map_col:
-            city_month = seasonal[seasonal["month"] == selected_date.month][["city", "pm2_5_median"]]
-            map_data = city_info.merge(city_month, on="city", how="left")
-            fig = px.scatter(
-                map_data,
-                x="longitude",
-                y="latitude",
-                size="pm2_5_median",
-                color="pm2_5_median",
-                hover_name="city",
-                color_continuous_scale="RdYlGn_r",
-                title="京津冀城市历史 PM2.5 中位数",
-            )
-            selected = map_data[map_data["city"] == city]
-            fig.add_trace(
-                go.Scatter(
-                    x=selected["longitude"],
-                    y=selected["latitude"],
-                    mode="markers+text",
-                    text=selected["city"],
-                    textposition="top center",
-                    marker=dict(size=18, color="#111827", symbol="x"),
-                    name="当前城市",
-                )
-            )
-            fig.update_traces(marker=dict(line=dict(width=1, color="#263238")))
-            fig.update_layout(height=390, margin=dict(l=10, r=10, t=50, b=20), xaxis_title="经度", yaxis_title="纬度")
-            st.plotly_chart(fig, use_container_width=True)
-
-        render_weather_context(
-            seasonal,
-            daily,
-            current_bundle,
-            city_info,
-            profiles,
-            city,
-            selected_date,
-            overrides,
-            wind_speed,
-            wind_direction,
-        )
 
     with tab_results:
-        high_accuracy_tab, attribution_tab = st.tabs(["高精度预测模型", "气象模型体系"])
+        high_accuracy_tab, attribution_tab, chemical_tab = st.tabs(["高精度预测模型", "气象模型体系", "化学组分机制模型"])
 
         with high_accuracy_tab:
             st.markdown(high_accuracy_intro_html(assets), unsafe_allow_html=True)
@@ -4480,9 +5322,9 @@ def main() -> None:
             st.caption("高精度模型以短时浓度估计为目标，表中同时保留全时期与分时期结果。")
             performance = high_accuracy_performance_table(assets)
             chart_a, chart_b = st.columns(2)
-            chart_a.plotly_chart(performance_chart(performance), use_container_width=True)
-            chart_b.plotly_chart(r2_chart(performance), use_container_width=True)
-            st.dataframe(performance, use_container_width=True, hide_index=True)
+            render_plotly_chart(chart_a, performance_chart(performance), key="results_high_accuracy_performance")
+            render_plotly_chart(chart_b, r2_chart(performance), key="results_high_accuracy_r2")
+            st.dataframe(performance, width="stretch", hide_index=True)
 
             with st.expander("数据补齐与高精度训练口径", expanded=False):
                 st.write(
@@ -4517,22 +5359,30 @@ def main() -> None:
 
             st.subheader("高精度模型 SHAP 解释")
             shap_a, shap_b = st.columns(2)
-            shap_a.plotly_chart(shap_chart(assets["current_shap"], "全时期高精度模型 SHAP 贡献"), use_container_width=True)
-            shap_b.plotly_chart(shap_chart(assets["pre_covid_high_accuracy_shap"], "疫情前高精度模型 SHAP 贡献"), use_container_width=True)
+            render_plotly_chart(
+                shap_a,
+                shap_chart(assets["current_shap"], "全时期高精度模型 SHAP 贡献"),
+                key="results_high_accuracy_shap_current",
+            )
+            render_plotly_chart(
+                shap_b,
+                shap_chart(assets["pre_covid_high_accuracy_shap"], "疫情前高精度模型 SHAP 贡献"),
+                key="results_high_accuracy_shap_pre_covid",
+            )
 
             h1, h2, h3 = st.columns(3)
             with h1:
                 st.markdown("**疫情前高精度**")
                 st.caption(metric_text(assets["pre_covid_high_accuracy_metrics"]))
-                st.dataframe(top_shap_table(assets["pre_covid_high_accuracy_shap"], 8), use_container_width=True, hide_index=True)
+                st.dataframe(top_shap_table(assets["pre_covid_high_accuracy_shap"], 8), width="stretch", hide_index=True)
             with h2:
                 st.markdown("**疫情期高精度**")
                 st.caption(metric_text(assets["covid_high_accuracy_metrics"]))
-                st.dataframe(top_shap_table(assets["covid_high_accuracy_shap"], 8), use_container_width=True, hide_index=True)
+                st.dataframe(top_shap_table(assets["covid_high_accuracy_shap"], 8), width="stretch", hide_index=True)
             with h3:
                 st.markdown("**疫情后高精度**")
                 st.caption(metric_text(assets["post_covid_high_accuracy_metrics"]))
-                st.dataframe(top_shap_table(assets["post_covid_high_accuracy_shap"], 8), use_container_width=True, hide_index=True)
+                st.dataframe(top_shap_table(assets["post_covid_high_accuracy_shap"], 8), width="stretch", hide_index=True)
 
             st.markdown(
                 """
@@ -4555,18 +5405,22 @@ def main() -> None:
                 v2_summary = meteorology_v2_summary_table(assets)
                 v2_best = meteorology_v2_best_table(assets)
                 v2_chart_col, v2_table_col = st.columns([0.55, 0.45])
-                v2_chart_col.plotly_chart(meteorology_v2_r2_chart(v2_summary), use_container_width=True)
+                render_plotly_chart(
+                    v2_chart_col,
+                    meteorology_v2_r2_chart(v2_summary),
+                    key="results_meteorology_v2_r2",
+                )
                 with v2_table_col:
                     st.markdown("**各时期研究代表模型**")
-                    st.dataframe(v2_best, use_container_width=True, hide_index=True)
+                    st.dataframe(v2_best, width="stretch", hide_index=True)
 
                 with st.expander("9 套过程型候选模型完整指标", expanded=False):
-                    st.dataframe(v2_summary, use_container_width=True, hide_index=True)
+                    st.dataframe(v2_summary, width="stretch", hide_index=True)
                     st.caption("代表模型兼顾测试指标和解释口径，不一定等同于同一时期最高 R2 候选。")
 
                 st.subheader("基础气象归因模型与过程型气象贡献模型对照")
                 old_new = meteorology_v2_old_new_compare_table(assets)
-                st.dataframe(old_new, use_container_width=True, hide_index=True)
+                st.dataframe(old_new, width="stretch", hide_index=True)
                 st.markdown(
                     """
                     <div class="explain-band green">
@@ -4609,13 +5463,17 @@ def main() -> None:
                                     ],
                                     columns=["项目", "值"],
                                 ),
-                                use_container_width=True,
+                                width="stretch",
                                 hide_index=True,
                             )
                         with shap_col:
                             st.markdown("**Top SHAP 与置信区间**")
-                            st.dataframe(meteorology_v2_shap_table(model, 10), use_container_width=True, hide_index=True)
-                        st.plotly_chart(meteorology_v2_shap_chart(model), use_container_width=True)
+                            st.dataframe(meteorology_v2_shap_table(model, 10), width="stretch", hide_index=True)
+                        render_plotly_chart(
+                            st,
+                            meteorology_v2_shap_chart(model),
+                            key=f"results_meteorology_v2_shap_{model.get('period', index)}_{model.get('target_kind', model.get('target_label', index))}",
+                        )
                         st.caption("Bootstrap 置信区间用于评估 SHAP 排名稳定性；特征贡献仍是模型解释结果，需要结合大气物理机制讨论。")
             else:
                 st.warning("尚未检索到过程型气象贡献模型结果，当前仅呈现基础气象归因模型。")
@@ -4662,7 +5520,7 @@ def main() -> None:
             )
             for column in ["高精度 R2", "高精度 RMSE", "过程型气象贡献 R2", "过程型气象贡献 RMSE"]:
                 compare[column] = compare[column].astype(float).round(3)
-            st.dataframe(compare, use_container_width=True, hide_index=True)
+            st.dataframe(compare, width="stretch", hide_index=True)
             st.caption("预测性能比较以高精度模型为主；气象贡献分析以 weather-only 过程型模型为主。")
 
             st.subheader("基础气象归因模型档案")
@@ -4676,29 +5534,29 @@ def main() -> None:
             with p1:
                 st.markdown("**疫情前 2018-2019**")
                 st.caption(metric_text(assets["pre_covid_meteorology_metrics"]))
-                st.dataframe(top_shap_table(assets["pre_covid_meteorology_shap"], 8), use_container_width=True, hide_index=True)
+                st.dataframe(top_shap_table(assets["pre_covid_meteorology_shap"], 8), width="stretch", hide_index=True)
             with p2:
                 st.markdown("**疫情期 2020-2022**")
                 st.caption(metric_text(assets["covid_meteorology_metrics"]))
-                st.dataframe(top_shap_table(assets["covid_meteorology_shap"], 8), use_container_width=True, hide_index=True)
+                st.dataframe(top_shap_table(assets["covid_meteorology_shap"], 8), width="stretch", hide_index=True)
             with p3:
                 st.markdown("**疫情后 2023+**")
                 st.caption(metric_text(assets["post_covid_meteorology_metrics"]))
-                st.dataframe(top_shap_table(assets["post_covid_meteorology_shap"], 8), use_container_width=True, hide_index=True)
+                st.dataframe(top_shap_table(assets["post_covid_meteorology_shap"], 8), width="stretch", hide_index=True)
 
             residual = assets["period_residual_analysis"][
                 ["时期", "气象模型_R2", "高精度模型_R2", "气象残差均值", "负残差占比"]
             ].copy()
             for column in ["气象模型_R2", "高精度模型_R2", "气象残差均值", "负残差占比"]:
                 residual[column] = residual[column].astype(float).round(3)
-            st.dataframe(residual, use_container_width=True, hide_index=True)
+            st.dataframe(residual, width="stretch", hide_index=True)
             st.caption("气象残差 = 实测 PM2.5 - 气象模型预测 PM2.5。残差只作为非气象因素讨论的辅助证据，不能直接等同于排放变化量。")
 
             st.subheader("阶段性气象贡献判断")
             st.markdown(
                 """
                 <div class="period-conclusion-grid">
-                  <section class="period-conclusion-card" style="--accent:#059669;--soft:#ecfdf5;">
+                  <section class="period-conclusion-card" style="--accent:var(--accent-alt);--soft:var(--accent-soft);">
                     <div class="period-tag">疫情前 2018-2019</div>
                     <h4>季节背景、空间差异与边界层扩散共同控制</h4>
                     <div class="period-factor-row">
@@ -4709,7 +5567,7 @@ def main() -> None:
                     </div>
                     <p>疫情前代表过程型模型显示，PM2.5 变化并非只由单时刻气象决定，而是由季节周期、城市南北空间差异、连续边界层扩散能力和冷空气输送共同约束。</p>
                   </section>
-                  <section class="period-conclusion-card" style="--accent:#d97706;--soft:#fffbeb;">
+                  <section class="period-conclusion-card" style="--accent:var(--accent-warn);--soft:var(--accent-soft);">
                     <div class="period-tag">疫情期 2020-2022</div>
                     <h4>气象解释力仍然存在，区域输送和气压过程突出</h4>
                     <div class="period-factor-row">
@@ -4720,7 +5578,7 @@ def main() -> None:
                     </div>
                     <p>疫情期人为活动减弱背景下，过程型气象贡献模型仍获得较高解释度，表明静稳扩散、风向输送和湿度过程仍是 PM2.5 波动的重要气象背景。</p>
                   </section>
-                  <section class="period-conclusion-card" style="--accent:#0f766e;--soft:#ecfdf5;">
+                  <section class="period-conclusion-card" style="--accent:var(--accent-alt);--soft:var(--accent-soft);">
                     <div class="period-tag">疫情后 2023+</div>
                     <h4>边界层约束和通风扩散能力重新成为主要证据</h4>
                     <div class="period-factor-row">
@@ -4737,17 +5595,20 @@ def main() -> None:
                 unsafe_allow_html=True,
             )
 
+        with chemical_tab:
+            render_chemical_model_section(assets)
+
     with tab_training:
-        training_prediction_tab, training_attribution_tab = st.tabs(["高精度预测模型", "气象模型体系"])
+        training_prediction_tab, training_attribution_tab, training_chemical_tab = st.tabs(["高精度预测模型", "气象模型体系", "化学组分机制模型"])
 
         with training_prediction_tab:
             st.markdown(high_accuracy_training_html(assets), unsafe_allow_html=True)
 
             st.subheader("高精度模型训练明细")
             st.caption(
-                "全时期主模型、分时期高精度模型和 24 小时辅助模型均属于预测口径，可使用污染历史和共污染物。"
+                "全时期高精度模型、分时期高精度模型和 24 小时辅助模型均属于预测口径，可使用污染历史和共污染物。"
             )
-            st.dataframe(high_accuracy_training_rows(assets), use_container_width=True, hide_index=True)
+            st.dataframe(high_accuracy_training_rows(assets), width="stretch", hide_index=True)
 
             st.subheader("调参方案")
             st.caption(
@@ -4762,7 +5623,7 @@ def main() -> None:
             st.caption(
                 "基础气象归因模型保留为方法对照，不属于本轮 v2-core 重训。"
             )
-            st.dataframe(meteorology_legacy_training_rows(assets), use_container_width=True, hide_index=True)
+            st.dataframe(meteorology_legacy_training_rows(assets), width="stretch", hide_index=True)
 
             v2_rows = meteorology_v2_training_rows(assets)
             if not v2_rows.empty:
@@ -4770,13 +5631,16 @@ def main() -> None:
                 st.caption(
                     "本轮重训矩阵为 3 个时期 x 3 种目标形式；每套候选均完成 60 轮调参。"
                 )
-                st.dataframe(v2_rows, use_container_width=True, hide_index=True)
+                st.dataframe(v2_rows, width="stretch", hide_index=True)
 
             st.subheader("调参方案")
             st.caption(
                 "过程型气象贡献模型统一使用 weather-only 特征、验证集 RMSE 和后置测试集。"
             )
             st.markdown(meteorology_tuning_html(assets), unsafe_allow_html=True)
+
+        with training_chemical_tab:
+            render_chemical_training_section(assets)
 
     with tab_validation:
         render_research_validation_section(assets)
