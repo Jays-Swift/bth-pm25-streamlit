@@ -3212,6 +3212,11 @@ def style_page() -> None:
             --accent-alt:color-mix(in srgb, var(--theme-primary) 66%, var(--theme-text));
             --accent-warn:color-mix(in srgb, var(--theme-primary) 42%, var(--theme-text));
             --accent-purple:color-mix(in srgb, var(--theme-primary) 58%, var(--theme-text));
+            --tab-bar-bg:color-mix(in srgb, var(--theme-bg) 96%, var(--theme-text));
+            --tab-idle-bg:color-mix(in srgb, var(--theme-secondary-bg) 78%, var(--theme-bg));
+            --tab-hover-bg:color-mix(in srgb, var(--theme-primary) 10%, var(--theme-bg));
+            --tab-active-bg:color-mix(in srgb, var(--theme-primary) 88%, var(--theme-text));
+            --tab-active-text:#ffffff;
             --google-blue:var(--theme-primary);
             --google-green:var(--accent-alt);
             --google-yellow:var(--accent-warn);
@@ -3308,12 +3313,66 @@ def style_page() -> None:
             padding:14px 14px 10px 14px;
             box-shadow:0 8px 24px color-mix(in srgb, var(--text) 6%, transparent);
         }
-        .stTabs [data-baseweb="tab-list"] {gap: 8px;}
+        .stTabs [data-baseweb="tab-list"] {
+            display:flex;
+            flex-wrap:nowrap !important;
+            align-items:center;
+            gap:6px;
+            width:100%;
+            max-width:100%;
+            overflow-x:auto;
+            overflow-y:hidden;
+            padding:5px;
+            margin:0 0 12px 0;
+            background:var(--tab-bar-bg);
+            border:1px solid var(--border-strong);
+            border-radius:10px;
+            box-shadow:var(--shadow-sm);
+            scrollbar-width:none;
+            -webkit-overflow-scrolling:touch;
+        }
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+            display:none;
+        }
         .stTabs [data-baseweb="tab"] {
-            background:var(--surface);
-            border:1px solid var(--border);
-            border-radius:8px;
-            padding:8px 14px;
+            flex:0 0 auto;
+            min-width:max-content;
+            height:36px;
+            border:1px solid transparent;
+            border-radius:7px;
+            background:var(--tab-idle-bg);
+            color:var(--muted);
+            padding:0 13px;
+            font-size:0.88rem;
+            line-height:1;
+            font-weight:700;
+            white-space:nowrap;
+        }
+        .stTabs [data-baseweb="tab"] p {
+            margin:0;
+            color:inherit;
+            font-size:inherit;
+            line-height:1;
+            white-space:nowrap;
+        }
+        .stTabs [data-baseweb="tab"]:hover {
+            background:var(--tab-hover-bg);
+            border-color:var(--border-soft);
+            color:var(--text);
+        }
+        .stTabs [data-baseweb="tab"][aria-selected="true"],
+        .stTabs [aria-selected="true"] {
+            background:var(--tab-active-bg) !important;
+            border-color:var(--tab-active-bg) !important;
+            color:var(--tab-active-text) !important;
+            box-shadow:0 1px 2px color-mix(in srgb, var(--theme-text) 18%, transparent);
+        }
+        .stTabs [data-baseweb="tab"][aria-selected="true"] p,
+        .stTabs [aria-selected="true"] p {
+            color:var(--tab-active-text) !important;
+        }
+        .stTabs [data-baseweb="tab-highlight"] {
+            display:none !important;
         }
         /* 统一下拉菜单浮层的前端圆角与阴影 */
         div[data-baseweb="menu"] {
@@ -4690,26 +4749,65 @@ def style_page() -> None:
             line-height:1.58;
         }
         .stTabs [data-baseweb="tab-list"] {
+            display:flex;
+            flex-wrap:nowrap !important;
+            align-items:center;
             gap:6px;
-            background:var(--surface);
+            width:100%;
+            max-width:100%;
+            overflow-x:auto;
+            overflow-y:hidden;
+            background:var(--tab-bar-bg);
             border:1px solid var(--border-strong);
             border-radius:10px;
             padding:5px;
+            margin:0 0 12px 0;
             box-shadow:var(--shadow-sm);
+            scrollbar-width:none;
+            -webkit-overflow-scrolling:touch;
+        }
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
+            display:none;
         }
         .stTabs [data-baseweb="tab"] {
-            height:38px;
+            flex:0 0 auto;
+            min-width:max-content;
+            height:36px;
             border:1px solid transparent;
-            border-radius:8px;
-            background:transparent;
+            border-radius:7px;
+            background:var(--tab-idle-bg);
             color:var(--muted);
-            padding:7px 14px;
+            padding:0 13px;
+            font-size:0.88rem;
+            line-height:1;
             font-weight:700;
+            white-space:nowrap;
         }
+        .stTabs [data-baseweb="tab"] p {
+            margin:0;
+            color:inherit;
+            font-size:inherit;
+            line-height:1;
+            white-space:nowrap;
+        }
+        .stTabs [data-baseweb="tab"]:hover {
+            background:var(--tab-hover-bg);
+            border-color:var(--border-soft);
+            color:var(--text);
+        }
+        .stTabs [data-baseweb="tab"][aria-selected="true"],
         .stTabs [aria-selected="true"] {
-            background:var(--accent-soft) !important;
-            border-color:var(--border-soft) !important;
-            color:var(--google-blue) !important;
+            background:var(--tab-active-bg) !important;
+            border-color:var(--tab-active-bg) !important;
+            color:var(--tab-active-text) !important;
+            box-shadow:0 1px 2px color-mix(in srgb, var(--theme-text) 18%, transparent);
+        }
+        .stTabs [data-baseweb="tab"][aria-selected="true"] p,
+        .stTabs [aria-selected="true"] p {
+            color:var(--tab-active-text) !important;
+        }
+        .stTabs [data-baseweb="tab-highlight"] {
+            display:none !important;
         }
         section[data-testid="stSidebar"] {
             background:var(--surface);
