@@ -3212,11 +3212,14 @@ def style_page() -> None:
             --accent-alt:color-mix(in srgb, var(--theme-primary) 66%, var(--theme-text));
             --accent-warn:color-mix(in srgb, var(--theme-primary) 42%, var(--theme-text));
             --accent-purple:color-mix(in srgb, var(--theme-primary) 58%, var(--theme-text));
-            --tab-bar-bg:color-mix(in srgb, var(--theme-bg) 96%, var(--theme-text));
-            --tab-idle-bg:color-mix(in srgb, var(--theme-secondary-bg) 78%, var(--theme-bg));
-            --tab-hover-bg:color-mix(in srgb, var(--theme-primary) 10%, var(--theme-bg));
-            --tab-active-bg:color-mix(in srgb, var(--theme-primary) 88%, var(--theme-text));
-            --tab-active-text:#ffffff;
+            --tab-bar-bg:var(--theme-bg);
+            --tab-idle-bg:transparent;
+            --tab-idle-text:color-mix(in srgb, var(--theme-text) 88%, var(--theme-bg));
+            --tab-hover-bg:color-mix(in srgb, #eff6ff 72%, var(--theme-bg));
+            --tab-active-bg:color-mix(in srgb, #eff6ff 88%, var(--theme-bg));
+            --tab-active-border:#bfdbfe;
+            --tab-active-text:#1d4ed8;
+            --tab-underline:#2563eb;
             --google-blue:var(--theme-primary);
             --google-green:var(--accent-alt);
             --google-yellow:var(--accent-warn);
@@ -3317,17 +3320,18 @@ def style_page() -> None:
             display:flex;
             flex-wrap:nowrap !important;
             align-items:center;
-            gap:6px;
+            gap:14px;
             width:100%;
             max-width:100%;
             overflow-x:auto;
             overflow-y:hidden;
-            padding:5px;
-            margin:0 0 12px 0;
+            min-height:84px;
+            padding:10px 18px 8px 18px;
+            margin:0 0 18px 0;
             background:var(--tab-bar-bg);
             border:1px solid var(--border-strong);
-            border-radius:10px;
-            box-shadow:var(--shadow-sm);
+            border-radius:16px;
+            box-shadow:0 2px 4px color-mix(in srgb, var(--theme-text) 18%, transparent), 0 14px 28px color-mix(in srgb, var(--theme-text) 9%, transparent);
             scrollbar-width:none;
             -webkit-overflow-scrolling:touch;
         }
@@ -3335,17 +3339,21 @@ def style_page() -> None:
             display:none;
         }
         .stTabs [data-baseweb="tab"] {
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
             flex:0 0 auto;
             min-width:max-content;
-            height:36px;
+            height:68px;
             border:1px solid transparent;
-            border-radius:7px;
+            border-radius:14px;
             background:var(--tab-idle-bg);
-            color:var(--muted);
-            padding:0 13px;
-            font-size:0.88rem;
+            color:var(--tab-idle-text);
+            padding:0 24px;
+            font-size:1.08rem;
             line-height:1;
-            font-weight:700;
+            font-weight:800;
             white-space:nowrap;
         }
         .stTabs [data-baseweb="tab"] p {
@@ -3357,22 +3365,26 @@ def style_page() -> None:
         }
         .stTabs [data-baseweb="tab"]:hover {
             background:var(--tab-hover-bg);
-            border-color:var(--border-soft);
+            border-color:var(--tab-active-border);
             color:var(--text);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"],
         .stTabs [aria-selected="true"] {
             background:var(--tab-active-bg) !important;
-            border-color:var(--tab-active-bg) !important;
+            border-color:var(--tab-active-border) !important;
             color:var(--tab-active-text) !important;
-            box-shadow:0 1px 2px color-mix(in srgb, var(--theme-text) 18%, transparent);
+            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 58%, transparent);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"] p,
         .stTabs [aria-selected="true"] p {
             color:var(--tab-active-text) !important;
         }
         .stTabs [data-baseweb="tab-highlight"] {
-            display:none !important;
+            display:block !important;
+            height:3px !important;
+            border-radius:999px !important;
+            background:var(--tab-underline) !important;
+            bottom:-8px !important;
         }
         /* 统一下拉菜单浮层的前端圆角与阴影 */
         div[data-baseweb="menu"] {
@@ -4752,17 +4764,18 @@ def style_page() -> None:
             display:flex;
             flex-wrap:nowrap !important;
             align-items:center;
-            gap:6px;
+            gap:14px;
             width:100%;
             max-width:100%;
             overflow-x:auto;
             overflow-y:hidden;
+            min-height:84px;
             background:var(--tab-bar-bg);
             border:1px solid var(--border-strong);
-            border-radius:10px;
-            padding:5px;
-            margin:0 0 12px 0;
-            box-shadow:var(--shadow-sm);
+            border-radius:16px;
+            padding:10px 18px 8px 18px;
+            margin:0 0 18px 0;
+            box-shadow:0 2px 4px color-mix(in srgb, var(--theme-text) 18%, transparent), 0 14px 28px color-mix(in srgb, var(--theme-text) 9%, transparent);
             scrollbar-width:none;
             -webkit-overflow-scrolling:touch;
         }
@@ -4770,17 +4783,21 @@ def style_page() -> None:
             display:none;
         }
         .stTabs [data-baseweb="tab"] {
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
             flex:0 0 auto;
             min-width:max-content;
-            height:36px;
+            height:68px;
             border:1px solid transparent;
-            border-radius:7px;
+            border-radius:14px;
             background:var(--tab-idle-bg);
-            color:var(--muted);
-            padding:0 13px;
-            font-size:0.88rem;
+            color:var(--tab-idle-text);
+            padding:0 24px;
+            font-size:1.08rem;
             line-height:1;
-            font-weight:700;
+            font-weight:800;
             white-space:nowrap;
         }
         .stTabs [data-baseweb="tab"] p {
@@ -4792,22 +4809,26 @@ def style_page() -> None:
         }
         .stTabs [data-baseweb="tab"]:hover {
             background:var(--tab-hover-bg);
-            border-color:var(--border-soft);
+            border-color:var(--tab-active-border);
             color:var(--text);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"],
         .stTabs [aria-selected="true"] {
             background:var(--tab-active-bg) !important;
-            border-color:var(--tab-active-bg) !important;
+            border-color:var(--tab-active-border) !important;
             color:var(--tab-active-text) !important;
-            box-shadow:0 1px 2px color-mix(in srgb, var(--theme-text) 18%, transparent);
+            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 58%, transparent);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"] p,
         .stTabs [aria-selected="true"] p {
             color:var(--tab-active-text) !important;
         }
         .stTabs [data-baseweb="tab-highlight"] {
-            display:none !important;
+            display:block !important;
+            height:3px !important;
+            border-radius:999px !important;
+            background:var(--tab-underline) !important;
+            bottom:-8px !important;
         }
         section[data-testid="stSidebar"] {
             background:var(--surface);
@@ -5044,6 +5065,21 @@ def style_page() -> None:
         }
         @media (max-width: 900px) {
             .block-container {padding-left:1rem;padding-right:1rem;}
+            .stTabs [data-baseweb="tab-list"] {
+                gap:10px;
+                min-height:70px;
+                padding:8px 12px 7px 12px;
+                border-radius:14px;
+            }
+            .stTabs [data-baseweb="tab"] {
+                height:54px;
+                padding:0 18px;
+                font-size:0.98rem;
+                border-radius:12px;
+            }
+            .stTabs [data-baseweb="tab-highlight"] {
+                bottom:-7px !important;
+            }
             .app-hero {grid-template-columns:1fr;}
             .page-guide {grid-template-columns:1fr;}
             .page-guide-grid {grid-template-columns:1fr;}
