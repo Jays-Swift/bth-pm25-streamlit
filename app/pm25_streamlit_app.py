@@ -3199,12 +3199,12 @@ def style_page() -> None:
             --surface-elevated:color-mix(in srgb, var(--theme-bg) 94%, var(--theme-text));
             --surface-soft:color-mix(in srgb, var(--theme-bg) 88%, var(--theme-primary));
             --surface-muted:color-mix(in srgb, var(--theme-secondary-bg) 82%, var(--theme-bg));
-            --border:color-mix(in srgb, var(--theme-text) 26%, transparent);
-            --border-soft:color-mix(in srgb, var(--theme-text) 17%, transparent);
-            --border-strong:color-mix(in srgb, var(--theme-text) 34%, transparent);
+            --border:color-mix(in srgb, var(--theme-text) 32%, transparent);
+            --border-soft:color-mix(in srgb, var(--theme-text) 22%, transparent);
+            --border-strong:color-mix(in srgb, var(--theme-text) 42%, transparent);
             --text:var(--theme-text);
-            --muted:color-mix(in srgb, var(--theme-text) 72%, var(--theme-bg));
-            --muted-2:color-mix(in srgb, var(--theme-text) 48%, var(--theme-bg));
+            --muted:color-mix(in srgb, var(--theme-text) 86%, var(--theme-bg));
+            --muted-2:color-mix(in srgb, var(--theme-text) 72%, var(--theme-bg));
             --accent:var(--theme-primary);
             --accent-strong:color-mix(in srgb, var(--theme-primary) 78%, var(--theme-text));
             --accent-soft:color-mix(in srgb, var(--theme-primary) 14%, var(--theme-bg));
@@ -3220,8 +3220,9 @@ def style_page() -> None:
             --shadow-sm:0 1px 2px color-mix(in srgb, var(--theme-text) 16%, transparent),0 2px 5px color-mix(in srgb, var(--theme-text) 9%, transparent);
             --shadow-md:0 2px 7px color-mix(in srgb, var(--theme-text) 16%, transparent),0 10px 24px color-mix(in srgb, var(--theme-text) 10%, transparent);
             --shadow-lg:0 3px 10px color-mix(in srgb, var(--theme-text) 16%, transparent),0 18px 42px color-mix(in srgb, var(--theme-text) 12%, transparent);
-            --radius:8px;
-            --radius-sm:8px;
+            --radius:22px;
+            --radius-sm:16px;
+            --radius-xs:12px;
         }
         .stApp {background:var(--app-bg);}
         header,
@@ -4943,6 +4944,304 @@ def style_page() -> None:
             border:1px solid var(--border) !important;
             border-radius:10px !important;
             box-shadow:var(--shadow-sm);
+        }
+        /* Final visual lock for Streamlit Cloud runtime components. */
+        .stApp {
+            font-family: Inter, "Segoe UI", Arial, "Helvetica Neue", sans-serif !important;
+            color:var(--text) !important;
+            font-weight:520;
+        }
+        h1, h2, h3, h4, h5, h6,
+        p, li, label,
+        input, textarea, select,
+        .stCaptionContainer,
+        div[data-testid="stCaptionContainer"],
+        div[data-testid="stMarkdownContainer"],
+        div[data-testid="stWidgetLabel"],
+        div[data-testid="stMetric"],
+        div[data-baseweb="tab"],
+        div[data-baseweb="select"],
+        div[data-baseweb="input"],
+        div[data-baseweb="textarea"],
+        .app-hero,
+        .page-guide,
+        .forecast-panel,
+        .model-hero-card,
+        .intro-hero,
+        .training-hero,
+        .research-brief {
+            font-family: Inter, "Segoe UI", Arial, "Helvetica Neue", sans-serif !important;
+            letter-spacing:0 !important;
+        }
+        h1 {
+            font-size:2.08rem !important;
+            font-weight:850 !important;
+            color:var(--text) !important;
+        }
+        h2, h3, h4,
+        .stMarkdown strong,
+        div[data-testid="stMarkdownContainer"] strong {
+            color:var(--text) !important;
+            font-weight:850 !important;
+        }
+        p, li,
+        .stCaptionContainer,
+        div[data-testid="stCaptionContainer"],
+        div[data-testid="stMarkdownContainer"] p,
+        div[data-testid="stMarkdownContainer"] li {
+            color:var(--muted) !important;
+            font-weight:560 !important;
+        }
+        .app-hero-main,
+        .app-hero-side,
+        .page-guide,
+        .page-guide-item,
+        .prediction-card,
+        .forecast-panel,
+        .forecast-panel-main,
+        .forecast-metric,
+        .forecast-side-item,
+        .scenario-item,
+        .factor-card,
+        .model-card,
+        .model-hero-card,
+        .model-route-card,
+        .intro-hero-main,
+        .intro-score-panel,
+        .intro-model-card,
+        .method-band > div,
+        .explain-band,
+        .v2-card-note,
+        .training-hero,
+        .training-score-card,
+        .training-family-card,
+        .flow-step,
+        .training-period-card,
+        .method-panel,
+        .tuning-main,
+        .tuning-side,
+        .param-row,
+        .tuning-stat,
+        .training-detail-card,
+        .artifact-card,
+        .period-conclusion-card,
+        .period-warning,
+        .research-upgrade-main,
+        .research-upgrade-side,
+        .research-evidence-panel,
+        .research-brief,
+        .research-brief-body,
+        .research-note,
+        .research-boundary-panel,
+        .research-stat-tile,
+        div[data-testid="stMetric"],
+        div[data-testid="stPlotlyChart"],
+        div[data-testid="stDataFrame"],
+        div[data-testid="stExpander"],
+        div[data-testid="stForm"],
+        div[data-testid="stAlert"] {
+            border-radius:var(--radius) !important;
+        }
+        .page-guide-item,
+        .app-side-step,
+        .forecast-panel-main,
+        .forecast-side-item,
+        .scenario-item,
+        .factor-card,
+        .model-card,
+        .model-route-card,
+        .intro-model-card,
+        .method-band > div,
+        .explain-band,
+        .v2-card-note,
+        .training-family-card,
+        .flow-step,
+        .training-period-card,
+        .method-panel,
+        .param-row,
+        .tuning-stat,
+        .training-detail-card,
+        .artifact-card,
+        .research-note,
+        .research-boundary-panel,
+        .research-stat-tile {
+            border-radius:var(--radius-sm) !important;
+        }
+        .app-hero-main,
+        .app-hero-side,
+        .page-guide,
+        .forecast-panel,
+        .model-hero-card,
+        .intro-hero-main,
+        .intro-score-panel,
+        .training-hero,
+        .training-score-card,
+        .research-upgrade-main,
+        .research-upgrade-side,
+        .research-evidence-panel,
+        .research-brief,
+        div[data-testid="stForm"] {
+            box-shadow:var(--shadow-lg) !important;
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            gap:8px !important;
+            padding:8px !important;
+            border:1px solid var(--border-strong) !important;
+            border-radius:999px !important;
+            background:var(--surface) !important;
+            box-shadow:var(--shadow-md) !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            min-height:44px !important;
+            height:auto !important;
+            border:1px solid transparent !important;
+            border-radius:999px !important;
+            padding:10px 18px !important;
+            color:var(--text) !important;
+            font-weight:850 !important;
+            background:transparent !important;
+        }
+        .stTabs [data-baseweb="tab"]:hover {
+            background:var(--surface-muted) !important;
+            color:var(--text) !important;
+        }
+        .stTabs [aria-selected="true"] {
+            background:var(--accent-soft) !important;
+            border-color:var(--accent) !important;
+            color:var(--accent-strong) !important;
+            box-shadow:inset 0 0 0 1px var(--accent) !important;
+        }
+        .stButton > button,
+        button[kind],
+        div[data-testid="stFormSubmitButton"] button,
+        button[data-testid^="stBaseButton"] {
+            min-height:42px !important;
+            border-radius:999px !important;
+            border:1px solid var(--border-strong) !important;
+            color:var(--accent-strong) !important;
+            font-weight:850 !important;
+            box-shadow:var(--shadow-sm) !important;
+        }
+        div[data-testid="stFormSubmitButton"] button,
+        button[kind="primary"] {
+            background:var(--accent-strong) !important;
+            border-color:var(--accent-strong) !important;
+            color:var(--surface) !important;
+        }
+        .stButton > button:hover,
+        button[kind]:hover,
+        div[data-testid="stFormSubmitButton"] button:hover {
+            transform:translateY(-1px);
+            box-shadow:var(--shadow-md) !important;
+        }
+        label,
+        div[data-testid="stWidgetLabel"],
+        div[data-testid="stWidgetLabel"] *,
+        [data-baseweb="form-control"] label,
+        [data-baseweb="form-control"] label * {
+            color:var(--text) !important;
+            font-weight:820 !important;
+        }
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="textarea"] textarea,
+        div[data-baseweb="base-input"],
+        div[data-testid="stNumberInput"] input,
+        div[data-testid="stDateInput"] input,
+        div[data-testid="stTextInput"] input,
+        div[data-testid="stTextArea"] textarea {
+            min-height:42px !important;
+            border-color:var(--border-strong) !important;
+            background:var(--surface) !important;
+            color:var(--text) !important;
+            border-radius:var(--radius-sm) !important;
+            box-shadow:inset 0 0 0 1px var(--border-soft) !important;
+            font-weight:760 !important;
+        }
+        div[data-baseweb="select"] *,
+        div[data-baseweb="input"] *,
+        div[data-baseweb="textarea"] *,
+        div[data-testid="stNumberInput"] *,
+        div[data-testid="stDateInput"] *,
+        div[data-testid="stTextInput"] *,
+        div[data-testid="stTextArea"] * {
+            color:var(--text) !important;
+            font-weight:720 !important;
+        }
+        div[data-baseweb="menu"],
+        div[data-baseweb="popover"] > div {
+            border-radius:var(--radius-sm) !important;
+            border:1px solid var(--border-strong) !important;
+            box-shadow:var(--shadow-lg) !important;
+            overflow:hidden !important;
+        }
+        div[data-baseweb="slider"] div[role="slider"] {
+            border:2px solid var(--surface) !important;
+            box-shadow:var(--shadow-md) !important;
+        }
+        div[data-baseweb="slider"] [data-testid="stTickBar"],
+        div[data-baseweb="slider"] [role="progressbar"] {
+            color:var(--accent-strong) !important;
+        }
+        input[type="checkbox"] {
+            accent-color:var(--accent-strong);
+        }
+        div[data-testid="stMetric"] {
+            border-color:var(--border-strong) !important;
+            padding:16px 16px 12px 16px !important;
+        }
+        div[data-testid="stMetricLabel"],
+        .forecast-metric-label,
+        .scenario-label,
+        .factor-title,
+        .training-score-label,
+        .research-stat-tile span,
+        .forecast-place,
+        .forecast-model-line,
+        .forecast-main-note,
+        .forecast-side-item div {
+            color:var(--muted) !important;
+            font-weight:850 !important;
+        }
+        div[data-testid="stMetricValue"],
+        .forecast-metric-value,
+        .forecast-number,
+        .scenario-value,
+        .factor-value,
+        .forecast-side-item strong,
+        .research-stat-tile b {
+            color:var(--text) !important;
+            font-weight:920 !important;
+        }
+        .app-kicker,
+        .page-guide-kicker,
+        .section-bridge-kicker,
+        .model-kicker,
+        .training-kicker,
+        .method-kicker,
+        .intro-kicker,
+        .intro-score-label,
+        .model-card-tag,
+        .family-index,
+        .period-tag,
+        .method-band-kicker,
+        .route-badge,
+        .forecast-status,
+        .score-pill,
+        .period-factor,
+        .app-chip-row span,
+        .training-chip-row span,
+        .intro-chip-row span,
+        .forecast-chip-row span {
+            border-radius:999px !important;
+            color:var(--text) !important;
+            font-weight:850 !important;
+        }
+        div[data-testid="stPlotlyChart"] > div,
+        div[data-testid="stDataFrame"] > div,
+        div[data-testid="stExpander"] > details,
+        div[data-testid="stAlert"] > div {
+            border-radius:inherit !important;
         }
         @media (max-width: 900px) {
             .block-container {padding-left:1rem;padding-right:1rem;}
