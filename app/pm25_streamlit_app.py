@@ -5222,6 +5222,123 @@ def style_page() -> None:
             .research-stat-grid {grid-template-columns:1fr;}
             .research-brief {padding:16px;}
         }
+        /* Final Streamlit tab override: target the runtime container, not only legacy classes. */
+        div[data-testid="stTabs"] [data-baseweb="tab-list"],
+        div[data-testid="stTabs"] [role="tablist"],
+        .stTabs [data-baseweb="tab-list"],
+        .stTabs [role="tablist"] {
+            display:flex !important;
+            align-items:center !important;
+            gap:16px !important;
+            width:100% !important;
+            max-width:100% !important;
+            min-height:78px !important;
+            padding:12px 18px !important;
+            margin:0 0 20px 0 !important;
+            overflow-x:auto !important;
+            overflow-y:hidden !important;
+            background:#ffffff !important;
+            border:1px solid #d7dee8 !important;
+            border-radius:20px !important;
+            box-shadow:0 2px 5px rgba(15, 23, 42, 0.10), 0 14px 30px rgba(15, 23, 42, 0.08) !important;
+            scrollbar-width:none !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab-list"]::-webkit-scrollbar,
+        div[data-testid="stTabs"] [role="tablist"]::-webkit-scrollbar,
+        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar,
+        .stTabs [role="tablist"]::-webkit-scrollbar {
+            display:none !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab"],
+        div[data-testid="stTabs"] [role="tab"],
+        .stTabs [data-baseweb="tab"],
+        .stTabs [role="tab"] {
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            flex:0 0 auto !important;
+            min-width:max-content !important;
+            height:54px !important;
+            padding:0 24px !important;
+            margin:0 !important;
+            border:1px solid transparent !important;
+            border-radius:18px !important;
+            background:transparent !important;
+            box-shadow:none !important;
+            color:#172033 !important;
+            font-size:1.12rem !important;
+            font-weight:900 !important;
+            line-height:1 !important;
+            white-space:nowrap !important;
+            overflow:hidden !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab"] *,
+        div[data-testid="stTabs"] [role="tab"] *,
+        .stTabs [data-baseweb="tab"] *,
+        .stTabs [role="tab"] * {
+            color:inherit !important;
+            font-size:inherit !important;
+            font-weight:inherit !important;
+            line-height:1 !important;
+            white-space:nowrap !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"],
+        div[data-testid="stTabs"] [role="tab"][aria-selected="true"],
+        .stTabs [data-baseweb="tab"][aria-selected="true"],
+        .stTabs [role="tab"][aria-selected="true"] {
+            background:#e8f2ff !important;
+            border:1px solid #8bbcff !important;
+            border-radius:18px !important;
+            color:#0f4fe8 !important;
+            box-shadow:inset 0 0 0 1px rgba(147, 197, 253, 0.42), 0 7px 16px rgba(37, 99, 235, 0.16) !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] *,
+        div[data-testid="stTabs"] [role="tab"][aria-selected="true"] *,
+        .stTabs [data-baseweb="tab"][aria-selected="true"] *,
+        .stTabs [role="tab"][aria-selected="true"] * {
+            background:transparent !important;
+            border-radius:18px !important;
+            color:#0f4fe8 !important;
+        }
+        div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
+        div[data-testid="stTabs"] [data-baseweb="tab-border"],
+        div[data-testid="stTabs"] [role="tablist"] > div:not([role="tab"]):not([data-baseweb="tab"]),
+        .stTabs [data-baseweb="tab-highlight"],
+        .stTabs [data-baseweb="tab-border"],
+        .stTabs [role="tablist"] > div:not([role="tab"]):not([data-baseweb="tab"]) {
+            display:none !important;
+            width:0 !important;
+            height:0 !important;
+            opacity:0 !important;
+            border:0 !important;
+            background:transparent !important;
+        }
+        @media (max-width: 900px) {
+            div[data-testid="stTabs"] [data-baseweb="tab-list"],
+            div[data-testid="stTabs"] [role="tablist"],
+            .stTabs [data-baseweb="tab-list"],
+            .stTabs [role="tablist"] {
+                gap:10px !important;
+                min-height:68px !important;
+                padding:8px 12px !important;
+                border-radius:18px !important;
+            }
+            div[data-testid="stTabs"] [data-baseweb="tab"],
+            div[data-testid="stTabs"] [role="tab"],
+            .stTabs [data-baseweb="tab"],
+            .stTabs [role="tab"] {
+                height:50px !important;
+                padding:0 18px !important;
+                border-radius:16px !important;
+                font-size:0.98rem !important;
+            }
+            div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"],
+            div[data-testid="stTabs"] [role="tab"][aria-selected="true"],
+            .stTabs [data-baseweb="tab"][aria-selected="true"],
+            .stTabs [role="tab"][aria-selected="true"] {
+                border-radius:16px !important;
+            }
+        }
         </style>
         """,
         unsafe_allow_html=True,
