@@ -5171,6 +5171,14 @@ def style_page() -> None:
             display:none !important;
             content:none !important;
         }
+        .stTabs .react-aria-SelectionIndicator,
+        .stTabs [data-testid="stTabSelectionIndicator"] {
+            display:none !important;
+            width:0 !important;
+            height:0 !important;
+            background:transparent !important;
+            border:0 !important;
+        }
         .stButton > button,
         button[kind],
         div[data-testid="stFormSubmitButton"] button,
