@@ -3212,14 +3212,6 @@ def style_page() -> None:
             --accent-alt:color-mix(in srgb, var(--theme-primary) 66%, var(--theme-text));
             --accent-warn:color-mix(in srgb, var(--theme-primary) 42%, var(--theme-text));
             --accent-purple:color-mix(in srgb, var(--theme-primary) 58%, var(--theme-text));
-            --tab-bar-bg:var(--theme-bg);
-            --tab-idle-bg:transparent;
-            --tab-idle-text:color-mix(in srgb, var(--theme-text) 88%, var(--theme-bg));
-            --tab-hover-bg:color-mix(in srgb, #dbeafe 78%, var(--theme-bg));
-            --tab-active-bg:#e8f2ff;
-            --tab-active-border:#93c5fd;
-            --tab-active-text:#0f4fe8;
-            --tab-underline:#2563eb;
             --google-blue:var(--theme-primary);
             --google-green:var(--accent-alt);
             --google-yellow:var(--accent-warn);
@@ -3316,110 +3308,12 @@ def style_page() -> None:
             padding:14px 14px 10px 14px;
             box-shadow:0 8px 24px color-mix(in srgb, var(--text) 6%, transparent);
         }
-        .stTabs [data-baseweb="tab-list"] {
-            display:flex;
-            flex-wrap:nowrap !important;
-            align-items:center;
-            gap:14px;
-            width:100%;
-            max-width:100%;
-            overflow-x:auto;
-            overflow-y:hidden;
-            min-height:84px;
-            padding:10px 18px 8px 18px;
-            margin:0 0 18px 0;
-            background:var(--tab-bar-bg);
-            border:1px solid var(--border-strong);
-            border-radius:16px;
-            box-shadow:0 2px 4px color-mix(in srgb, var(--theme-text) 18%, transparent), 0 14px 28px color-mix(in srgb, var(--theme-text) 9%, transparent);
-            scrollbar-width:none;
-            -webkit-overflow-scrolling:touch;
-        }
-        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
-            display:none;
-        }
-        .stTabs [data-baseweb="tab"],
-        .stTabs [role="tab"] {
-            position:relative;
-            z-index:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex:0 0 auto;
-            min-width:max-content;
-            height:68px;
-            border:0 !important;
-            border-radius:22px !important;
-            background:transparent !important;
-            color:var(--tab-idle-text);
-            padding:0 24px;
-            font-size:1.12rem;
-            line-height:1;
-            font-weight:900;
-            white-space:nowrap;
-            overflow:hidden;
-            box-shadow:none !important;
-            transition:color .18s ease;
-        }
-        .stTabs [data-baseweb="tab"]::before,
-        .stTabs [role="tab"]::before {
-            content:"";
-            position:absolute;
-            z-index:0;
-            inset:4px 0;
-            border:1px solid transparent;
-            border-radius:22px;
-            background:transparent;
-            transition:background .18s ease, border-color .18s ease, box-shadow .18s ease;
-        }
-        .stTabs [data-baseweb="tab"] p,
-        .stTabs [role="tab"] p {
-            position:relative;
-            z-index:1;
-            margin:0;
-            color:inherit;
-            font-size:inherit;
-            font-weight:inherit;
-            line-height:1;
-            white-space:nowrap;
-        }
-        .stTabs [data-baseweb="tab"]:hover,
-        .stTabs [role="tab"]:hover {
-            color:var(--text);
-            background:transparent !important;
-        }
-        .stTabs [data-baseweb="tab"]:hover::before,
-        .stTabs [role="tab"]:hover::before {
-            background:var(--tab-hover-bg);
-            border-color:color-mix(in srgb, var(--tab-active-border) 66%, transparent);
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"],
-        .stTabs [role="tab"][aria-selected="true"],
-        .stTabs [aria-selected="true"] {
-            background:transparent !important;
-            outline:none !important;
-            border-color:transparent !important;
-            border-radius:22px !important;
-            color:var(--tab-active-text) !important;
-            box-shadow:none !important;
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"]::before,
-        .stTabs [role="tab"][aria-selected="true"]::before,
-        .stTabs [aria-selected="true"]::before {
-            background:var(--tab-active-bg) !important;
-            border-color:var(--tab-active-border) !important;
-            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 46%, transparent), 0 6px 14px color-mix(in srgb, #2563eb 16%, transparent);
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"] p,
-        .stTabs [role="tab"][aria-selected="true"] p,
-        .stTabs [aria-selected="true"] p {
-            color:var(--tab-active-text) !important;
-        }
-        .stTabs [data-baseweb="tab-highlight"],
-        .stTabs [data-baseweb="tab-border"] {
-            display:none !important;
-            opacity:0 !important;
-            height:0 !important;
+        .stTabs [data-baseweb="tab-list"] {gap: 8px;}
+        .stTabs [data-baseweb="tab"] {
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:8px;
+            padding:8px 14px;
         }
         /* 统一下拉菜单浮层的前端圆角与阴影 */
         div[data-baseweb="menu"] {
@@ -4796,109 +4690,26 @@ def style_page() -> None:
             line-height:1.58;
         }
         .stTabs [data-baseweb="tab-list"] {
-            display:flex;
-            flex-wrap:nowrap !important;
-            align-items:center;
-            gap:14px;
-            width:100%;
-            max-width:100%;
-            overflow-x:auto;
-            overflow-y:hidden;
-            min-height:84px;
-            background:var(--tab-bar-bg);
+            gap:6px;
+            background:var(--surface);
             border:1px solid var(--border-strong);
-            border-radius:16px;
-            padding:10px 18px 8px 18px;
-            margin:0 0 18px 0;
-            box-shadow:0 2px 4px color-mix(in srgb, var(--theme-text) 18%, transparent), 0 14px 28px color-mix(in srgb, var(--theme-text) 9%, transparent);
-            scrollbar-width:none;
-            -webkit-overflow-scrolling:touch;
+            border-radius:10px;
+            padding:5px;
+            box-shadow:var(--shadow-sm);
         }
-        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
-            display:none;
-        }
-        .stTabs [data-baseweb="tab"],
-        .stTabs [role="tab"] {
-            position:relative;
-            z-index:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex:0 0 auto;
-            min-width:max-content;
-            height:68px;
-            border:0 !important;
-            border-radius:22px !important;
-            background:transparent !important;
-            color:var(--tab-idle-text);
-            padding:0 24px;
-            font-size:1.12rem;
-            line-height:1;
-            font-weight:900;
-            white-space:nowrap;
-            overflow:hidden;
-            box-shadow:none !important;
-            transition:color .18s ease;
-        }
-        .stTabs [data-baseweb="tab"]::before,
-        .stTabs [role="tab"]::before {
-            content:"";
-            position:absolute;
-            z-index:0;
-            inset:4px 0;
+        .stTabs [data-baseweb="tab"] {
+            height:38px;
             border:1px solid transparent;
-            border-radius:22px;
+            border-radius:8px;
             background:transparent;
-            transition:background .18s ease, border-color .18s ease, box-shadow .18s ease;
+            color:var(--muted);
+            padding:7px 14px;
+            font-weight:700;
         }
-        .stTabs [data-baseweb="tab"] p,
-        .stTabs [role="tab"] p {
-            position:relative;
-            z-index:1;
-            margin:0;
-            color:inherit;
-            font-size:inherit;
-            font-weight:inherit;
-            line-height:1;
-            white-space:nowrap;
-        }
-        .stTabs [data-baseweb="tab"]:hover,
-        .stTabs [role="tab"]:hover {
-            color:var(--text);
-            background:transparent !important;
-        }
-        .stTabs [data-baseweb="tab"]:hover::before,
-        .stTabs [role="tab"]:hover::before {
-            background:var(--tab-hover-bg);
-            border-color:color-mix(in srgb, var(--tab-active-border) 66%, transparent);
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"],
-        .stTabs [role="tab"][aria-selected="true"],
         .stTabs [aria-selected="true"] {
-            background:transparent !important;
-            outline:none !important;
-            border-color:transparent !important;
-            border-radius:22px !important;
-            color:var(--tab-active-text) !important;
-            box-shadow:none !important;
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"]::before,
-        .stTabs [role="tab"][aria-selected="true"]::before,
-        .stTabs [aria-selected="true"]::before {
-            background:var(--tab-active-bg) !important;
-            border-color:var(--tab-active-border) !important;
-            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 46%, transparent), 0 6px 14px color-mix(in srgb, #2563eb 16%, transparent);
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"] p,
-        .stTabs [role="tab"][aria-selected="true"] p,
-        .stTabs [aria-selected="true"] p {
-            color:var(--tab-active-text) !important;
-        }
-        .stTabs [data-baseweb="tab-highlight"],
-        .stTabs [data-baseweb="tab-border"] {
-            display:none !important;
-            opacity:0 !important;
-            height:0 !important;
+            background:var(--accent-soft) !important;
+            border-color:var(--border-soft) !important;
+            color:var(--google-blue) !important;
         }
         section[data-testid="stSidebar"] {
             background:var(--surface);
@@ -5135,24 +4946,6 @@ def style_page() -> None:
         }
         @media (max-width: 900px) {
             .block-container {padding-left:1rem;padding-right:1rem;}
-            .stTabs [data-baseweb="tab-list"] {
-                gap:10px;
-                min-height:70px;
-                padding:8px 12px 7px 12px;
-                border-radius:14px;
-            }
-            .stTabs [data-baseweb="tab"],
-            .stTabs [role="tab"] {
-                height:54px;
-                padding:0 18px;
-                font-size:0.98rem;
-                border-radius:18px !important;
-            }
-            .stTabs [data-baseweb="tab"]::before,
-            .stTabs [role="tab"]::before {
-                inset:4px 0;
-                border-radius:18px;
-            }
             .app-hero {grid-template-columns:1fr;}
             .page-guide {grid-template-columns:1fr;}
             .page-guide-grid {grid-template-columns:1fr;}
@@ -5221,123 +5014,6 @@ def style_page() -> None:
             .training-flow {grid-template-columns:1fr;}
             .research-stat-grid {grid-template-columns:1fr;}
             .research-brief {padding:16px;}
-        }
-        /* Final Streamlit tab override: target the runtime container, not only legacy classes. */
-        div[data-testid="stTabs"] [data-baseweb="tab-list"],
-        div[data-testid="stTabs"] [role="tablist"],
-        .stTabs [data-baseweb="tab-list"],
-        .stTabs [role="tablist"] {
-            display:flex !important;
-            align-items:center !important;
-            gap:16px !important;
-            width:100% !important;
-            max-width:100% !important;
-            min-height:78px !important;
-            padding:12px 18px !important;
-            margin:0 0 20px 0 !important;
-            overflow-x:auto !important;
-            overflow-y:hidden !important;
-            background:#ffffff !important;
-            border:1px solid #d7dee8 !important;
-            border-radius:20px !important;
-            box-shadow:0 2px 5px rgba(15, 23, 42, 0.10), 0 14px 30px rgba(15, 23, 42, 0.08) !important;
-            scrollbar-width:none !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab-list"]::-webkit-scrollbar,
-        div[data-testid="stTabs"] [role="tablist"]::-webkit-scrollbar,
-        .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar,
-        .stTabs [role="tablist"]::-webkit-scrollbar {
-            display:none !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab"],
-        div[data-testid="stTabs"] [role="tab"],
-        .stTabs [data-baseweb="tab"],
-        .stTabs [role="tab"] {
-            display:flex !important;
-            align-items:center !important;
-            justify-content:center !important;
-            flex:0 0 auto !important;
-            min-width:max-content !important;
-            height:54px !important;
-            padding:0 24px !important;
-            margin:0 !important;
-            border:1px solid transparent !important;
-            border-radius:18px !important;
-            background:transparent !important;
-            box-shadow:none !important;
-            color:#172033 !important;
-            font-size:1.12rem !important;
-            font-weight:900 !important;
-            line-height:1 !important;
-            white-space:nowrap !important;
-            overflow:hidden !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab"] *,
-        div[data-testid="stTabs"] [role="tab"] *,
-        .stTabs [data-baseweb="tab"] *,
-        .stTabs [role="tab"] * {
-            color:inherit !important;
-            font-size:inherit !important;
-            font-weight:inherit !important;
-            line-height:1 !important;
-            white-space:nowrap !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"],
-        div[data-testid="stTabs"] [role="tab"][aria-selected="true"],
-        .stTabs [data-baseweb="tab"][aria-selected="true"],
-        .stTabs [role="tab"][aria-selected="true"] {
-            background:#e8f2ff !important;
-            border:1px solid #8bbcff !important;
-            border-radius:18px !important;
-            color:#0f4fe8 !important;
-            box-shadow:inset 0 0 0 1px rgba(147, 197, 253, 0.42), 0 7px 16px rgba(37, 99, 235, 0.16) !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"] *,
-        div[data-testid="stTabs"] [role="tab"][aria-selected="true"] *,
-        .stTabs [data-baseweb="tab"][aria-selected="true"] *,
-        .stTabs [role="tab"][aria-selected="true"] * {
-            background:transparent !important;
-            border-radius:18px !important;
-            color:#0f4fe8 !important;
-        }
-        div[data-testid="stTabs"] [data-baseweb="tab-highlight"],
-        div[data-testid="stTabs"] [data-baseweb="tab-border"],
-        div[data-testid="stTabs"] [role="tablist"] > div:not([role="tab"]):not([data-baseweb="tab"]),
-        .stTabs [data-baseweb="tab-highlight"],
-        .stTabs [data-baseweb="tab-border"],
-        .stTabs [role="tablist"] > div:not([role="tab"]):not([data-baseweb="tab"]) {
-            display:none !important;
-            width:0 !important;
-            height:0 !important;
-            opacity:0 !important;
-            border:0 !important;
-            background:transparent !important;
-        }
-        @media (max-width: 900px) {
-            div[data-testid="stTabs"] [data-baseweb="tab-list"],
-            div[data-testid="stTabs"] [role="tablist"],
-            .stTabs [data-baseweb="tab-list"],
-            .stTabs [role="tablist"] {
-                gap:10px !important;
-                min-height:68px !important;
-                padding:8px 12px !important;
-                border-radius:18px !important;
-            }
-            div[data-testid="stTabs"] [data-baseweb="tab"],
-            div[data-testid="stTabs"] [role="tab"],
-            .stTabs [data-baseweb="tab"],
-            .stTabs [role="tab"] {
-                height:50px !important;
-                padding:0 18px !important;
-                border-radius:16px !important;
-                font-size:0.98rem !important;
-            }
-            div[data-testid="stTabs"] [data-baseweb="tab"][aria-selected="true"],
-            div[data-testid="stTabs"] [role="tab"][aria-selected="true"],
-            .stTabs [data-baseweb="tab"][aria-selected="true"],
-            .stTabs [role="tab"][aria-selected="true"] {
-                border-radius:16px !important;
-            }
         }
         </style>
         """,
