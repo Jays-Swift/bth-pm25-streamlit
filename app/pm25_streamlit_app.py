@@ -5084,7 +5084,8 @@ def style_page() -> None:
             box-shadow:var(--shadow-lg) !important;
         }
         /* Compact static-page tab lock: rounded bar, small selected tile, blue underline. */
-        .stTabs [data-baseweb="tab-list"] {
+        .stTabs [data-baseweb="tab-list"],
+        .stTabs [role="tablist"] {
             position:relative !important;
             min-height:52px !important;
             align-items:flex-start !important;
@@ -5097,7 +5098,8 @@ def style_page() -> None:
             box-shadow:0 1px 2px rgba(15,23,42,0.12),0 4px 12px rgba(15,23,42,0.10) !important;
             overflow:visible !important;
         }
-        .stTabs [data-baseweb="tab-list"]::before {
+        .stTabs [data-baseweb="tab-list"]::before,
+        .stTabs [role="tablist"]::before {
             content:"" !important;
             position:absolute !important;
             inset:0 !important;
@@ -5105,7 +5107,8 @@ def style_page() -> None:
             pointer-events:none !important;
             box-shadow:inset 0 1px 0 rgba(255,255,255,0.95) !important;
         }
-        .stTabs [data-baseweb="tab-list"]::after {
+        .stTabs [data-baseweb="tab-list"]::after,
+        .stTabs [role="tablist"]::after {
             content:"" !important;
             position:absolute !important;
             left:12px !important;
@@ -5115,7 +5118,8 @@ def style_page() -> None:
             background:rgba(120,130,145,0.25) !important;
             pointer-events:none !important;
         }
-        .stTabs [data-baseweb="tab"] {
+        .stTabs [data-baseweb="tab"],
+        .stTabs [role="tab"] {
             position:relative !important;
             min-height:40px !important;
             height:40px !important;
@@ -5141,7 +5145,10 @@ def style_page() -> None:
         }
         .stTabs [data-baseweb="tab"] p,
         .stTabs [data-baseweb="tab"] span,
-        .stTabs [data-baseweb="tab"] div {
+        .stTabs [data-baseweb="tab"] div,
+        .stTabs [role="tab"] p,
+        .stTabs [role="tab"] span,
+        .stTabs [role="tab"] div {
             color:inherit !important;
             font-family:inherit !important;
             font-size:inherit !important;
@@ -5149,11 +5156,14 @@ def style_page() -> None:
             line-height:inherit !important;
             letter-spacing:0 !important;
         }
-        .stTabs [data-baseweb="tab"]:hover {
+        .stTabs [data-baseweb="tab"]:hover,
+        .stTabs [role="tab"]:hover {
             color:#111827 !important;
             background:rgba(238,243,249,0.72) !important;
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"],
+        .stTabs [role="tab"][aria-selected="true"],
+        .stTabs [role="tab"][data-selected="true"],
         .stTabs [aria-selected="true"] {
             color:#1f6feb !important;
             background:#f3f8ff !important;
@@ -5161,7 +5171,9 @@ def style_page() -> None:
             border-radius:8px !important;
             box-shadow:inset 0 1px 0 rgba(255,255,255,0.95) !important;
         }
-        .stTabs [data-baseweb="tab"][aria-selected="true"]::after {
+        .stTabs [data-baseweb="tab"][aria-selected="true"]::after,
+        .stTabs [role="tab"][aria-selected="true"]::after,
+        .stTabs [role="tab"][data-selected="true"]::after {
             content:"" !important;
             position:absolute !important;
             left:0 !important;
