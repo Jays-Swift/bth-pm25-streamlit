@@ -5083,33 +5083,94 @@ def style_page() -> None:
         div[data-testid="stForm"] {
             box-shadow:var(--shadow-lg) !important;
         }
+        /* Compact static-page tab lock: rounded bar, small selected tile, blue underline. */
         .stTabs [data-baseweb="tab-list"] {
-            gap:8px !important;
-            padding:8px !important;
-            border:1px solid var(--border-strong) !important;
-            border-radius:999px !important;
-            background:var(--surface) !important;
-            box-shadow:var(--shadow-md) !important;
+            position:relative !important;
+            min-height:52px !important;
+            align-items:flex-start !important;
+            gap:12px !important;
+            padding:5px 16px 0 16px !important;
+            margin:0 0 14px 0 !important;
+            border:1px solid #c9cdd4 !important;
+            border-radius:10px !important;
+            background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%) !important;
+            box-shadow:0 1px 2px rgba(15,23,42,0.12),0 4px 12px rgba(15,23,42,0.10) !important;
+            overflow:visible !important;
+        }
+        .stTabs [data-baseweb="tab-list"]::before {
+            content:"" !important;
+            position:absolute !important;
+            inset:0 !important;
+            border-radius:10px !important;
+            pointer-events:none !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.95) !important;
+        }
+        .stTabs [data-baseweb="tab-list"]::after {
+            content:"" !important;
+            position:absolute !important;
+            left:12px !important;
+            right:12px !important;
+            bottom:-1px !important;
+            height:1px !important;
+            background:rgba(120,130,145,0.25) !important;
+            pointer-events:none !important;
         }
         .stTabs [data-baseweb="tab"] {
-            min-height:44px !important;
-            height:auto !important;
+            position:relative !important;
+            min-height:40px !important;
+            height:40px !important;
+            flex:0 0 auto !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            margin:0 !important;
             border:1px solid transparent !important;
-            border-radius:999px !important;
-            padding:10px 18px !important;
-            color:var(--text) !important;
-            font-weight:850 !important;
+            border-radius:8px !important;
+            padding:0 18px !important;
+            color:#1f2937 !important;
             background:transparent !important;
+            font-family:"PingFang SC","Microsoft YaHei",Inter,"Segoe UI",Arial,sans-serif !important;
+            font-size:0.98rem !important;
+            font-weight:850 !important;
+            line-height:1.1 !important;
+            text-align:center !important;
+            letter-spacing:0 !important;
+            white-space:nowrap !important;
+            text-shadow:none !important;
+            box-shadow:none !important;
+        }
+        .stTabs [data-baseweb="tab"] p,
+        .stTabs [data-baseweb="tab"] span,
+        .stTabs [data-baseweb="tab"] div {
+            color:inherit !important;
+            font-family:inherit !important;
+            font-size:inherit !important;
+            font-weight:inherit !important;
+            line-height:inherit !important;
+            letter-spacing:0 !important;
         }
         .stTabs [data-baseweb="tab"]:hover {
-            background:var(--surface-muted) !important;
-            color:var(--text) !important;
+            color:#111827 !important;
+            background:rgba(238,243,249,0.72) !important;
         }
+        .stTabs [data-baseweb="tab"][aria-selected="true"],
         .stTabs [aria-selected="true"] {
-            background:var(--accent-soft) !important;
-            border-color:var(--accent) !important;
-            color:var(--accent-strong) !important;
-            box-shadow:inset 0 0 0 1px var(--accent) !important;
+            color:#1f6feb !important;
+            background:#f3f8ff !important;
+            border-color:#d7e3f5 !important;
+            border-radius:8px !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.95) !important;
+        }
+        .stTabs [data-baseweb="tab"][aria-selected="true"]::after {
+            content:"" !important;
+            position:absolute !important;
+            left:0 !important;
+            right:0 !important;
+            bottom:-7px !important;
+            height:2px !important;
+            border-radius:2px 2px 0 0 !important;
+            background:#2563ff !important;
+            pointer-events:none !important;
         }
         .stButton > button,
         button[kind],
