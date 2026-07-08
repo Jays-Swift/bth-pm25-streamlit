@@ -5083,7 +5083,7 @@ def style_page() -> None:
         div[data-testid="stForm"] {
             box-shadow:var(--shadow-lg) !important;
         }
-        /* Compact static-page tab lock: rounded bar, small selected tile, blue underline. */
+        /* Compact static-page tab lock: rounded bar, small selected tile, no underline. */
         .stTabs [data-baseweb="tab-list"],
         .stTabs [role="tablist"] {
             position:relative !important;
@@ -5109,14 +5109,8 @@ def style_page() -> None:
         }
         .stTabs [data-baseweb="tab-list"]::after,
         .stTabs [role="tablist"]::after {
-            content:"" !important;
-            position:absolute !important;
-            left:12px !important;
-            right:12px !important;
-            bottom:-1px !important;
-            height:1px !important;
-            background:rgba(120,130,145,0.25) !important;
-            pointer-events:none !important;
+            display:none !important;
+            content:none !important;
         }
         .stTabs [data-baseweb="tab"],
         .stTabs [role="tab"] {
@@ -5174,15 +5168,8 @@ def style_page() -> None:
         .stTabs [data-baseweb="tab"][aria-selected="true"]::after,
         .stTabs [role="tab"][aria-selected="true"]::after,
         .stTabs [role="tab"][data-selected="true"]::after {
-            content:"" !important;
-            position:absolute !important;
-            left:0 !important;
-            right:0 !important;
-            bottom:-7px !important;
-            height:2px !important;
-            border-radius:2px 2px 0 0 !important;
-            background:#2563ff !important;
-            pointer-events:none !important;
+            display:none !important;
+            content:none !important;
         }
         .stButton > button,
         button[kind],
