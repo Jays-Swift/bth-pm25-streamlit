@@ -3215,10 +3215,10 @@ def style_page() -> None:
             --tab-bar-bg:var(--theme-bg);
             --tab-idle-bg:transparent;
             --tab-idle-text:color-mix(in srgb, var(--theme-text) 88%, var(--theme-bg));
-            --tab-hover-bg:color-mix(in srgb, #eff6ff 72%, var(--theme-bg));
-            --tab-active-bg:color-mix(in srgb, #eff6ff 88%, var(--theme-bg));
-            --tab-active-border:#bfdbfe;
-            --tab-active-text:#1d4ed8;
+            --tab-hover-bg:color-mix(in srgb, #dbeafe 78%, var(--theme-bg));
+            --tab-active-bg:#e8f2ff;
+            --tab-active-border:#93c5fd;
+            --tab-active-text:#0f4fe8;
             --tab-underline:#2563eb;
             --google-blue:var(--theme-primary);
             --google-green:var(--accent-alt);
@@ -3338,53 +3338,88 @@ def style_page() -> None:
         .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
             display:none;
         }
-        .stTabs [data-baseweb="tab"] {
+        .stTabs [data-baseweb="tab"],
+        .stTabs [role="tab"] {
             position:relative;
+            z-index:0;
             display:flex;
             align-items:center;
             justify-content:center;
             flex:0 0 auto;
             min-width:max-content;
             height:68px;
-            border:1px solid transparent;
-            border-radius:14px;
-            background:var(--tab-idle-bg);
+            border:0 !important;
+            border-radius:22px !important;
+            background:transparent !important;
             color:var(--tab-idle-text);
             padding:0 24px;
-            font-size:1.08rem;
+            font-size:1.12rem;
             line-height:1;
-            font-weight:800;
+            font-weight:900;
             white-space:nowrap;
+            overflow:hidden;
+            box-shadow:none !important;
+            transition:color .18s ease;
         }
-        .stTabs [data-baseweb="tab"] p {
+        .stTabs [data-baseweb="tab"]::before,
+        .stTabs [role="tab"]::before {
+            content:"";
+            position:absolute;
+            z-index:0;
+            inset:4px 0;
+            border:1px solid transparent;
+            border-radius:22px;
+            background:transparent;
+            transition:background .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+        .stTabs [data-baseweb="tab"] p,
+        .stTabs [role="tab"] p {
+            position:relative;
+            z-index:1;
             margin:0;
             color:inherit;
             font-size:inherit;
+            font-weight:inherit;
             line-height:1;
             white-space:nowrap;
         }
-        .stTabs [data-baseweb="tab"]:hover {
-            background:var(--tab-hover-bg);
-            border-color:var(--tab-active-border);
+        .stTabs [data-baseweb="tab"]:hover,
+        .stTabs [role="tab"]:hover {
             color:var(--text);
+            background:transparent !important;
+        }
+        .stTabs [data-baseweb="tab"]:hover::before,
+        .stTabs [role="tab"]:hover::before {
+            background:var(--tab-hover-bg);
+            border-color:color-mix(in srgb, var(--tab-active-border) 66%, transparent);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"],
+        .stTabs [role="tab"][aria-selected="true"],
         .stTabs [aria-selected="true"] {
+            background:transparent !important;
+            outline:none !important;
+            border-color:transparent !important;
+            border-radius:22px !important;
+            color:var(--tab-active-text) !important;
+            box-shadow:none !important;
+        }
+        .stTabs [data-baseweb="tab"][aria-selected="true"]::before,
+        .stTabs [role="tab"][aria-selected="true"]::before,
+        .stTabs [aria-selected="true"]::before {
             background:var(--tab-active-bg) !important;
             border-color:var(--tab-active-border) !important;
-            color:var(--tab-active-text) !important;
-            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 58%, transparent);
+            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 46%, transparent), 0 6px 14px color-mix(in srgb, #2563eb 16%, transparent);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"] p,
+        .stTabs [role="tab"][aria-selected="true"] p,
         .stTabs [aria-selected="true"] p {
             color:var(--tab-active-text) !important;
         }
-        .stTabs [data-baseweb="tab-highlight"] {
-            display:block !important;
-            height:3px !important;
-            border-radius:999px !important;
-            background:var(--tab-underline) !important;
-            bottom:-8px !important;
+        .stTabs [data-baseweb="tab-highlight"],
+        .stTabs [data-baseweb="tab-border"] {
+            display:none !important;
+            opacity:0 !important;
+            height:0 !important;
         }
         /* 统一下拉菜单浮层的前端圆角与阴影 */
         div[data-baseweb="menu"] {
@@ -4782,53 +4817,88 @@ def style_page() -> None:
         .stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {
             display:none;
         }
-        .stTabs [data-baseweb="tab"] {
+        .stTabs [data-baseweb="tab"],
+        .stTabs [role="tab"] {
             position:relative;
+            z-index:0;
             display:flex;
             align-items:center;
             justify-content:center;
             flex:0 0 auto;
             min-width:max-content;
             height:68px;
-            border:1px solid transparent;
-            border-radius:14px;
-            background:var(--tab-idle-bg);
+            border:0 !important;
+            border-radius:22px !important;
+            background:transparent !important;
             color:var(--tab-idle-text);
             padding:0 24px;
-            font-size:1.08rem;
+            font-size:1.12rem;
             line-height:1;
-            font-weight:800;
+            font-weight:900;
             white-space:nowrap;
+            overflow:hidden;
+            box-shadow:none !important;
+            transition:color .18s ease;
         }
-        .stTabs [data-baseweb="tab"] p {
+        .stTabs [data-baseweb="tab"]::before,
+        .stTabs [role="tab"]::before {
+            content:"";
+            position:absolute;
+            z-index:0;
+            inset:4px 0;
+            border:1px solid transparent;
+            border-radius:22px;
+            background:transparent;
+            transition:background .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+        .stTabs [data-baseweb="tab"] p,
+        .stTabs [role="tab"] p {
+            position:relative;
+            z-index:1;
             margin:0;
             color:inherit;
             font-size:inherit;
+            font-weight:inherit;
             line-height:1;
             white-space:nowrap;
         }
-        .stTabs [data-baseweb="tab"]:hover {
-            background:var(--tab-hover-bg);
-            border-color:var(--tab-active-border);
+        .stTabs [data-baseweb="tab"]:hover,
+        .stTabs [role="tab"]:hover {
             color:var(--text);
+            background:transparent !important;
+        }
+        .stTabs [data-baseweb="tab"]:hover::before,
+        .stTabs [role="tab"]:hover::before {
+            background:var(--tab-hover-bg);
+            border-color:color-mix(in srgb, var(--tab-active-border) 66%, transparent);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"],
+        .stTabs [role="tab"][aria-selected="true"],
         .stTabs [aria-selected="true"] {
+            background:transparent !important;
+            outline:none !important;
+            border-color:transparent !important;
+            border-radius:22px !important;
+            color:var(--tab-active-text) !important;
+            box-shadow:none !important;
+        }
+        .stTabs [data-baseweb="tab"][aria-selected="true"]::before,
+        .stTabs [role="tab"][aria-selected="true"]::before,
+        .stTabs [aria-selected="true"]::before {
             background:var(--tab-active-bg) !important;
             border-color:var(--tab-active-border) !important;
-            color:var(--tab-active-text) !important;
-            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 58%, transparent);
+            box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tab-active-border) 46%, transparent), 0 6px 14px color-mix(in srgb, #2563eb 16%, transparent);
         }
         .stTabs [data-baseweb="tab"][aria-selected="true"] p,
+        .stTabs [role="tab"][aria-selected="true"] p,
         .stTabs [aria-selected="true"] p {
             color:var(--tab-active-text) !important;
         }
-        .stTabs [data-baseweb="tab-highlight"] {
-            display:block !important;
-            height:3px !important;
-            border-radius:999px !important;
-            background:var(--tab-underline) !important;
-            bottom:-8px !important;
+        .stTabs [data-baseweb="tab-highlight"],
+        .stTabs [data-baseweb="tab-border"] {
+            display:none !important;
+            opacity:0 !important;
+            height:0 !important;
         }
         section[data-testid="stSidebar"] {
             background:var(--surface);
@@ -5071,14 +5141,17 @@ def style_page() -> None:
                 padding:8px 12px 7px 12px;
                 border-radius:14px;
             }
-            .stTabs [data-baseweb="tab"] {
+            .stTabs [data-baseweb="tab"],
+            .stTabs [role="tab"] {
                 height:54px;
                 padding:0 18px;
                 font-size:0.98rem;
-                border-radius:12px;
+                border-radius:18px !important;
             }
-            .stTabs [data-baseweb="tab-highlight"] {
-                bottom:-7px !important;
+            .stTabs [data-baseweb="tab"]::before,
+            .stTabs [role="tab"]::before {
+                inset:4px 0;
+                border-radius:18px;
             }
             .app-hero {grid-template-columns:1fr;}
             .page-guide {grid-template-columns:1fr;}
